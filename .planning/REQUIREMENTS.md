@@ -142,13 +142,80 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (Populated during roadmap creation) | | |
+| HOTK-01 | Phase 2 | Pending |
+| HOTK-02 | Phase 2 | Pending |
+| HOTK-03 | Phase 2 | Pending |
+| HOTK-04 | Phase 2 | Pending |
+| AUDI-01 | Phase 3 | Pending |
+| AUDI-02 | Phase 3 | Pending |
+| AUDI-03 | Phase 3 | Pending |
+| AUDI-04 | Phase 3 | Pending |
+| AUDI-05 | Phase 3 | Pending |
+| AUDI-06 | Phase 3 | Pending |
+| FLOT-01 | Phase 4 | Pending |
+| FLOT-02 | Phase 4 | Pending |
+| FLOT-03 | Phase 4 | Pending |
+| FLOT-04 | Phase 4 | Pending |
+| FLOT-05 | Phase 4 | Pending |
+| FLOT-06 | Phase 4 | Pending |
+| CLOD-01 | Phase 5 | Pending |
+| CLOD-02 | Phase 5 | Pending |
+| CLOD-03 | Phase 5 | Pending |
+| CLOD-04 | Phase 5 | Pending |
+| CLOD-05 | Phase 5 | Pending |
+| CLOD-06 | Phase 5 | Pending |
+| CLOD-07 | Phase 5 | Pending |
+| CLOD-08 | Phase 5 | Pending |
+| CLOD-09 | Phase 5 | Pending |
+| CLOD-10 | Phase 5 | Pending |
+| LOCL-01 | Phase 10 | Pending |
+| LOCL-02 | Phase 10 | Pending |
+| LOCL-03 | Phase 10 | Pending |
+| LOCL-04 | Phase 10 | Pending |
+| LOCL-05 | Phase 10 | Pending |
+| LOCL-06 | Phase 10 | Pending |
+| LOCL-07 | Phase 10 | Pending |
+| INJC-01 | Phase 6 | Pending |
+| INJC-02 | Phase 6 | Pending |
+| INJC-03 | Phase 6 | Pending |
+| INJC-04 | Phase 6 | Pending |
+| INJC-05 | Phase 6 | Pending |
+| INJC-06 | Phase 6 | Pending |
+| INJC-07 | Phase 6 | Pending |
+| INJC-08 | Phase 6 | Pending |
+| INJC-09 | Phase 6 | Pending |
+| INJC-10 | Phase 6 | Pending |
+| INJC-11 | Phase 6 | Pending |
+| TRAY-01 | Phase 1 | Pending |
+| TRAY-02 | Phase 1 | Pending |
+| TRAY-03 | Phase 1 | Pending |
+| TRAY-04 | Phase 1 | Pending |
+| SETT-01 | Phase 8 | Pending |
+| SETT-02 | Phase 8 | Pending |
+| SETT-03 | Phase 8 | Pending |
+| SETT-04 | Phase 8 | Pending |
+| SETT-05 | Phase 8 | Pending |
+| SETT-06 | Phase 8 | Pending |
+| SETT-07 | Phase 8 | Pending |
+| WIZR-01 | Phase 9 | Pending |
+| WIZR-02 | Phase 9 | Pending |
+| WIZR-03 | Phase 9 | Pending |
+| WIZR-04 | Phase 9 | Pending |
+| WIZR-05 | Phase 9 | Pending |
+| WIZR-06 | Phase 9 | Pending |
+| NOTF-01 | Phase 7 | Pending |
+| NOTF-02 | Phase 7 | Pending |
+| NOTF-03 | Phase 7 | Pending |
+| NOTF-04 | Phase 7 | Pending |
+| CONF-01 | Phase 1 | Pending |
+| CONF-02 | Phase 1 | Pending |
+| CONF-03 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 49 total
-- Mapped to phases: 0
-- Unmapped: 49
+- v1 requirements: 68 total
+- Mapped to phases: 68
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-14 after initial definition*
+*Last updated: 2026-03-14 after roadmap creation — all 68 requirements mapped*
