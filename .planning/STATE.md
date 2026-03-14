@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-foundation-01-02-PLAN.md (config persistence)
-last_updated: "2026-03-14T21:51:26.899Z"
+stopped_at: Completed 01-foundation-01-03-PLAN.md (tray and settings lifecycle)
+last_updated: "2026-03-14T21:57:57.726Z"
 last_activity: 2026-03-14 — Phase 1 context gathered
 progress:
   total_phases: 10
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 33
 ---
 
@@ -52,6 +52,7 @@ Progress: [███░░░░░░░] 33%
 *Updated after each plan completion*
 | Phase 01-foundation P01 | 6 | 5 tasks | 21 files |
 | Phase 01-foundation P01-02 | 6 | 5 tasks | 9 files |
+| Phase 01-foundation P01-03 | 25 | 5 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,8 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: Raw JSON preserved in AppState.config_raw for unknown-field round-trip via merge_into()
 - [Phase 01-foundation]: Malformed config renamed .corrupt.{timestamp} on load, never silently overwritten
 - [Phase 01-foundation]: AppState::load() replaces AppState::new() — config on disk from day one of phase 1
+- [Phase 01-foundation]: close-to-hide uses on_window_event CloseRequested with api.prevent_close() and Quit calls app.exit(0) to bypass it
+- [Phase 01-foundation]: show_settings_window checks get_webview_window by label — single instance guarantee without extra state
 
 ### Pending Todos
 
@@ -86,6 +89,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-14T21:51:26.897Z
-Stopped at: Completed 01-foundation-01-02-PLAN.md (config persistence)
+Last session: 2026-03-14T21:57:57.723Z
+Stopped at: Completed 01-foundation-01-03-PLAN.md (tray and settings lifecycle)
 Resume file: None

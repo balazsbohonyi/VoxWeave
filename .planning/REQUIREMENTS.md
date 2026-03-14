@@ -71,10 +71,10 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### System Tray
 
-- [ ] **TRAY-01**: App shows a tray icon on launch; icon changes appearance when recording is active
-- [ ] **TRAY-02**: Right-click tray icon shows context menu: Settings, Start/Stop Recording, separator, Quit
-- [ ] **TRAY-03**: Double-click tray icon opens the settings window
-- [ ] **TRAY-04**: Closing the settings window minimizes to tray (does not quit)
+- [x] **TRAY-01**: App shows a tray icon on launch; icon changes appearance when recording is active
+- [x] **TRAY-02**: Right-click tray icon shows context menu: Settings, Start/Stop Recording, separator, Quit
+- [x] **TRAY-03**: Double-click tray icon opens the settings window
+- [x] **TRAY-04**: Closing the settings window minimizes to tray (does not quit)
 
 ### Settings
 
@@ -186,10 +186,10 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 | INJC-09 | Phase 6 | Pending |
 | INJC-10 | Phase 6 | Pending |
 | INJC-11 | Phase 6 | Pending |
-| TRAY-01 | Phase 1 | Pending |
-| TRAY-02 | Phase 1 | Pending |
-| TRAY-03 | Phase 1 | Pending |
-| TRAY-04 | Phase 1 | Pending |
+| TRAY-01 | Phase 1 | Complete |
+| TRAY-02 | Phase 1 | Complete |
+| TRAY-03 | Phase 1 | Complete |
+| TRAY-04 | Phase 1 | Complete |
 | SETT-01 | Phase 8 | Pending |
 | SETT-02 | Phase 8 | Pending |
 | SETT-03 | Phase 8 | Pending |
