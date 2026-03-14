@@ -54,7 +54,9 @@ pub fn load() -> Result<LoadedConfig, String> {
 
     if !path.exists() {
         let config = AppConfig::default();
-        let raw = serde_json::to_value(&config).map_err(|e| e.to_string())?;
+        let mut raw = serde_json::to_value(&config).map_err(|e| e.to_string())?;
+        // Write defaults to disk on first launch so the file exists immediately.
+        let _ = save(&config, &mut raw);
         return Ok(LoadedConfig { config, raw });
     }
 
