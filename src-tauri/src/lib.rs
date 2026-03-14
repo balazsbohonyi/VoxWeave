@@ -5,7 +5,7 @@ mod state;
 mod tray;
 
 use state::AppState;
-use tauri::Manager;
+use tauri::{Manager, WindowEvent};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -16,11 +16,21 @@ pub fn run() {
             let app_state = AppState::load();
             app.manage(app_state);
 
-            // Build tray icon; tray drives all window visibility (tray-first bootstrap)
+            // Build tray icon; tray drives all window visibility (tray-first bootstrap).
             tray::setup_tray(app)?;
 
-            // Settings window is created hidden; tray "Open Settings" shows it on demand.
-            // The window is defined in tauri.conf.json with `visible: false`.
+            // Settings window is defined in tauri.conf.json with `visible: false`.
+            // Register the close-to-hide handler so titlebar close hides rather than destroys.
+            if let Some(settings_win) = app.get_webview_window("settings") {
+                let win_clone = settings_win.clone();
+                settings_win.on_window_event(move |event| {
+                    if let WindowEvent::CloseRequested { api, .. } = event {
+                        // Prevent the default destroy behaviour; just hide the window.
+                        api.prevent_close();
+                        let _ = win_clone.hide();
+                    }
+                });
+            }
 
             Ok(())
         })
