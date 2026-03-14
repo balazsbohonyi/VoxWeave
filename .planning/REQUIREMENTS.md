@@ -1,0 +1,154 @@
+# Requirements: VoxFlow
+
+**Defined:** 2026-03-14
+**Core Value:** Text lands in any window — terminals, editors, browsers — without friction
+
+## v1 Requirements
+
+Requirements for Windows MVP. Each maps to roadmap phases.
+
+### Hotkey
+
+- [ ] **HOTK-01**: User can trigger recording via a global hotkey (default `Ctrl+Shift+Space`) from any application
+- [ ] **HOTK-02**: Hotkey operates in toggle mode — first press starts recording, second press stops and triggers transcription
+- [ ] **HOTK-03**: User can change the hotkey in settings and the new binding persists across restarts
+- [ ] **HOTK-04**: App detects and warns about hotkey conflicts with other applications
+
+### Audio
+
+- [ ] **AUDI-01**: App captures audio from the selected microphone (or system default) at 16kHz mono
+- [ ] **AUDI-02**: Recording starts within 200ms of hotkey press
+- [ ] **AUDI-03**: Audio is encoded as Opus for cloud providers and WAV for local whisper.cpp
+- [ ] **AUDI-04**: User can select audio input device from a dropdown in settings
+- [ ] **AUDI-05**: If the selected device is disconnected, app falls back to system default with a notification
+- [ ] **AUDI-06**: If no microphone is available, app shows an error notification
+
+### Floating Indicator
+
+- [ ] **FLOT-01**: A floating pill-shaped window (~200x48px) appears when recording starts
+- [ ] **FLOT-02**: Floating indicator is always-on-top, click-through, and does not steal focus
+- [ ] **FLOT-03**: Indicator displays real-time audio waveform (5-10 bars) reflecting mic input at ≥24fps
+- [ ] **FLOT-04**: Indicator shows distinct states: recording (red pulsing dot + waveform), processing (spinner), injecting (pasting/typing cue)
+- [ ] **FLOT-05**: Indicator is draggable and remembers its last position across sessions
+- [ ] **FLOT-06**: Indicator disappears after text injection completes (or error is shown)
+
+### Cloud Transcription
+
+- [ ] **CLOD-01**: App supports three cloud providers: OpenAI, Groq, and OpenRouter
+- [ ] **CLOD-02**: Each provider has its own API key, model selection, and language hint in settings
+- [ ] **CLOD-03**: OpenAI sends to `/v1/audio/transcriptions` with models: whisper-1, gpt-4o-transcribe, gpt-4o-mini-transcribe
+- [ ] **CLOD-04**: Groq sends to its transcription endpoint with hardcoded models: whisper-large-v3-turbo (default), whisper-large-v3, distil-whisper-large-v3-en
+- [ ] **CLOD-05**: OpenRouter sends to chat completions endpoint with audio as input_audio content; models: google/gemini-2.5-flash (default), google/gemini-2.5-pro, google/gemini-2.5-flash-lite, openai/gpt-4o-audio-preview, openai/gpt-audio, openai/gpt-audio-mini
+- [ ] **CLOD-06**: Invalid API key errors prompt user to open settings with the offending provider tab highlighted
+- [ ] **CLOD-07**: Rate limit errors (429) retry with exponential backoff, max 3 retries
+- [ ] **CLOD-08**: Network errors show a notification with a retry button
+- [ ] **CLOD-09**: If the active provider fails after retries and another provider is configured, offer to retry with the fallback provider via toast action
+- [ ] **CLOD-10**: User can configure a language hint per provider (or leave on auto-detect)
+
+### Local Transcription
+
+- [ ] **LOCL-01**: App supports local transcription via whisper.cpp (whisper-rs)
+- [ ] **LOCL-02**: Models are NOT bundled — downloaded on-demand from settings with progress bar and cancel option
+- [ ] **LOCL-03**: Available models: tiny (~75MB), base (~150MB), small (~500MB), medium (~1.5GB) with quality/speed descriptions
+- [ ] **LOCL-04**: Downloaded models stored in `%APPDATA%/VoxFlow/models/`; user can delete models to free space
+- [ ] **LOCL-05**: Local transcription runs on a background thread without freezing the UI
+- [ ] **LOCL-06**: Audio is passed as WAV/PCM float32 to whisper.cpp
+- [ ] **LOCL-07**: If the model file is missing or corrupt, show an error with a prompt to re-download
+
+### Injection
+
+- [ ] **INJC-01**: FlashPaste is the default injection method: save clipboard → write text → simulate paste → wait 500ms → restore clipboard
+- [ ] **INJC-02**: FlashPaste detects terminal windows (ConsoleWindowClass, CASCADIA_HOSTING_WINDOW_CLASS, mintty, VirtualConsoleClass) and uses Ctrl+Shift+V or Shift+Insert instead of Ctrl+V
+- [ ] **INJC-03**: Simulated keystroke injection is available as an alternative — character-by-character via SendInput with KEYEVENTF_UNICODE
+- [ ] **INJC-04**: Keystroke injection speed is configurable: slow (10ms/char), normal (5ms/char), fast (2ms/char)
+- [ ] **INJC-05**: Newline characters are injected as VK_RETURN keystrokes in keystroke mode
+- [ ] **INJC-06**: Manual clipboard mode copies transcription to clipboard without auto-pasting
+- [ ] **INJC-07**: Before injection, app checks if the target process runs at higher integrity level; if so, shows dialog with "Relaunch as Admin" and "Copy to clipboard" options
+- [ ] **INJC-08**: Pressing Escape or the hotkey during keystroke injection cancels immediately; toast shows "X of Y characters typed"
+- [ ] **INJC-09**: Automatic fallback chain when selected method fails: Keystrokes → FlashPaste → Clipboard; FlashPaste → Clipboard (configurable toggle)
+- [ ] **INJC-10**: Focus is restored to the target window before injection if VoxFlow's window gained focus
+- [ ] **INJC-11**: Unicode text (accented characters, symbols) is handled correctly in all injection modes
+
+### System Tray
+
+- [ ] **TRAY-01**: App shows a tray icon on launch; icon changes appearance when recording is active
+- [ ] **TRAY-02**: Right-click tray icon shows context menu: Settings, Start/Stop Recording, separator, Quit
+- [ ] **TRAY-03**: Double-click tray icon opens the settings window
+- [ ] **TRAY-04**: Closing the settings window minimizes to tray (does not quit)
+
+### Settings
+
+- [ ] **SETT-01**: Settings window has sections: General, Audio, Transcription, Injection
+- [ ] **SETT-02**: General: hotkey capture input, "Launch on Windows startup" toggle (default OFF), minimize-to-tray toggle
+- [ ] **SETT-03**: Audio: microphone device dropdown listing all available devices
+- [ ] **SETT-04**: Transcription: Cloud/Local engine toggle; Cloud has tabbed interface (OpenAI, Groq, OpenRouter) each with API key (masked), model dropdown, "Test connection", "Set as active"; active provider visually highlighted
+- [ ] **SETT-05**: Transcription: Local sub-section with model variants, sizes, download/delete buttons, progress bar
+- [ ] **SETT-06**: Injection: method selector (FlashPaste/Keystrokes/Clipboard), speed selector (shown only for Keystrokes), auto-fallback checkbox
+- [ ] **SETT-07**: All settings persist immediately (no save button) and are restored on restart
+
+### Setup Wizard
+
+- [ ] **WIZR-01**: On first launch (no config), app opens a 3-step setup wizard instead of minimizing to tray
+- [ ] **WIZR-02**: Step 1: choose engine (Cloud or Local)
+- [ ] **WIZR-03**: Step 2: configure provider/API key with inline validation (Cloud) or download model (Local)
+- [ ] **WIZR-04**: Step 3: confirm default hotkey with option to change
+- [ ] **WIZR-05**: "Finish" saves config and shows "VoxFlow is ready" toast
+- [ ] **WIZR-06**: Wizard can be re-opened from Settings at any time
+
+### Notifications
+
+- [ ] **NOTF-01**: Success toasts confirm injection method and show text preview ("Text pasted", "Text typed", "Copied to clipboard")
+- [ ] **NOTF-02**: Error toasts show actionable messages (open settings, retry, fallback notification)
+- [ ] **NOTF-03**: Cancellation toasts show "X of Y characters typed" or "Paste cancelled"
+- [ ] **NOTF-04**: Toasts auto-dismiss after 4 seconds and can be manually dismissed
+
+### Config
+
+- [ ] **CONF-01**: All settings persist in JSON at `%APPDATA%/VoxFlow/config.json`
+- [ ] **CONF-02**: Config includes: engine, active provider, API keys, models, language hints, hotkey, mic device, local model, injection method/speed, auto-fallback, autostart, indicator position, first-launch flag
+- [ ] **CONF-03**: Missing fields use defaults; unknown fields are ignored (forward/backward compatible)
+
+## v2 Requirements
+
+### Cross-Platform
+
+- **XPLT-01**: macOS support via CoreAudio, CGEvent, NSPasteboard
+- **XPLT-02**: Android support via foreground service + Accessibility Service
+
+### AI Enhancements
+
+- **AIEH-01**: Post-transcription AI editing (grammar, punctuation, filler removal)
+- **AIEH-02**: Per-app tone adaptation
+- **AIEH-03**: Personal dictionary / custom vocabulary
+
+### Advanced
+
+- **ADVN-01**: Streaming/real-time transcription display
+- **ADVN-02**: Dynamic provider registry (add providers without code changes)
+- **ADVN-03**: User-configurable API base URL per provider
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Usage analytics / telemetry | Against BYOK philosophy — zero data collection, ever |
+| User accounts / cloud sync | Against BYOK philosophy — personal tool, local config only |
+| Hold-to-record mode | Toggle mode is simpler and more standard for dictation |
+| Multi-language auto-detection | Manual language selection + auto-detect option is sufficient for v1 |
+| Streaming transcription display | Doubles pipeline complexity for marginal UX gain |
+| AI post-processing | Adds latency, LLM cost, scope — defer to v2 |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| (Populated during roadmap creation) | | |
+
+**Coverage:**
+- v1 requirements: 49 total
+- Mapped to phases: 0
+- Unmapped: 49
+
+---
+*Requirements defined: 2026-03-14*
+*Last updated: 2026-03-14 after initial definition*
