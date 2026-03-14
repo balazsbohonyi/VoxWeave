@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "voxflow",
+  "productName": "VoxFlow",
   "version": "0.1.0",
   "identifier": "com.balazs.bohonyi.voxflow",
   "build": {
@@ -12,9 +12,17 @@
   "app": {
     "windows": [
       {
-        "title": "voxflow",
+        "label": "settings",
+        "title": "VoxFlow Settings",
+        "url": "index.html",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "minWidth": 640,
+        "minHeight": 480,
+        "visible": false,
+        "skipTaskbar": false,
+        "decorations": true,
+        "resizable": true
       }
     ],
     "security": {
