@@ -44,8 +44,19 @@ fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event: tauri::menu::MenuEve
     match event.id().as_ref() {
         "open_settings" => show_settings_window(app),
         "quit" => {
-            // Hard exit — bypasses close-to-hide intercept on the settings window.
-            app.exit(0);
+            // Hide and close all windows first, then exit after a short delay so
+            // WebView2/Chromium teardown finishes before the process exits.
+            // This avoids the Chrome_WidgetWin_0 unregister error (Error 1412).
+            if let Some(win) = app.get_webview_window("settings") {
+                let _ = win.hide();
+                let _ = win.close();
+            }
+            let app_for_exit = app.clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(std::time::Duration::from_millis(120));
+                app_for_exit.cleanup_before_exit();
+                app_for_exit.exit(0);
+            });
         }
         // "start_stop_recording" is disabled; no action needed.
         _ => {}
