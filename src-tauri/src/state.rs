@@ -36,6 +36,11 @@ pub struct AppState {
     /// Set to `true` when the user requests cancellation of an in-flight
     /// transcription. Checked by the transcription worker thread.
     pub cancel_flag: Arc<Mutex<bool>>,
+
+    /// Set to `true` when the app is quitting via the tray Quit action.
+    /// The close-to-hide handler checks this to allow window destruction
+    /// instead of hiding, so WebView2 tears down cleanly before exit.
+    pub quitting: Arc<Mutex<bool>>,
 }
 
 impl AppState {
@@ -48,6 +53,7 @@ impl AppState {
                 config_raw: Arc::new(Mutex::new(loaded.raw)),
                 recording_state: Arc::new(Mutex::new(RecordingState::default())),
                 cancel_flag: Arc::new(Mutex::new(false)),
+                quitting: Arc::new(Mutex::new(false)),
             },
             Err(e) => {
                 log::error!("Failed to load config from disk: {e}. Using defaults.");
@@ -60,6 +66,7 @@ impl AppState {
                     config_raw: Arc::new(Mutex::new(raw)),
                     recording_state: Arc::new(Mutex::new(RecordingState::default())),
                     cancel_flag: Arc::new(Mutex::new(false)),
+                    quitting: Arc::new(Mutex::new(false)),
                 }
             }
         }

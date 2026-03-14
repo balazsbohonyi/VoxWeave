@@ -23,9 +23,14 @@ pub fn run() {
             // Register the close-to-hide handler so titlebar close hides rather than destroys.
             if let Some(settings_win) = app.get_webview_window("settings") {
                 let win_clone = settings_win.clone();
+                let quitting = app.state::<AppState>().quitting.clone();
                 settings_win.on_window_event(move |event| {
                     if let WindowEvent::CloseRequested { api, .. } = event {
-                        // Prevent the default destroy behaviour; just hide the window.
+                        if *quitting.lock().unwrap() {
+                            // App is quitting — allow WebView2 to destroy cleanly.
+                            return;
+                        }
+                        // Normal close: hide instead of destroy so the window is reusable.
                         api.prevent_close();
                         let _ = win_clone.hide();
                     }
