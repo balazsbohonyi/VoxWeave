@@ -1,30 +1,45 @@
 // useConfig — reactive wrapper around the persisted AppConfig.
-// Placeholder: full implementation in Phase 8 (Settings).
+// Calls Rust commands get_config / save_config via Tauri IPC.
 import { ref } from "vue";
+import { invoke } from "@tauri-apps/api/core";
 import type { AppConfig } from "../types/index";
 
-// Default config mirrors Rust defaults in config/mod.rs.
-const defaultConfig: AppConfig = {
-  hotkey: "Alt+Shift+Space",
-  audio_device: null,
-  transcription_provider: "openai",
-  openai_api_key: "",
-  groq_api_key: "",
-  openrouter_api_key: "",
-  openai_model: "whisper-1",
-  groq_model: "whisper-large-v3",
-  openrouter_model: "",
-  injection_mode: "flash_paste",
-  show_indicator: true,
-  launch_at_login: false,
-};
-
 export function useConfig() {
-  const config = ref<AppConfig>({ ...defaultConfig });
+  const config = ref<AppConfig | null>(null);
   const loading = ref(false);
   const error = ref<string | null>(null);
 
-  // TODO (Phase 8): invoke("get_config") and invoke("save_config", { config })
+  /** Load config from Rust / disk. */
+  async function loadConfig(): Promise<void> {
+    loading.value = true;
+    error.value = null;
+    try {
+      config.value = await invoke<AppConfig>("get_config");
+    } catch (e) {
+      error.value = String(e);
+    } finally {
+      loading.value = false;
+    }
+  }
 
-  return { config, loading, error };
+  /** Persist a partial or full config update. Merges with current value. */
+  async function saveConfig(updates: Partial<AppConfig>): Promise<void> {
+    if (!config.value) {
+      error.value = "Config not loaded — call loadConfig() first";
+      return;
+    }
+    loading.value = true;
+    error.value = null;
+    try {
+      const merged: AppConfig = { ...config.value, ...updates };
+      await invoke<void>("save_config", { config: merged });
+      config.value = merged;
+    } catch (e) {
+      error.value = String(e);
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  return { config, loading, error, loadConfig, saveConfig };
 }
