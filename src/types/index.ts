@@ -2,35 +2,58 @@
 // Keep in sync with src-tauri/src/config/mod.rs and src-tauri/src/state.rs.
 
 // ---------------------------------------------------------------------------
-// Config
+// Config enums
 // ---------------------------------------------------------------------------
 
 export type InjectionMode = "flash_paste" | "keystroke" | "clipboard";
 
 export type TranscriptionProvider = "openai" | "groq" | "openrouter" | "local";
 
-export interface AppConfig {
-  // Hotkey
-  hotkey: string;
+// ---------------------------------------------------------------------------
+// Nested config sections
+// ---------------------------------------------------------------------------
 
-  // Audio
-  audio_device: string | null;
+export interface AudioConfig {
+  device: string | null;
+  vad_threshold: number;
+  vad_silence_ms: number;
+}
 
-  // Transcription
-  transcription_provider: TranscriptionProvider;
+export interface TranscriptionConfig {
+  provider: TranscriptionProvider;
   openai_api_key: string;
   groq_api_key: string;
   openrouter_api_key: string;
   openai_model: string;
   groq_model: string;
   openrouter_model: string;
+  /** BCP-47 language hint (e.g. "en"). Empty string = auto-detect. */
+  language: string;
+  local_model_path: string | null;
+}
 
-  // Injection
-  injection_mode: InjectionMode;
+export interface InjectionConfig {
+  mode: InjectionMode;
+}
 
-  // UI
-  show_indicator: boolean;
+export interface IndicatorConfig {
+  show: boolean;
+  position_x: number | null;
+  position_y: number | null;
+}
+
+// ---------------------------------------------------------------------------
+// Root AppConfig
+// ---------------------------------------------------------------------------
+
+export interface AppConfig {
+  hotkey: string;
+  audio: AudioConfig;
+  transcription: TranscriptionConfig;
+  injection: InjectionConfig;
+  indicator: IndicatorConfig;
   launch_at_login: boolean;
+  first_launch: boolean;
 }
 
 // ---------------------------------------------------------------------------
