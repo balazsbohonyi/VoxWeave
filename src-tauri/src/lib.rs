@@ -13,7 +13,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             // Managed state — single source of truth across commands and tray
-            let app_state = AppState::new();
+            let app_state = AppState::load();
             app.manage(app_state);
 
             // Build tray icon; tray drives all window visibility (tray-first bootstrap)
@@ -25,8 +25,8 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            commands::get_config,
-            commands::save_config,
+            commands::config::get_config,
+            commands::config::save_config,
         ])
         .run(tauri::generate_context!())
         .expect("error while running VoxFlow");
