@@ -156,7 +156,7 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/TBD | Not started | - |
+| 1. Foundation | 1/3 | In Progress|  |
 | 2. Hotkey | 0/TBD | Not started | - |
 | 3. Audio Capture | 0/TBD | Not started | - |
 | 4. Floating Indicator | 0/TBD | Not started | - |
