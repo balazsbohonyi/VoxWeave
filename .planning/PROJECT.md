@@ -52,7 +52,6 @@ Text lands in any window — terminals, editors, browsers — without friction. 
 - **Competitive context**: Wispr Flow is the commercial incumbent. VoxFlow differentiates on BYOK model, zero cost (beyond API usage), privacy (audio never touches third-party servers beyond the user's chosen provider), and terminal support.
 - **Distribution**: Pre-built Windows installer via GitHub Releases. Open source.
 - **Cross-platform intent**: Windows is the MVP, but macOS is the next planned platform. The architecture must use proper abstractions for platform-specific code (audio capture, text injection, clipboard operations, hotkey registration, elevation checks) so adding macOS requires implementing platform traits — not rewriting core logic.
-- **OpenSpec specs exist**: Detailed specs were created via OpenSpec at `openspec/changes/voxflow-windows-mvp/` covering all capabilities. These serve as additional reference but GSD manages the implementation roadmap.
 - **Provider model lists**: Hardcoded model lists for all providers. OpenAI: whisper-1, gpt-4o-transcribe, gpt-4o-mini-transcribe. Groq: whisper-large-v3-turbo (default), whisper-large-v3, distil-whisper-large-v3-en. OpenRouter: uses chat completions endpoint (no Whisper) — google/gemini-2.5-flash (default), google/gemini-2.5-pro, google/gemini-2.5-flash-lite, openai/gpt-4o-audio-preview, openai/gpt-audio, openai/gpt-audio-mini.
 
 ## Constraints

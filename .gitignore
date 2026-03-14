@@ -1,0 +1,53 @@
+# Rust / Cargo
+target/
+Cargo.lock
+
+# Node / npm
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Tauri
+src-tauri/target/
+src-tauri/gen/
+
+# Vue / Vite
+.vite/
+*.d.ts.map
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Editor & OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build artifacts
+*.tgz
+*.zip
+*.dmg
+*.AppImage
+*.deb
+*.rpm
+*.msi
+*.exe
+bundle/
