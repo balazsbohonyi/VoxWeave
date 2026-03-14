@@ -71,7 +71,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### System Tray
 
-- [ ] **TRAY-01**: App shows a tray icon on launch; icon changes appearance when recording is active
+- [ ] **TRAY-01**: App shows a tray icon on launch
 - [ ] **TRAY-02**: Right-click tray icon shows context menu: Settings, Start/Stop Recording, separator, Quit
 - [ ] **TRAY-03**: Double-click tray icon opens the settings window
 - [ ] **TRAY-04**: Closing the settings window minimizes to tray (does not quit)
@@ -219,3 +219,4 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 ---
 *Requirements defined: 2026-03-14*
 *Last updated: 2026-03-14 after roadmap creation — all 68 requirements mapped*
+
