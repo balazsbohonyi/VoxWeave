@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-foundation-01-01-PLAN.md (scaffold platform)
-last_updated: "2026-03-14T21:41:18.886Z"
+stopped_at: Completed 01-foundation-01-02-PLAN.md (config persistence)
+last_updated: "2026-03-14T21:51:26.899Z"
 last_activity: 2026-03-14 — Phase 1 context gathered
 progress:
   total_phases: 10
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
   percent: 33
 ---
 
@@ -51,6 +51,7 @@ Progress: [███░░░░░░░] 33%
 
 *Updated after each plan completion*
 | Phase 01-foundation P01 | 6 | 5 tasks | 21 files |
+| Phase 01-foundation P01-02 | 6 | 5 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,10 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: Tray-first bootstrap: settings window starts hidden, tray is sole launcher
 - [Phase 01-foundation]: Platform traits defined as seam from day one; Windows stubs compile without real OS calls
 - [Phase 01-foundation]: whisper-rs feature-gated behind local-transcription cargo feature
+- [Phase 01-foundation]: Nested config sections (not flat struct) for serde default granularity and cleaner IPC
+- [Phase 01-foundation]: Raw JSON preserved in AppState.config_raw for unknown-field round-trip via merge_into()
+- [Phase 01-foundation]: Malformed config renamed .corrupt.{timestamp} on load, never silently overwritten
+- [Phase 01-foundation]: AppState::load() replaces AppState::new() — config on disk from day one of phase 1
 
 ### Pending Todos
 
@@ -81,6 +86,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-14T21:41:18.884Z
-Stopped at: Completed 01-foundation-01-01-PLAN.md (scaffold platform)
+Last session: 2026-03-14T21:51:26.897Z
+Stopped at: Completed 01-foundation-01-02-PLAN.md (config persistence)
 Resume file: None

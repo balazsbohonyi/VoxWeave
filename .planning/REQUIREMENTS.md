@@ -104,9 +104,9 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### Config
 
-- [ ] **CONF-01**: All settings persist in JSON at `%APPDATA%/VoxFlow/config.json`
-- [ ] **CONF-02**: Config includes: engine, active provider, API keys, models, language hints, hotkey, mic device, local model, injection method/speed, auto-fallback, autostart, indicator position, first-launch flag
-- [ ] **CONF-03**: Missing fields use defaults; unknown fields are ignored (forward/backward compatible)
+- [x] **CONF-01**: All settings persist in JSON at `%APPDATA%/VoxFlow/config.json`
+- [x] **CONF-02**: Config includes: engine, active provider, API keys, models, language hints, hotkey, mic device, local model, injection method/speed, auto-fallback, autostart, indicator position, first-launch flag
+- [x] **CONF-03**: Missing fields use defaults; unknown fields are ignored (forward/backward compatible)
 
 ## v2 Requirements
 
@@ -207,9 +207,9 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 | NOTF-02 | Phase 7 | Pending |
 | NOTF-03 | Phase 7 | Pending |
 | NOTF-04 | Phase 7 | Pending |
-| CONF-01 | Phase 1 | Pending |
-| CONF-02 | Phase 1 | Pending |
-| CONF-03 | Phase 1 | Pending |
+| CONF-01 | Phase 1 | Complete |
+| CONF-02 | Phase 1 | Complete |
+| CONF-03 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 68 total
