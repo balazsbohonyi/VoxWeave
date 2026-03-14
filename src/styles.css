@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* VoxFlow global base styles */
+:root {
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
