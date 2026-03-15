@@ -9,6 +9,7 @@ const {
   hotkeyWarning,
   audioWarning,
   audioInputDevices,
+  audioDevicesLoadError,
   clearHotkeyWarning,
   clearAudioWarning,
   loadConfig,
@@ -234,6 +235,15 @@ onMounted(() => {
                 {{ isSavingAudioDevice ? "Saving..." : "Save" }}
               </button>
             </div>
+            <p v-if="audioDevicesLoadError" class="text-xs text-red-600 dark:text-red-300">
+              Failed to refresh microphones: {{ audioDevicesLoadError }}
+            </p>
+            <p
+              v-else-if="audioInputDevices.length === 0"
+              class="text-xs text-amber-700 dark:text-amber-300"
+            >
+              No microphone devices detected. Connect a microphone and click Refresh.
+            </p>
           </div>
           <div class="flex justify-between">
             <dt>Injection mode</dt>

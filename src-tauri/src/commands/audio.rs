@@ -12,7 +12,6 @@ mod tests {
     #[test]
     fn lists_input_devices() {
         let devices = list_audio_input_devices().expect("command failed");
-        assert!(!devices.is_empty());
+        assert_eq!(devices, vec!["Mock Microphone".to_string()]);
     }
 }
-

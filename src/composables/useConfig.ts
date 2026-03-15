@@ -16,6 +16,7 @@ export function useConfig() {
   const hotkeyWarning = ref<HotkeyWarningPayload | null>(null);
   const audioWarning = ref<AudioWarningPayload | null>(null);
   const audioInputDevices = ref<string[]>([]);
+  const audioDevicesLoadError = ref<string | null>(null);
   let unlistenHotkeyWarning: UnlistenFn | null = null;
   let unlistenAudioWarning: UnlistenFn | null = null;
 
@@ -42,12 +43,14 @@ export function useConfig() {
   }
 
   async function loadAudioInputDevices(): Promise<void> {
+    audioDevicesLoadError.value = null;
     try {
       const devices = await invoke<string[]>("list_audio_input_devices");
       audioInputDevices.value = devices;
     } catch (e) {
       const message = String(e);
       error.value = message;
+      audioDevicesLoadError.value = message;
       audioInputDevices.value = [];
     }
   }
@@ -107,6 +110,7 @@ export function useConfig() {
     hotkeyWarning,
     audioWarning,
     audioInputDevices,
+    audioDevicesLoadError,
     clearHotkeyWarning,
     clearAudioWarning,
     loadConfig,

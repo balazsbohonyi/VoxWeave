@@ -63,7 +63,9 @@ pub fn start_recording_with_snapshot<R: Runtime>(
 
     let resolved = match resolve_input_device(selected.as_deref(), &snapshot) {
         Ok(device) => device,
-        Err(message) => {
+        Err(_) => {
+            let message =
+                "No microphone input device is available. Open Settings > Microphone and click Refresh.".to_string();
             *state.recording_state.lock().map_err(|e| e.to_string())? = RecordingState::Idle;
             *state.audio_session.lock().map_err(|e| e.to_string())? = None;
             emit_audio_error(
