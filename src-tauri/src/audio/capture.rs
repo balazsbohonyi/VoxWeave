@@ -1,3 +1,6 @@
+#[cfg(not(test))]
+use cpal::traits::{DeviceTrait, HostTrait};
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct DeviceSnapshot {
     pub input_devices: Vec<String>,
@@ -64,6 +67,15 @@ pub fn list_input_device_names(snapshot: &DeviceSnapshot) -> Vec<String> {
     dedupe_preserve_order(snapshot.input_devices.clone())
 }
 
+fn snapshot_from_device_names(input_devices: Vec<String>, default_input: Option<String>) -> DeviceSnapshot {
+    let input_devices = dedupe_preserve_order(input_devices);
+    let default_input = default_input.filter(|default_name| input_devices.iter().any(|name| name == default_name));
+    DeviceSnapshot {
+        input_devices,
+        default_input,
+    }
+}
+
 pub fn system_device_snapshot() -> DeviceSnapshot {
     #[cfg(test)]
     {
@@ -73,10 +85,62 @@ pub fn system_device_snapshot() -> DeviceSnapshot {
         };
     }
 
-    #[allow(unreachable_code)]
-    DeviceSnapshot {
-        input_devices: Vec::new(),
-        default_input: None,
+    #[cfg(not(test))]
+    {
+        let host = cpal::default_host();
+
+        let input_devices = host
+            .input_devices()
+            .map(|devices| {
+                devices
+                    .filter_map(|device| device.name().ok())
+                    .collect::<Vec<String>>()
+            })
+            .unwrap_or_default();
+
+        let default_input = host.default_input_device().and_then(|device| device.name().ok());
+
+        return snapshot_from_device_names(input_devices, default_input);
     }
+
+    #[allow(unreachable_code)]
+    snapshot_from_device_names(Vec::new(), None)
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn snapshot_mapping_dedupes_devices_and_preserves_order() {
+        let snapshot = snapshot_from_device_names(
+            vec![
+                "Mic B".to_string(),
+                "Mic A".to_string(),
+                "Mic B".to_string(),
+                "Mic C".to_string(),
+            ],
+            Some("Mic B".to_string()),
+        );
+
+        assert_eq!(
+            snapshot.input_devices,
+            vec!["Mic B".to_string(), "Mic A".to_string(), "Mic C".to_string()]
+        );
+        assert_eq!(snapshot.default_input, Some("Mic B".to_string()));
+    }
+
+    #[test]
+    fn snapshot_mapping_drops_default_not_in_enumerated_inputs() {
+        let snapshot = snapshot_from_device_names(
+            vec!["Mic A".to_string(), "Mic B".to_string()],
+            Some("External Mic".to_string()),
+        );
+
+        assert_eq!(
+            snapshot.input_devices,
+            vec!["Mic A".to_string(), "Mic B".to_string()]
+        );
+        assert_eq!(snapshot.default_input, None);
+    }
+}
