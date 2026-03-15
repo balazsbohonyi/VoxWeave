@@ -42,10 +42,17 @@ fn show_with_state<R: Runtime>(
 
     let window = get_window(app)?;
     window::apply_window_policy(&window)?;
-    window::place_window_from_config(app, &window, position_x, position_y)?;
+    let is_visible = window.is_visible().map_err(|e| e.to_string())?;
+    if should_place_window_from_config(is_visible) {
+        window::place_window_from_config(app, &window, position_x, position_y)?;
+    }
     window.show().map_err(|e| e.to_string())?;
     emit_state(app, visual_state);
     Ok(())
+}
+
+fn should_place_window_from_config(is_visible: bool) -> bool {
+    !is_visible
 }
 
 pub fn show_processing<R: Runtime>(app: &AppHandle<R>) {
@@ -188,5 +195,11 @@ mod tests {
         let (x, y) = window::clamp_position_to_monitor(5000, -100, monitor);
         assert!(x <= 1920 - window::INDICATOR_WIDTH);
         assert_eq!(y, 0);
+    }
+
+    #[test]
+    fn state_transitions_do_not_snap_to_stale_position() {
+        assert!(!should_place_window_from_config(true));
+        assert!(should_place_window_from_config(false));
     }
 }
