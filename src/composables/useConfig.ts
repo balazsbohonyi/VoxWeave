@@ -39,10 +39,12 @@ export function useConfig() {
   }
 
   /** Persist a partial or full config update. Merges with current value. */
-  async function saveConfig(updates: Partial<AppConfig>): Promise<void> {
+  async function saveConfig(
+    updates: Partial<AppConfig>,
+  ): Promise<AppConfig | null> {
     if (!config.value) {
       error.value = "Config not loaded - call loadConfig() first";
-      return;
+      return null;
     }
     await ensureHotkeyWarningListener();
     loading.value = true;
@@ -51,8 +53,11 @@ export function useConfig() {
       const merged: AppConfig = { ...config.value, ...updates };
       const saved = await invoke<AppConfig>("save_config", { config: merged });
       config.value = saved;
+      return saved;
     } catch (e) {
-      error.value = String(e);
+      const message = String(e);
+      error.value = message;
+      throw new Error(message);
     } finally {
       loading.value = false;
     }
