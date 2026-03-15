@@ -191,4 +191,16 @@ mod tests {
         );
         assert!(state.hotkey_warning.lock().unwrap().is_some());
     }
+
+    #[test]
+    fn recording_transition_starts_audio_session() {
+        let app = mock_app();
+        app.manage(AppState::load());
+
+        service::toggle_recording_state(&app.handle());
+
+        let state = app.state::<AppState>();
+        assert_eq!(*state.recording_state.lock().unwrap(), RecordingState::Recording);
+        assert!(state.audio_session.lock().unwrap().is_some());
+    }
 }

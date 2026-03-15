@@ -7,8 +7,12 @@ const {
   loading,
   error,
   hotkeyWarning,
+  audioWarning,
+  audioInputDevices,
   clearHotkeyWarning,
+  clearAudioWarning,
   loadConfig,
+  loadAudioInputDevices,
   saveConfig,
 } = useConfig();
 
@@ -16,6 +20,8 @@ const hotkeyDraft = ref("");
 const hotkeyApplyError = ref<string | null>(null);
 const hotkeyApplySuccess = ref<string | null>(null);
 const isApplyingHotkey = ref(false);
+const selectedAudioDevice = ref<string>("");
+const isSavingAudioDevice = ref(false);
 
 const hotkeyDirty = computed(() => {
   if (!config.value) {
@@ -61,10 +67,33 @@ async function applyHotkey(): Promise<void> {
   }
 }
 
+async function saveAudioDevice(): Promise<void> {
+  if (!config.value) {
+    return;
+  }
+
+  isSavingAudioDevice.value = true;
+  try {
+    const nextDevice = selectedAudioDevice.value.trim();
+    const saved = await saveConfig({
+      audio: {
+        ...config.value.audio,
+        device: nextDevice.length > 0 ? nextDevice : null,
+      },
+    });
+    if (saved) {
+      selectedAudioDevice.value = saved.audio.device ?? "";
+    }
+  } finally {
+    isSavingAudioDevice.value = false;
+  }
+}
+
 onMounted(() => {
   loadConfig().then(() => {
     if (config.value) {
       hotkeyDraft.value = config.value.hotkey;
+      selectedAudioDevice.value = config.value.audio.device ?? "";
     }
   });
 });
@@ -96,6 +125,30 @@ onMounted(() => {
           <button
             class="text-[11px] font-semibold text-amber-700 hover:text-amber-900 dark:text-amber-200 dark:hover:text-amber-50"
             @click="clearHotkeyWarning"
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+      <div
+        v-if="audioWarning"
+        class="absolute right-6 top-36 w-80 rounded-lg border border-amber-300 bg-amber-50 p-4 text-xs text-amber-900 shadow-lg dark:border-amber-500/60 dark:bg-amber-900/20 dark:text-amber-100"
+      >
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[11px] uppercase tracking-wide text-amber-700 dark:text-amber-200">
+              Audio Warning
+            </p>
+            <p class="mt-1 font-medium">
+              Microphone fallback
+            </p>
+            <p class="mt-1 text-amber-700/90 dark:text-amber-200/90">
+              {{ audioWarning.message }}
+            </p>
+          </div>
+          <button
+            class="text-[11px] font-semibold text-amber-700 hover:text-amber-900 dark:text-amber-200 dark:hover:text-amber-50"
+            @click="clearAudioWarning"
           >
             Dismiss
           </button>
@@ -150,6 +203,37 @@ onMounted(() => {
           <div class="flex justify-between">
             <dt>Provider</dt>
             <dd class="font-mono text-gray-800 dark:text-gray-200">{{ config.transcription.provider }}</dd>
+          </div>
+          <div class="space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800/40">
+            <div class="flex items-center justify-between">
+              <dt class="font-medium text-gray-700 dark:text-gray-300">Microphone</dt>
+              <button
+                class="text-[11px] font-semibold text-blue-700 hover:text-blue-900 dark:text-blue-300 dark:hover:text-blue-100"
+                type="button"
+                @click="loadAudioInputDevices"
+              >
+                Refresh
+              </button>
+            </div>
+            <div class="flex items-start gap-2">
+              <select
+                v-model="selectedAudioDevice"
+                class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-xs text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                :disabled="isSavingAudioDevice"
+              >
+                <option value="">System default</option>
+                <option v-for="device in audioInputDevices" :key="device" :value="device">
+                  {{ device }}
+                </option>
+              </select>
+              <button
+                class="rounded-md bg-blue-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400 dark:disabled:bg-gray-600"
+                :disabled="isSavingAudioDevice"
+                @click="saveAudioDevice"
+              >
+                {{ isSavingAudioDevice ? "Saving..." : "Save" }}
+              </button>
+            </div>
           </div>
           <div class="flex justify-between">
             <dt>Injection mode</dt>

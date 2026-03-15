@@ -3,34 +3,63 @@
 import { ref } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import type { AppConfig, HotkeyWarningPayload } from "../types/index";
+import type {
+  AppConfig,
+  AudioWarningPayload,
+  HotkeyWarningPayload,
+} from "../types/index";
 
 export function useConfig() {
   const config = ref<AppConfig | null>(null);
   const loading = ref(false);
   const error = ref<string | null>(null);
   const hotkeyWarning = ref<HotkeyWarningPayload | null>(null);
+  const audioWarning = ref<AudioWarningPayload | null>(null);
+  const audioInputDevices = ref<string[]>([]);
   let unlistenHotkeyWarning: UnlistenFn | null = null;
+  let unlistenAudioWarning: UnlistenFn | null = null;
 
-  async function ensureHotkeyWarningListener(): Promise<void> {
+  async function ensureListeners(): Promise<void> {
     if (unlistenHotkeyWarning) {
-      return;
+      // hotkey listener already set
+    } else {
+      unlistenHotkeyWarning = await listen<HotkeyWarningPayload>(
+        "hotkey-warning",
+        (event) => {
+          hotkeyWarning.value = event.payload;
+        },
+      );
     }
-    unlistenHotkeyWarning = await listen<HotkeyWarningPayload>(
-      "hotkey-warning",
-      (event) => {
-        hotkeyWarning.value = event.payload;
-      },
-    );
+
+    if (!unlistenAudioWarning) {
+      unlistenAudioWarning = await listen<AudioWarningPayload>(
+        "audio-warning",
+        (event) => {
+          audioWarning.value = event.payload;
+        },
+      );
+    }
+  }
+
+  async function loadAudioInputDevices(): Promise<void> {
+    try {
+      const devices = await invoke<string[]>("list_audio_input_devices");
+      audioInputDevices.value = devices;
+    } catch (e) {
+      const message = String(e);
+      error.value = message;
+      audioInputDevices.value = [];
+    }
   }
 
   /** Load config from Rust / disk. */
   async function loadConfig(): Promise<void> {
-    await ensureHotkeyWarningListener();
+    await ensureListeners();
     loading.value = true;
     error.value = null;
     try {
       config.value = await invoke<AppConfig>("get_config");
+      await loadAudioInputDevices();
     } catch (e) {
       error.value = String(e);
     } finally {
@@ -46,7 +75,7 @@ export function useConfig() {
       error.value = "Config not loaded - call loadConfig() first";
       return null;
     }
-    await ensureHotkeyWarningListener();
+    await ensureListeners();
     loading.value = true;
     error.value = null;
     try {
@@ -67,13 +96,21 @@ export function useConfig() {
     hotkeyWarning.value = null;
   }
 
+  function clearAudioWarning(): void {
+    audioWarning.value = null;
+  }
+
   return {
     config,
     loading,
     error,
     hotkeyWarning,
+    audioWarning,
+    audioInputDevices,
     clearHotkeyWarning,
+    clearAudioWarning,
     loadConfig,
+    loadAudioInputDevices,
     saveConfig,
   };
 }

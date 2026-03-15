@@ -1,3 +1,4 @@
+mod audio;
 mod commands;
 mod config;
 mod hotkey;
@@ -51,6 +52,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::config::get_config,
             commands::config::save_config,
+            commands::audio::list_audio_input_devices,
         ])
         .run(tauri::generate_context!())
         .expect("error while running VoxFlow");
