@@ -1,5 +1,6 @@
 mod commands;
 mod config;
+mod hotkey;
 mod platform;
 mod state;
 mod tray;
@@ -15,6 +16,11 @@ pub fn run() {
             // Managed state — single source of truth across commands and tray
             let app_state = AppState::load();
             app.manage(app_state);
+
+            // Global shortcut plugin (hotkey runtime relies on this in Phase 2).
+            #[cfg(desktop)]
+            app.handle()
+                .plugin(tauri_plugin_global_shortcut::Builder::new().build())?;
 
             // Build tray icon; tray drives all window visibility (tray-first bootstrap).
             tray::setup_tray(app)?;
