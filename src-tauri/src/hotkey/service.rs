@@ -25,6 +25,36 @@ pub struct HotkeyWarningPayload {
     pub source: HotkeyWarningSource,
 }
 
+fn pretty_hotkey(hotkey: &str) -> String {
+    hotkey
+        .split('+')
+        .map(|part| match part {
+            "Super" | "Meta" | "Command" | "Cmd" => "Win".to_string(),
+            value if value.starts_with("Key") && value.len() > 3 => value[3..].to_string(),
+            other => other.to_string(),
+        })
+        .collect::<Vec<_>>()
+        .join("+")
+}
+
+fn humanize_registration_error(hotkey: &str, err: &str) -> String {
+    let pretty = pretty_hotkey(hotkey);
+    let lower = err.to_ascii_lowercase();
+
+    if lower.contains("already registered")
+        || lower.contains("already in use")
+        || err.contains("HotKey {")
+    {
+        return format!("{pretty} is already registered by another app. Choose a different hotkey.");
+    }
+
+    if lower.contains("invalid") || lower.contains("unsupported") {
+        return format!("{pretty} is not a valid global hotkey on this system.");
+    }
+
+    format!("Could not register {pretty}. {err}")
+}
+
 pub fn register_startup_hotkey<R: Runtime>(app: &AppHandle<R>) {
     register_startup_hotkey_with(app, |app, hotkey, handler| {
         app.global_shortcut()
@@ -57,7 +87,7 @@ pub(crate) fn register_startup_hotkey_with<R: Runtime, F>(
         Err(err) => {
             let warning = HotkeyWarning {
                 hotkey: canonical,
-                message: err.clone(),
+                message: humanize_registration_error(&configured, &err),
             };
             *state.hotkey_availability.lock().unwrap() = HotkeyAvailability::Unavailable;
             *state.hotkey_warning.lock().unwrap() = Some(warning.clone());
@@ -154,8 +184,8 @@ where
         }
         Err(err) => {
             let warning = HotkeyWarning {
-                hotkey: requested_canonical,
-                message: err.clone(),
+                hotkey: requested_canonical.clone(),
+                message: humanize_registration_error(&requested_canonical, &err),
             };
             *state
                 .hotkey_warning

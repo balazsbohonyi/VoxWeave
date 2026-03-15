@@ -167,7 +167,12 @@ mod tests {
             *state.hotkey_availability.lock().unwrap(),
             HotkeyAvailability::Registered
         );
-        assert!(state.hotkey_warning.lock().unwrap().is_some());
+        let warning = state.hotkey_warning.lock().unwrap().clone();
+        assert!(warning.is_some());
+        assert_eq!(
+            warning.unwrap().message,
+            "Ctrl+Alt+Space is already registered by another app. Choose a different hotkey."
+        );
     }
 
     #[test]
