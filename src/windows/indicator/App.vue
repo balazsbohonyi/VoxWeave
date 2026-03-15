@@ -29,6 +29,10 @@ const isRecording = computed(() => state.value === "recording");
 const isProcessing = computed(() => state.value === "processing");
 const isInjecting = computed(() => state.value === "injecting");
 const WAVE_SEGMENTS = 7;
+const RECORDING_BASELINE = 0.08;
+const RECORDING_STALE_MS = 260;
+const RECORDING_SMOOTHING = 0.42;
+const lastAudioLevelAt = ref(0);
 
 const statusLabel = computed(() => {
   if (isRecording.value) return "Recording";
@@ -46,8 +50,12 @@ const methodHint = computed(() => {
 
 const animatedLevel = computed(() => {
   if (isRecording.value) {
-    const synthetic = 0.25 + (Math.sin(phase.value * 0.18) + 1) * 0.22;
-    return Math.max(level.value, synthetic);
+    const now = performance.now();
+    const hasFreshLevel = now - lastAudioLevelAt.value <= RECORDING_STALE_MS;
+    if (!hasFreshLevel) {
+      return RECORDING_BASELINE;
+    }
+    return RECORDING_BASELINE + level.value * 0.92;
   }
   if (isProcessing.value) {
     return 0.18 + (Math.sin(phase.value * 0.12) + 1) * 0.05;
@@ -131,11 +139,14 @@ onMounted(async () => {
 
   unlistenHidden = await listen("indicator-hidden", () => {
     level.value = 0;
+    lastAudioLevelAt.value = 0;
     state.value = "hidden";
   });
 
   unlistenAudioLevel = await listen<AudioLevelPayload>("audio-level", (event) => {
-    level.value = Math.max(0, Math.min(1, event.payload.rms));
+    const incoming = Math.max(0, Math.min(1, event.payload.rms));
+    level.value = level.value * (1 - RECORDING_SMOOTHING) + incoming * RECORDING_SMOOTHING;
+    lastAudioLevelAt.value = performance.now();
   });
 
   const syncState = async () => {
