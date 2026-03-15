@@ -115,6 +115,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Goal**: A full settings window lets the user configure every aspect of VoxFlow, with changes taking effect immediately and persisting across restarts
 **Depends on**: Phase 7
 **Requirements**: SETT-01, SETT-02, SETT-03, SETT-04, SETT-05, SETT-06, SETT-07
+**Note from Phase 3 context**: Audio settings must expose an `Auto-stop on silence` toggle and silence-duration control; defaults remain backend-managed until this phase.
 **Success Criteria** (what must be TRUE):
   1. The settings window has four sections: General, Audio, Transcription, and Injection, each exposing all relevant controls
   2. General section includes the hotkey capture input, a "Launch on Windows startup" toggle (default OFF), and a minimize-to-tray toggle
