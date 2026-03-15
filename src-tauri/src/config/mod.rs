@@ -150,6 +150,10 @@ pub struct IndicatorConfig {
     /// Vertical position of the indicator window in logical pixels.
     #[serde(default)]
     pub position_y: Option<i32>,
+
+    /// Show indicator window when app starts.
+    #[serde(default = "default_true")]
+    pub show_on_startup: bool,
 }
 
 impl Default for IndicatorConfig {
@@ -158,6 +162,7 @@ impl Default for IndicatorConfig {
             show: true,
             position_x: None,
             position_y: None,
+            show_on_startup: true,
         }
     }
 }

@@ -40,6 +40,7 @@ export interface IndicatorConfig {
   show: boolean;
   position_x: number | null;
   position_y: number | null;
+  show_on_startup: boolean;
 }
 
 // ---------------------------------------------------------------------------

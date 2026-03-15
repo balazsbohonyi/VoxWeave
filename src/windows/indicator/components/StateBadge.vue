@@ -8,41 +8,23 @@ const props = defineProps<{
 }>();
 
 const label = computed(() => {
-  if (props.state === "recording") {
-    return "Recording";
-  }
-  if (props.state === "processing") {
-    return "Processing";
-  }
-  if (props.state === "injecting") {
-    return "Injecting";
-  }
+  if (props.state === "recording") return "Recording";
+  if (props.state === "processing") return "Processing";
+  if (props.state === "injecting") return "Injecting";
   return "Idle";
 });
 
 const icon = computed(() => {
-  if (props.state === "recording") {
-    return "●";
-  }
-  if (props.state === "processing") {
-    return "◌";
-  }
-  if (props.state === "injecting") {
-    return "↵";
-  }
-  return "○";
+  if (props.state === "recording") return "REC";
+  if (props.state === "processing") return "...";
+  if (props.state === "injecting") return "INJ";
+  return "IDLE";
 });
 
 const methodHint = computed(() => {
-  if (props.state !== "injecting") {
-    return "";
-  }
-  if (props.injectionMode === "flash_paste") {
-    return "FlashPaste";
-  }
-  if (props.injectionMode === "keystroke") {
-    return "Keystroke";
-  }
+  if (props.state !== "injecting") return "";
+  if (props.injectionMode === "flash_paste") return "FlashPaste";
+  if (props.injectionMode === "keystroke") return "Keystroke";
   return "Clipboard";
 });
 </script>

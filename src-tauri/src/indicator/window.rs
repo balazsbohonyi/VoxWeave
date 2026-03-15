@@ -1,8 +1,9 @@
 use tauri::{AppHandle, LogicalPosition, Monitor, Position, Runtime, WebviewWindow};
 
-pub const INDICATOR_WIDTH: i32 = 260;
-pub const INDICATOR_HEIGHT: i32 = 48;
-const EDGE_MARGIN: i32 = 20;
+pub const INDICATOR_WIDTH: i32 = 180;
+pub const INDICATOR_HEIGHT: i32 = 70;
+const EDGE_MARGIN_X: i32 = 20;
+const EDGE_MARGIN_Y: i32 = 92;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MonitorRect {
@@ -13,8 +14,11 @@ pub struct MonitorRect {
 }
 
 pub fn apply_window_policy<R: Runtime>(window: &WebviewWindow<R>) -> Result<(), String> {
+    window.set_always_on_top(true).map_err(|e| e.to_string())?;
+    #[cfg(desktop)]
+    let _ = window.set_shadow(false);
     window
-        .set_ignore_cursor_events(true)
+        .set_ignore_cursor_events(false)
         .map_err(|e| e.to_string())?;
     Ok(())
 }
@@ -40,8 +44,8 @@ pub fn clamp_position_to_monitor(x: i32, y: i32, monitor: MonitorRect) -> (i32, 
 }
 
 pub fn fallback_bottom_right(monitor: MonitorRect) -> (i32, i32) {
-    let x = monitor.x + (monitor.width - INDICATOR_WIDTH - EDGE_MARGIN).max(0);
-    let y = monitor.y + (monitor.height - INDICATOR_HEIGHT - EDGE_MARGIN).max(0);
+    let x = monitor.x + (monitor.width - INDICATOR_WIDTH - EDGE_MARGIN_X).max(0);
+    let y = monitor.y + (monitor.height - INDICATOR_HEIGHT - EDGE_MARGIN_Y).max(0);
     (x, y)
 }
 

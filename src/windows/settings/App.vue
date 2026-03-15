@@ -96,6 +96,16 @@ async function saveAudioDevice(): Promise<void> {
   }
 }
 
+async function saveIndicatorVisibility(showOnStartup: boolean): Promise<void> {
+  if (!config.value) return;
+  await saveConfig({
+    indicator: {
+      ...config.value.indicator,
+      show_on_startup: showOnStartup,
+    },
+  });
+}
+
 async function syncAudioDeviceSelection(nextDevice: string | null): Promise<void> {
   if (!config.value) {
     return;
@@ -266,6 +276,17 @@ watch(audioInputDevices, async (devices) => {
           <div class="flex justify-between">
             <dt>First launch</dt>
             <dd class="font-mono text-gray-800 dark:text-gray-200">{{ config.first_launch }}</dd>
+          </div>
+          <div class="space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800/40">
+            <dt class="font-medium text-gray-700 dark:text-gray-300">Indicator</dt>
+            <label class="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
+              <input
+                type="checkbox"
+                :checked="config.indicator.show_on_startup"
+                @change="saveIndicatorVisibility(($event.target as HTMLInputElement).checked)"
+              >
+              Show indicator on app startup
+            </label>
           </div>
         </dl>
         <p class="pt-2 text-xs text-gray-400 dark:text-gray-500">

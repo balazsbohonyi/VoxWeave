@@ -2,6 +2,7 @@
 // application data accessed across commands, tray, and window lifecycle.
 
 use crate::config::{persistence, AppConfig};
+use crate::indicator::events::IndicatorVisualState;
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 
@@ -84,6 +85,9 @@ pub struct AppState {
     /// Whether indicator drag mode is currently active (temporary interactivity).
     pub indicator_drag_active: Arc<Mutex<bool>>,
 
+    /// Last known indicator visual state for late frontend subscribers.
+    pub indicator_visual_state: Arc<Mutex<IndicatorVisualState>>,
+
     /// Set to `true` when the app is quitting via the tray Quit action.
     /// The close-to-hide handler checks this to allow window destruction
     /// instead of hiding, so WebView2 tears down cleanly before exit.
@@ -108,6 +112,7 @@ impl AppState {
                     cancel_flag: Arc::new(Mutex::new(false)),
                     audio_session: Arc::new(Mutex::new(None)),
                     indicator_drag_active: Arc::new(Mutex::new(false)),
+                    indicator_visual_state: Arc::new(Mutex::new(IndicatorVisualState::Hidden)),
                     quitting: Arc::new(Mutex::new(false)),
                 }
             }
@@ -128,6 +133,7 @@ impl AppState {
                     cancel_flag: Arc::new(Mutex::new(false)),
                     audio_session: Arc::new(Mutex::new(None)),
                     indicator_drag_active: Arc::new(Mutex::new(false)),
+                    indicator_visual_state: Arc::new(Mutex::new(IndicatorVisualState::Hidden)),
                     quitting: Arc::new(Mutex::new(false)),
                 }
             }

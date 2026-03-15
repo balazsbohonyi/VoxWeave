@@ -232,15 +232,15 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
     tray::update_recording_menu(app, next_state.clone());
 
     if previous_state == RecordingState::Idle {
+        if let Err(err) = indicator::show_recording(app) {
+            log::warn!("Failed to show indicator: {err}");
+        }
         if let Err(err) = audio::start_recording(app) {
             log::warn!("Failed to start recording: {err}");
             *state.recording_state.lock().unwrap() = RecordingState::Idle;
             tray::update_recording_menu(app, RecordingState::Idle);
             indicator::hide(app);
             return;
-        }
-        if let Err(err) = indicator::show_recording(app) {
-            log::warn!("Failed to show indicator: {err}");
         }
         return;
     }

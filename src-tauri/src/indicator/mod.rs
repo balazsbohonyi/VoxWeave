@@ -16,6 +16,17 @@ fn get_window<R: Runtime>(app: &AppHandle<R>) -> Result<tauri::WebviewWindow<R>,
 }
 
 pub fn show_recording<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
+    show_with_state(app, IndicatorVisualState::Recording)
+}
+
+pub fn show_idle<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
+    show_with_state(app, IndicatorVisualState::Hidden)
+}
+
+fn show_with_state<R: Runtime>(
+    app: &AppHandle<R>,
+    visual_state: IndicatorVisualState,
+) -> Result<(), String> {
     let state = app.state::<AppState>();
     let (show, position_x, position_y) = {
         let config = state.config.lock().map_err(|e| e.to_string())?;
@@ -33,7 +44,7 @@ pub fn show_recording<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
     window::apply_window_policy(&window)?;
     window::place_window_from_config(app, &window, position_x, position_y)?;
     window.show().map_err(|e| e.to_string())?;
-    emit_state(app, IndicatorVisualState::Recording);
+    emit_state(app, visual_state);
     Ok(())
 }
 
@@ -46,10 +57,25 @@ pub fn show_injecting<R: Runtime>(app: &AppHandle<R>) {
 }
 
 pub fn hide<R: Runtime>(app: &AppHandle<R>) {
+    let keep_visible = {
+        let app_state = app.state::<AppState>();
+        let value = if let Ok(cfg) = app_state.config.lock() {
+            cfg.indicator.show && cfg.indicator.show_on_startup
+        } else {
+            false
+        };
+        value
+    };
+
+    if keep_visible {
+        let _ = show_idle(app);
+        return;
+    }
+
     emit_state(app, IndicatorVisualState::Hidden);
     if let Some(window) = app.get_webview_window(INDICATOR_LABEL) {
         let _ = window.hide();
-        let _ = window.set_ignore_cursor_events(true);
+        let _ = window.set_ignore_cursor_events(false);
     }
     let _ = app.emit(INDICATOR_HIDDEN_EVENT, ());
 }
@@ -69,7 +95,7 @@ pub fn begin_drag<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
 pub fn end_drag<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
     let window = get_window(app)?;
     window
-        .set_ignore_cursor_events(true)
+        .set_ignore_cursor_events(false)
         .map_err(|e| e.to_string())?;
     *app.state::<AppState>()
         .indicator_drag_active
@@ -98,6 +124,11 @@ pub fn persist_position<R: Runtime>(app: &AppHandle<R>, x: i32, y: i32) -> Resul
 }
 
 fn emit_state<R: Runtime>(app: &AppHandle<R>, visual_state: IndicatorVisualState) {
+    if let Some(state) = app.try_state::<AppState>() {
+        if let Ok(mut current) = state.indicator_visual_state.lock() {
+            *current = visual_state;
+        }
+    }
     let _ = app.emit(
         INDICATOR_STATE_EVENT,
         IndicatorStatePayload {
@@ -159,4 +190,3 @@ mod tests {
         assert_eq!(y, 0);
     }
 }
-
