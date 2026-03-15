@@ -35,7 +35,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Double-clicking the tray icon opens the settings window
   4. Closing the settings window minimizes to tray rather than quitting
   5. Config is read from and written to `%APPDATA%/VoxFlow/config.json`; missing fields use defaults and unknown fields are preserved
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [x] 04-01-indicator-window-runtime-PLAN.md - indicator window runtime + lifecycle wiring
+- [x] 04-02-indicator-visual-states-waveform-PLAN.md - indicator UI states + waveform visuals
+- [x] 04-03-indicator-drag-persistence-hide-PLAN.md - drag interaction + persistence + hide hardening
+- [ ] 04-04-indicator-focus-clickthrough-gap-PLAN.md - close focus theft + default click-through gap
+- [ ] 04-05-indicator-position-snapback-gap-PLAN.md - close drag-end persistence + snap-back gap
 
 ### Phase 2: Hotkey
 **Goal**: A global hotkey that can be triggered from any application and drives a toggle-mode recording state machine
