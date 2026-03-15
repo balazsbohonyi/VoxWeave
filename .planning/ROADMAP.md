@@ -13,7 +13,7 @@ VoxFlow is built in 10 phases that follow the natural dependency order of the pi
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Project scaffold, config persistence, and system tray presence (completed 2026-03-14)
-- [ ] **Phase 2: Hotkey** - Global hotkey registration and toggle-mode recording trigger
+- [x] **Phase 2: Hotkey** - Global hotkey registration and toggle-mode recording trigger (completed 2026-03-15)
 - [ ] **Phase 3: Audio Capture** - Microphone capture, encoding, and device management
 - [ ] **Phase 4: Floating Indicator** - Always-on-top recording status window with waveform
 - [ ] **Phase 5: Cloud Transcription** - OpenAI, Groq, and OpenRouter providers with error handling
@@ -157,7 +157,7 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete   | 2026-03-14 |
-| 2. Hotkey | 0/TBD | Not started | - |
+| 2. Hotkey | 0/TBD | Complete    | 2026-03-15 |
 | 3. Audio Capture | 0/TBD | Not started | - |
 | 4. Floating Indicator | 0/TBD | Not started | - |
 | 5. Cloud Transcription | 0/TBD | Not started | - |
