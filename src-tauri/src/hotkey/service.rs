@@ -2,11 +2,28 @@ use crate::config::{persistence, AppConfig};
 use crate::hotkey::normalize::normalize_hotkey;
 use crate::state::{AppState, HotkeyAvailability, HotkeyWarning, RecordingState};
 use crate::tray;
-use tauri::{AppHandle, Manager, Runtime};
+use serde::Serialize;
+use tauri::{AppHandle, Emitter, Manager, Runtime};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 
 pub(crate) type HotkeyHandler<R> =
     Box<dyn Fn(&AppHandle<R>, ShortcutState) + Send + Sync + 'static>;
+
+const HOTKEY_WARNING_EVENT: &str = "hotkey-warning";
+
+#[derive(Debug, Clone, Copy, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum HotkeyWarningSource {
+    Startup,
+    Save,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct HotkeyWarningPayload {
+    pub hotkey: String,
+    pub message: String,
+    pub source: HotkeyWarningSource,
+}
 
 pub fn register_startup_hotkey<R: Runtime>(app: &AppHandle<R>) {
     register_startup_hotkey_with(app, |app, hotkey, handler| {
@@ -44,6 +61,7 @@ pub(crate) fn register_startup_hotkey_with<R: Runtime, F>(
             };
             *state.hotkey_availability.lock().unwrap() = HotkeyAvailability::Unavailable;
             *state.hotkey_warning.lock().unwrap() = Some(warning.clone());
+            emit_hotkey_warning(app, &warning, HotkeyWarningSource::Startup, true);
             log::warn!("Failed to register global hotkey: {err}");
         }
     }
@@ -144,6 +162,8 @@ where
                 .lock()
                 .map_err(|e| e.to_string())? = Some(warning.clone());
 
+            emit_hotkey_warning(app, &warning, HotkeyWarningSource::Save, true);
+
             Ok(current_config)
         }
     }
@@ -186,6 +206,23 @@ fn complete_transcription_placeholder<R: Runtime>(app: &AppHandle<R>) {
         *state.recording_state.lock().unwrap() = RecordingState::Idle;
     }
     tray::update_recording_menu(app, RecordingState::Idle);
+}
+
+fn emit_hotkey_warning<R: Runtime>(
+    app: &AppHandle<R>,
+    warning: &HotkeyWarning,
+    source: HotkeyWarningSource,
+    focus_settings: bool,
+) {
+    if focus_settings {
+        tray::show_settings_window(app);
+    }
+    let payload = HotkeyWarningPayload {
+        hotkey: warning.hotkey.clone(),
+        message: warning.message.clone(),
+        source,
+    };
+    let _ = app.emit(HOTKEY_WARNING_EVENT, payload);
 }
 
 fn persist_config(state: &AppState, config: AppConfig) -> Result<(), String> {

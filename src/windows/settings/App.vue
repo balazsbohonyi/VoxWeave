@@ -5,7 +5,14 @@
 import { onMounted } from "vue";
 import { useConfig } from "../../composables/useConfig";
 
-const { config, loading, error, loadConfig } = useConfig();
+const {
+  config,
+  loading,
+  error,
+  hotkeyWarning,
+  clearHotkeyWarning,
+  loadConfig,
+} = useConfig();
 
 onMounted(() => {
   loadConfig();
@@ -20,7 +27,31 @@ onMounted(() => {
     </header>
 
     <!-- Content area — Phase 8 adds sidebar nav + tab panels here -->
-    <main class="flex flex-1 items-center justify-center">
+    <main class="relative flex flex-1 items-center justify-center">
+      <div
+        v-if="hotkeyWarning"
+        class="absolute right-6 top-6 w-80 rounded-lg border border-amber-300 bg-amber-50 p-4 text-xs text-amber-900 shadow-lg dark:border-amber-500/60 dark:bg-amber-900/20 dark:text-amber-100"
+      >
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[11px] uppercase tracking-wide text-amber-700 dark:text-amber-200">
+              Hotkey Warning
+            </p>
+            <p class="mt-1 font-medium">
+              {{ hotkeyWarning.hotkey }} unavailable
+            </p>
+            <p class="mt-1 text-amber-700/90 dark:text-amber-200/90">
+              {{ hotkeyWarning.message }}
+            </p>
+          </div>
+          <button
+            class="text-[11px] font-semibold text-amber-700 hover:text-amber-900 dark:text-amber-200 dark:hover:text-amber-50"
+            @click="clearHotkeyWarning"
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
       <div v-if="loading" class="text-center text-gray-400 dark:text-gray-500">
         <p class="text-sm">Loading…</p>
       </div>
