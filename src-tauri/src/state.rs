@@ -45,12 +45,14 @@ pub struct HotkeyWarning {
 }
 
 /// Runtime-owned audio session details for active recording.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct AudioSessionState {
     pub active_device: String,
     pub sample_rate_hz: u32,
     pub channels: u16,
     pub started_at: SystemTime,
+    pub level_emitter_stop: Option<Arc<std::sync::atomic::AtomicBool>>,
+    pub level_emitter_thread: Option<std::thread::JoinHandle<()>>,
 }
 
 /// Top-level managed state stored in `tauri::Manager`.
