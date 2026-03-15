@@ -202,4 +202,20 @@ mod tests {
         assert!(!should_place_window_from_config(true));
         assert!(should_place_window_from_config(false));
     }
+
+    #[test]
+    fn first_run_defaults_bottom_right_above_taskbar() {
+        let monitor = window::MonitorRect {
+            x: 0,
+            y: 0,
+            width: 1920,
+            height: 1080,
+        };
+        let expected = window::fallback_bottom_right(monitor);
+        let first_run = window::resolve_position(monitor, None, None);
+        let invalid_saved = window::resolve_position(monitor, Some(-5000), Some(-5000));
+
+        assert_eq!(first_run, expected);
+        assert_eq!(invalid_saved, expected);
+    }
 }

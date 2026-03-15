@@ -55,9 +55,19 @@ pub fn resolve_position(
     position_y: Option<i32>,
 ) -> (i32, i32) {
     match (position_x, position_y) {
-        (Some(x), Some(y)) => clamp_position_to_monitor(x, y, monitor),
+        (Some(x), Some(y)) if saved_position_is_valid(x, y, monitor) => {
+            clamp_position_to_monitor(x, y, monitor)
+        }
         _ => fallback_bottom_right(monitor),
     }
+}
+
+fn saved_position_is_valid(x: i32, y: i32, monitor: MonitorRect) -> bool {
+    let min_x = monitor.x;
+    let min_y = monitor.y;
+    let max_x = monitor.x + (monitor.width - INDICATOR_WIDTH).max(0);
+    let max_y = monitor.y + (monitor.height - INDICATOR_HEIGHT).max(0);
+    x >= min_x && x <= max_x && y >= min_y && y <= max_y
 }
 
 pub fn place_window<R: Runtime>(window: &WebviewWindow<R>, x: i32, y: i32) -> Result<(), String> {
