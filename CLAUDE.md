@@ -27,6 +27,7 @@ cargo tauri build        # Production build + Windows installer
 ```
 
 ### Testing & Linting
+For Rust tests, first do this: `cd src-tauri`
 
 ```bash
 cargo test               # Run all Rust tests
