@@ -18,7 +18,7 @@ pub fn apply_window_policy<R: Runtime>(window: &WebviewWindow<R>) -> Result<(), 
     #[cfg(desktop)]
     let _ = window.set_shadow(false);
     window
-        .set_ignore_cursor_events(false)
+        .set_ignore_cursor_events(true)
         .map_err(|e| e.to_string())?;
     Ok(())
 }

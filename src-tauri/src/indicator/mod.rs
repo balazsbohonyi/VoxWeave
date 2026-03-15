@@ -75,7 +75,7 @@ pub fn hide<R: Runtime>(app: &AppHandle<R>) {
     emit_state(app, IndicatorVisualState::Hidden);
     if let Some(window) = app.get_webview_window(INDICATOR_LABEL) {
         let _ = window.hide();
-        let _ = window.set_ignore_cursor_events(false);
+        let _ = window.set_ignore_cursor_events(true);
     }
     let _ = app.emit(INDICATOR_HIDDEN_EVENT, ());
 }
@@ -95,7 +95,7 @@ pub fn begin_drag<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
 pub fn end_drag<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
     let window = get_window(app)?;
     window
-        .set_ignore_cursor_events(false)
+        .set_ignore_cursor_events(true)
         .map_err(|e| e.to_string())?;
     *app.state::<AppState>()
         .indicator_drag_active

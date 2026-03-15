@@ -40,7 +40,7 @@
         "decorations": false,
         "transparent": true,
         "resizable": false,
-        "focus": true
+        "focus": false
       }
     ],
     "security": {
