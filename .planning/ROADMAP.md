@@ -2,12 +2,12 @@
 
 ## Overview
 
-VoxFlow is built in 10 phases that follow the natural dependency order of the pipeline: foundation first, then the hotkey trigger, then audio capture, then the visual indicator, then transcription (cloud), then injection — finally integrating all pieces end-to-end before layering on settings UI, first-launch onboarding, and the optional local transcription path. Every phase delivers a coherent, independently testable capability. The result is a working dictation tool that places text into any window, including terminals, using the user's own API keys.
+VoxFlow is built in 10 phases that follow the natural dependency order of the pipeline: foundation first, then the hotkey trigger, then audio capture, then the visual indicator, then transcription (cloud), then injection â€” finally integrating all pieces end-to-end before layering on settings UI, first-launch onboarding, and the optional local transcription path. Every phase delivers a coherent, independently testable capability. The result is a working dictation tool that places text into any window, including terminals, using the user's own API keys.
 
 ## Phases
 
 **Phase Numbering:**
-- Integer phases (1–10): Planned milestone work
+- Integer phases (1â€“10): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 Decimal phases appear between their surrounding integers in numeric order.
@@ -64,9 +64,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Goal**: A floating pill-shaped window provides real-time visual feedback for every state in the recording pipeline without interrupting the user's workflow
 **Depends on**: Phase 3
 **Requirements**: FLOT-01, FLOT-02, FLOT-03, FLOT-04, FLOT-05, FLOT-06
+**Note**: Deferred from Phase 2 UAT - indicator visibility checks from .planning/phases/02-hotkey/02-UAT.md were intentionally moved here because indicator delivery is Phase 4 scope.
 **Success Criteria** (what must be TRUE):
   1. A pill-shaped (~200x48px) always-on-top, click-through window appears when recording starts and does not steal keyboard focus
-  2. The indicator displays a live waveform (5–10 bars) at ≥24fps while recording is active
+  2. The indicator displays a live waveform (5â€“10 bars) at â‰¥24fps while recording is active
   3. The indicator transitions through distinct visual states: recording (red pulsing dot + waveform), processing (spinner), and injecting (paste/typing cue)
   4. The indicator can be dragged to any screen position and remembers that position across sessions
   5. The indicator automatically disappears after injection completes or an error is shown
@@ -94,7 +95,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Manual clipboard mode copies text to clipboard without auto-pasting
   4. Before injection, if the target process runs at a higher integrity level, a dialog offers "Relaunch as Admin" or "Copy to clipboard"
   5. Pressing Escape during keystroke injection cancels immediately and shows a toast with the count of characters typed
-  6. The automatic fallback chain (Keystrokes → FlashPaste → Clipboard) engages when the selected method fails
+  6. The automatic fallback chain (Keystrokes â†’ FlashPaste â†’ Clipboard) engages when the selected method fails
   7. Unicode characters (accented letters, symbols) are injected correctly in all three modes
 **Plans**: TBD
 
@@ -151,7 +152,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10
+Phases execute in numeric order: 1 â†’ 2 â†’ 3 â†’ 4 â†’ 5 â†’ 6 â†’ 7 â†’ 8 â†’ 9 â†’ 10
 Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 3 is complete if desired, but is scheduled last to keep the cloud pipeline unblocked.
 
 | Phase | Plans Complete | Status | Completed |
