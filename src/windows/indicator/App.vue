@@ -97,9 +97,14 @@ async function onPointerDown(event: PointerEvent): Promise<void> {
     return;
   }
   event.preventDefault();
-  await win.startDragging();
-  const pos = await win.outerPosition();
-  await invoke("persist_indicator_position", { x: Math.round(pos.x), y: Math.round(pos.y) });
+  await invoke("begin_indicator_drag");
+  try {
+    await win.startDragging();
+    const pos = await win.outerPosition();
+    await invoke("persist_indicator_position", { x: Math.round(pos.x), y: Math.round(pos.y) });
+  } finally {
+    await invoke("end_indicator_drag");
+  }
 }
 
 async function onRecordButtonClick(): Promise<void> {
