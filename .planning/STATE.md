@@ -6,14 +6,14 @@ current_phase: 5
 current_phase_name: Cloud Transcription
 current_plan: 2
 status: executing
-stopped_at: Completed 04-floating-indicator-04-05-PLAN.md
-last_updated: "2026-03-15T22:12:13.450Z"
+stopped_at: Completed 04-floating-indicator-04-06-PLAN.md
+last_updated: "2026-03-15T22:20:47.784Z"
 last_activity: 2026-03-15
 progress:
   total_phases: 10
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 16
-  completed_plans: 15
+  completed_plans: 16
 ---
 
 ---
@@ -80,6 +80,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 02 P03 | 25m | 3 tasks | 3 files |
 | Phase 04-floating-indicator P04-04 | 9m | 2 tasks | 4 files |
 | Phase 04-floating-indicator P04-05 | 3m | 3 tasks | 3 files |
+| Phase 04-floating-indicator P04-06 | 14m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,8 @@ Recent decisions affecting current work:
 - [Phase 04-floating-indicator]: Persist indicator coordinates only after drag completion and cleanup.
 - [Phase 04-floating-indicator]: Skip config-based window placement when indicator is already visible.
 - [Phase 04-floating-indicator]: Treat off-screen saved coordinates as invalid and fallback to deterministic bottom-right placement.
+- [Phase 04-floating-indicator]: Keep cpal::Stream ownership inside dedicated capture thread; AppState stores stop/join controls only.
+- [Phase 04-floating-indicator]: Recording waveform now requires fresh backend audio-level events and drops to baseline on stale data.
 
 ### Pending Todos
 
@@ -124,7 +127,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T22:12:13.445Z
-Stopped at: Completed 04-floating-indicator-04-05-PLAN.md
+Last session: 2026-03-15T22:20:47.667Z
+Stopped at: Completed 04-floating-indicator-04-06-PLAN.md
 Resume file: None
 
