@@ -47,6 +47,9 @@ updated: 2026-03-15
 | 02-02-02 | 02 | 2 | HOTK-04 | unit | `cargo test hotkey::tests::conflicting_hotkey_keeps_last_working_binding -- --exact` | yes after Wave 2 | pending |
 | 02-02-02 | 02 | 2 | HOTK-04 | unit | `cargo test hotkey::tests::startup_conflict_leaves_app_inactive -- --exact` | yes after Wave 2 | pending |
 | 02-02-03 | 02 | 2 | HOTK-03, HOTK-04 | unit + manual | `cargo test hotkey && cargo test` | yes after Wave 2 | pending |
+| 02-03-01 | 03 | 3 | HOTK-03 | manual | Open Settings, edit hotkey field, click Apply, confirm button shows `Saving...` then success text | yes in Wave 3 | pending |
+| 02-03-02 | 03 | 3 | HOTK-03, HOTK-04 | manual | Try saving a conflicting hotkey and confirm inline error text is shown while prior active hotkey remains displayed | yes in Wave 3 | pending |
+| 02-03-03 | 03 | 3 | HOTK-03 | manual | Save a valid new hotkey, restart app, verify Settings shows the canonical saved value and hotkey still triggers globally | yes in Wave 3 | pending |
 
 *Status: pending / green / red / flaky*
 
@@ -66,6 +69,12 @@ Existing infrastructure covers the phase once Wave 1 adds the `src-tauri/src/hot
 | Second press advances to processing placeholder and recovers to idle | HOTK-02 | Requires runtime state observation across real Tauri events | With recording active, press the hotkey again and confirm the app reaches `Transcribing` / processing briefly, then returns to `Idle` without getting stuck |
 | Custom hotkey save takes effect immediately and survives restart | HOTK-03 | Requires real runtime re-registration and app restart | Change the hotkey in Settings, save, trigger it from another app, restart VoxFlow, and confirm the same canonical hotkey still works |
 | Conflict warning focuses Settings and shows toast-like feedback | HOTK-04 | Requires real registration conflict plus desktop focus behavior | Occupy the same hotkey in another app if possible, try to save it in VoxFlow, confirm the old binding stays active, Settings is foregrounded, and the warning appears immediately |
+
+### Gap-closure plan reference
+
+- Plan: `02-03-hotkey-settings-input-PLAN.md`
+- Scope: minimal Settings hotkey edit/apply UX using existing `save_config` backend flow.
+- Manual verification command set: `cargo tauri dev` then execute the Wave 3 manual checklist above on Windows.
 
 ---
 
