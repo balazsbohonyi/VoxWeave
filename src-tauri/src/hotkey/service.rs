@@ -38,7 +38,7 @@ fn pretty_hotkey(hotkey: &str) -> String {
         .join("+")
 }
 
-fn humanize_registration_error(hotkey: &str, err: &str) -> String {
+pub(crate) fn humanize_registration_error(hotkey: &str, err: &str) -> String {
     let pretty = pretty_hotkey(hotkey);
     let lower = err.to_ascii_lowercase();
 
@@ -206,21 +206,23 @@ pub fn handle_shortcut_event<R: Runtime>(app: &AppHandle<R>, event: ShortcutStat
     }
 }
 
+pub(crate) fn next_recording_state(current: &RecordingState) -> Option<RecordingState> {
+    match current {
+        RecordingState::Idle => Some(RecordingState::Recording),
+        RecordingState::Recording => Some(RecordingState::Transcribing),
+        RecordingState::Transcribing => None,
+    }
+}
+
 pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
     let state = app.state::<AppState>();
     let previous_state = {
         let mut recording_state = state.recording_state.lock().unwrap();
         let previous = recording_state.clone();
-        match previous {
-            RecordingState::Idle => {
-                *recording_state = RecordingState::Recording;
-            }
-            RecordingState::Recording => {
-                *recording_state = RecordingState::Transcribing;
-            }
-            RecordingState::Transcribing => {
-                return;
-            }
+        if let Some(next) = next_recording_state(&previous) {
+            *recording_state = next;
+        } else {
+            return;
         }
         previous
     };

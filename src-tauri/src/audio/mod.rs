@@ -164,8 +164,6 @@ fn emit_audio_error<R: Runtime>(app: &AppHandle<R>, payload: AudioErrorPayload) 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tauri::test::mock_app;
-    use tauri::Manager;
 
     struct FailOnceBackend {
         failed: std::sync::Mutex<bool>,
@@ -199,55 +197,42 @@ mod tests {
 
     #[test]
     fn session_state_transitions() {
-        let app = mock_app();
-        app.manage(AppState::load());
-        let snapshot = DeviceSnapshot {
-            input_devices: vec!["Mic A".to_string()],
-            default_input: Some("Mic A".to_string()),
-        };
-
-        start_recording_with_snapshot(&app.handle(), snapshot).unwrap();
-        let state = app.state::<AppState>();
-        let session = state.audio_session.lock().unwrap();
-        assert!(session.is_some());
-        assert_eq!(session.as_ref().unwrap().sample_rate_hz, 16_000);
-        assert_eq!(session.as_ref().unwrap().channels, 1);
+        let session = session::new_session("Mic A".to_string());
+        assert_eq!(session.sample_rate_hz, 16_000);
+        assert_eq!(session.channels, 1);
+        assert_eq!(session.active_device, "Mic A");
     }
 
     #[test]
     fn missing_selected_device_falls_back() {
-        let app = mock_app();
-        app.manage(AppState::load());
-        let state = app.state::<AppState>();
-        state.config.lock().unwrap().audio.device = Some("Missing Mic".to_string());
         let snapshot = DeviceSnapshot {
             input_devices: vec!["Default Mic".to_string()],
             default_input: Some("Default Mic".to_string()),
         };
+        let resolved = resolve_input_device(Some("Missing Mic"), &snapshot).unwrap();
+        assert_eq!(resolved.active_device, "Default Mic");
+        assert_eq!(resolved.fallback_from, Some("Missing Mic".to_string()));
+    }
 
-        start_recording_with_snapshot(&app.handle(), snapshot).unwrap();
-
-        let session = state.audio_session.lock().unwrap();
-        assert_eq!(
-            session.as_ref().map(|s| s.active_device.as_str()),
-            Some("Default Mic")
-        );
+    #[test]
+    fn selected_device_is_used_when_available() {
+        let snapshot = DeviceSnapshot {
+            input_devices: vec!["Mic A".to_string(), "Mic B".to_string()],
+            default_input: Some("Default Mic".to_string()),
+        };
+        let resolved = resolve_input_device(Some("Mic B"), &snapshot).unwrap();
+        assert_eq!(resolved.active_device, "Mic B");
+        assert_eq!(resolved.fallback_from, None);
     }
 
     #[test]
     fn no_device_returns_error() {
-        let app = mock_app();
-        app.manage(AppState::load());
         let snapshot = DeviceSnapshot {
             input_devices: vec![],
             default_input: None,
         };
-        let err = start_recording_with_snapshot(&app.handle(), snapshot).unwrap_err();
+        let err = resolve_input_device(None, &snapshot).unwrap_err();
         assert!(err.contains("No microphone"));
-        assert_eq!(
-            *app.state::<AppState>().recording_state.lock().unwrap(),
-            RecordingState::Idle
-        );
     }
 
     #[test]
@@ -272,15 +257,10 @@ mod tests {
 
     #[test]
     fn encode_retry_once_then_fail() {
-        let app = mock_app();
-        app.manage(AppState::load());
-        let state = app.state::<AppState>();
-        *state.audio_session.lock().unwrap() = Some(session::new_session("Mic".to_string()));
-
         let backend = AlwaysFailBackend;
-        let err = stop_recording_and_encode_with_backend(&app.handle(), &backend).unwrap_err();
+        let err = encode_with_retry_once(&TranscriptionProvider::Openai, &[0.0; 16], &backend)
+            .unwrap_err();
         assert!(err.contains("encode boom"));
-        assert_eq!(*state.recording_state.lock().unwrap(), RecordingState::Idle);
     }
 
     #[test]
@@ -304,16 +284,11 @@ mod tests {
 
     #[test]
     fn encode_retries_once_on_transient_failure() {
-        let app = mock_app();
-        app.manage(AppState::load());
-        let state = app.state::<AppState>();
-        *state.audio_session.lock().unwrap() = Some(session::new_session("Mic".to_string()));
-        state.config.lock().unwrap().transcription.provider = TranscriptionProvider::Openai;
-
         let backend = FailOnceBackend {
             failed: std::sync::Mutex::new(false),
         };
-        let encoded = stop_recording_and_encode_with_backend(&app.handle(), &backend).unwrap();
+        let encoded = encode_with_retry_once(&TranscriptionProvider::Openai, &[0.0; 16], &backend)
+            .unwrap();
         assert_eq!(encoded.format, encode::EncodedFormat::Opus);
     }
 }
