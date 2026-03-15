@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 5
 current_phase_name: Cloud Transcription
-current_plan: 1
+current_plan: 2
 status: executing
-stopped_at: Completed 04-floating-indicator-04-04-PLAN.md
-last_updated: "2026-03-15T22:06:21.432Z"
+stopped_at: Completed 04-floating-indicator-04-05-PLAN.md
+last_updated: "2026-03-15T22:12:13.450Z"
 last_activity: 2026-03-15
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 16
-  completed_plans: 14
+  completed_plans: 15
 ---
 
 ---
@@ -47,7 +47,7 @@ Phase: 5 of 10 (Cloud Transcription)
 Plan: 1 of 2 in current phase
 Current Phase: 5
 Current Phase Name: Cloud Transcription
-Current Plan: 1
+Current Plan: 2
 Total Plans in Phase: 2
 status: ready_to_execute
 Last Activity: 2026-03-15
@@ -79,6 +79,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 02-hotkey P02-02 | 915 | 3 tasks | 9 files |
 | Phase 02 P03 | 25m | 3 tasks | 3 files |
 | Phase 04-floating-indicator P04-04 | 9m | 2 tasks | 4 files |
+| Phase 04-floating-indicator P04-05 | 3m | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,9 @@ Recent decisions affecting current work:
 - [Phase 04-floating-indicator]: Set indicator window focus=false to prevent focus theft on show.
 - [Phase 04-floating-indicator]: Indicator cursor policy defaults to click-through in apply/hide/end-drag paths.
 - [Phase 04-floating-indicator]: Frontend drag flow now wraps startDragging with begin/end IPC and finally cleanup.
+- [Phase 04-floating-indicator]: Persist indicator coordinates only after drag completion and cleanup.
+- [Phase 04-floating-indicator]: Skip config-based window placement when indicator is already visible.
+- [Phase 04-floating-indicator]: Treat off-screen saved coordinates as invalid and fallback to deterministic bottom-right placement.
 
 ### Pending Todos
 
@@ -120,7 +124,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T22:06:21.429Z
-Stopped at: Completed 04-floating-indicator-04-04-PLAN.md
+Last session: 2026-03-15T22:12:13.445Z
+Stopped at: Completed 04-floating-indicator-04-05-PLAN.md
 Resume file: None
 
