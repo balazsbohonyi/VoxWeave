@@ -171,7 +171,7 @@ impl Default for IndicatorConfig {
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct AppConfig {
     /// Global push-to-talk hotkey in the format "Modifier+Key"
-    /// (e.g. "Alt+Shift+Space").
+    /// (e.g. "Ctrl+Shift+Space").
     #[serde(default = "default_hotkey")]
     pub hotkey: String,
 

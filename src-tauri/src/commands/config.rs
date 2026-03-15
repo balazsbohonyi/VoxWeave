@@ -1,8 +1,10 @@
 // commands/config.rs — Tauri commands for config read/write.
 // Thin handlers only — business logic lives in config::persistence.
 
-use crate::config::{persistence, AppConfig};
+use crate::config::AppConfig;
+use crate::hotkey::service;
 use crate::state::AppState;
+use tauri::AppHandle;
 use tauri::State;
 
 /// Return the current in-memory config.
@@ -15,12 +17,6 @@ pub fn get_config(state: State<AppState>) -> Result<AppConfig, String> {
 /// Persist updated config fields to disk and update in-memory state.
 /// Unknown fields from previous load are preserved in the output file.
 #[tauri::command]
-pub fn save_config(state: State<AppState>, config: AppConfig) -> Result<(), String> {
-    let mut raw = state.config_raw.lock().map_err(|e| e.to_string())?;
-    persistence::save(&config, &mut raw)?;
-
-    let mut current = state.config.lock().map_err(|e| e.to_string())?;
-    *current = config;
-
-    Ok(())
+pub fn save_config(app: AppHandle, _state: State<AppState>, config: AppConfig) -> Result<AppConfig, String> {
+    service::apply_config_update(&app, config)
 }
