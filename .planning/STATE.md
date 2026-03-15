@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 5
 current_phase_name: Cloud Transcription
-current_plan: 0
-status: ready_to_execute
-stopped_at: Completed phase 04-floating-indicator execution and verification (human validation pending)
-last_updated: "2026-03-15T16:16:35.989Z"
+current_plan: 1
+status: executing
+stopped_at: Completed 04-floating-indicator-04-04-PLAN.md
+last_updated: "2026-03-15T22:06:21.432Z"
 last_activity: 2026-03-15
 progress:
   total_phases: 10
-  completed_phases: 4
-  total_plans: 10
-  completed_plans: 10
+  completed_phases: 3
+  total_plans: 16
+  completed_plans: 14
 ---
 
 ---
@@ -47,7 +47,7 @@ Phase: 5 of 10 (Cloud Transcription)
 Plan: 1 of 2 in current phase
 Current Phase: 5
 Current Phase Name: Cloud Transcription
-Current Plan: 0
+Current Plan: 1
 Total Plans in Phase: 2
 status: ready_to_execute
 Last Activity: 2026-03-15
@@ -78,6 +78,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 02-hotkey P02-01 | 2940 | 3 tasks | 9 files |
 | Phase 02-hotkey P02-02 | 915 | 3 tasks | 9 files |
 | Phase 02 P03 | 25m | 3 tasks | 3 files |
+| Phase 04-floating-indicator P04-04 | 9m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,9 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: close-to-hide uses on_window_event CloseRequested with api.prevent_close() and Quit calls app.exit(0) to bypass it
 - [Phase 01-foundation]: show_settings_window checks get_webview_window by label — single instance guarantee without extra state
 - [Phase 02-hotkey]: Enable Tauri test feature to use mock_app for hotkey unit tests
+- [Phase 04-floating-indicator]: Set indicator window focus=false to prevent focus theft on show.
+- [Phase 04-floating-indicator]: Indicator cursor policy defaults to click-through in apply/hide/end-drag paths.
+- [Phase 04-floating-indicator]: Frontend drag flow now wraps startDragging with begin/end IPC and finally cleanup.
 
 ### Pending Todos
 
@@ -116,7 +120,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T16:16:35.983Z
-Stopped at: Phase 4 context gathered
-Resume file: .planning/phases/04-floating-indicator/04-CONTEXT.md
+Last session: 2026-03-15T22:06:21.429Z
+Stopped at: Completed 04-floating-indicator-04-04-PLAN.md
+Resume file: None
 
