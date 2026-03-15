@@ -15,7 +15,7 @@ mod tests {
     use super::normalize;
     use super::service;
     use super::service::HotkeyHandler;
-    use crate::state::{AppState, RecordingState};
+    use crate::state::{AppState, HotkeyAvailability, RecordingState};
     use tauri::Manager;
     use tauri::test::mock_app;
     use tauri::test::MockRuntime;
@@ -90,5 +90,100 @@ mod tests {
 
         let state = app.state::<AppState>();
         assert_eq!(*state.recording_state.lock().unwrap(), RecordingState::Recording);
+    }
+
+    #[test]
+    fn apply_hotkey_change_persists_canonical_value() {
+        let app = mock_app();
+        app.manage(AppState::load());
+
+        let mut updated = app.state::<AppState>().config.lock().unwrap().clone();
+        updated.hotkey = "alt+ctrl+space".to_string();
+
+        let result = service::apply_config_update_with(
+            &app.handle(),
+            updated,
+            |_app, hotkey, _handler| {
+                assert_eq!(hotkey, "Ctrl+Alt+Space");
+                Ok(())
+            },
+            |_app, _hotkey| Ok(()),
+        )
+        .expect("config update failed");
+
+        assert_eq!(result.hotkey, "Ctrl+Alt+Space");
+        let state = app.state::<AppState>();
+        assert_eq!(
+            state.config.lock().unwrap().hotkey,
+            "Ctrl+Alt+Space".to_string()
+        );
+    }
+
+    #[test]
+    fn unchanged_canonical_save_short_circuit() {
+        let app = mock_app();
+        app.manage(AppState::load());
+
+        let mut updated = app.state::<AppState>().config.lock().unwrap().clone();
+        updated.hotkey = "shift+ctrl+space".to_string();
+
+        let result = service::apply_config_update_with(
+            &app.handle(),
+            updated,
+            |_app, _hotkey, _handler| panic!("should not re-register"),
+            |_app, _hotkey| Ok(()),
+        )
+        .expect("config update failed");
+
+        assert_eq!(result.hotkey, "Ctrl+Shift+Space");
+    }
+
+    #[test]
+    fn conflicting_hotkey_keeps_last_working_binding() {
+        let app = mock_app();
+        app.manage(AppState::load());
+
+        let state = app.state::<AppState>();
+        *state.hotkey_binding.lock().unwrap() = "Ctrl+Shift+Space".to_string();
+        *state.hotkey_availability.lock().unwrap() = HotkeyAvailability::Registered;
+
+        let mut updated = state.config.lock().unwrap().clone();
+        updated.hotkey = "ctrl+alt+space".to_string();
+
+        let result = service::apply_config_update_with(
+            &app.handle(),
+            updated,
+            |_app, _hotkey, _handler| Err("already registered".to_string()),
+            |_app, _hotkey| Ok(()),
+        )
+        .expect("config update failed");
+
+        assert_eq!(result.hotkey, "Ctrl+Shift+Space");
+        assert_eq!(
+            *state.hotkey_binding.lock().unwrap(),
+            "Ctrl+Shift+Space".to_string()
+        );
+        assert_eq!(
+            *state.hotkey_availability.lock().unwrap(),
+            HotkeyAvailability::Registered
+        );
+        assert!(state.hotkey_warning.lock().unwrap().is_some());
+    }
+
+    #[test]
+    fn startup_conflict_leaves_app_inactive() {
+        let app = mock_app();
+        app.manage(AppState::load());
+
+        service::register_startup_hotkey_with(&app.handle(), |_app, _hotkey, _handler| {
+            Err("startup conflict".to_string())
+        });
+
+        let state = app.state::<AppState>();
+        assert_eq!(
+            *state.hotkey_availability.lock().unwrap(),
+            HotkeyAvailability::Unavailable
+        );
+        assert!(state.hotkey_warning.lock().unwrap().is_some());
     }
 }

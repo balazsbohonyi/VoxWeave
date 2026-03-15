@@ -43,7 +43,9 @@ updated: 2026-03-15
 | 02-01-02 | 01 | 1 | HOTK-01, HOTK-02 | unit | `cargo test hotkey::tests::toggle_respects_state_machine -- --exact` | yes after Wave 1 | pending |
 | 02-01-03 | 01 | 1 | HOTK-01, HOTK-02 | unit | `cargo test hotkey` | yes after Wave 1 | pending |
 | 02-02-01 | 02 | 2 | HOTK-03 | unit | `cargo test hotkey::tests::apply_hotkey_change_persists_canonical_value -- --exact` | yes after Wave 2 | pending |
+| 02-02-01 | 02 | 2 | HOTK-03 | unit | `cargo test hotkey::tests::unchanged_canonical_save_short_circuit -- --exact` | yes after Wave 2 | pending |
 | 02-02-02 | 02 | 2 | HOTK-04 | unit | `cargo test hotkey::tests::conflicting_hotkey_keeps_last_working_binding -- --exact` | yes after Wave 2 | pending |
+| 02-02-02 | 02 | 2 | HOTK-04 | unit | `cargo test hotkey::tests::startup_conflict_leaves_app_inactive -- --exact` | yes after Wave 2 | pending |
 | 02-02-03 | 02 | 2 | HOTK-03, HOTK-04 | unit + manual | `cargo test hotkey && cargo test` | yes after Wave 2 | pending |
 
 *Status: pending / green / red / flaky*
