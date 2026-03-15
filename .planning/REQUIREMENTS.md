@@ -71,10 +71,10 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### System Tray
 
-- [ ] **TRAY-01**: App shows a tray icon on launch; icon changes appearance when recording is active
-- [ ] **TRAY-02**: Right-click tray icon shows context menu: Settings, Start/Stop Recording, separator, Quit
-- [ ] **TRAY-03**: Double-click tray icon opens the settings window
-- [ ] **TRAY-04**: Closing the settings window minimizes to tray (does not quit)
+- [x] **TRAY-01**: App shows a tray icon on launch; icon changes appearance when recording is active
+- [x] **TRAY-02**: Right-click tray icon shows context menu: Settings, Start/Stop Recording, separator, Quit
+- [x] **TRAY-03**: Double-click tray icon opens the settings window
+- [x] **TRAY-04**: Closing the settings window minimizes to tray (does not quit)
 
 ### Settings
 
@@ -104,9 +104,9 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### Config
 
-- [ ] **CONF-01**: All settings persist in JSON at `%APPDATA%/VoxFlow/config.json`
-- [ ] **CONF-02**: Config includes: engine, active provider, API keys, models, language hints, hotkey, mic device, local model, injection method/speed, auto-fallback, autostart, indicator position, first-launch flag
-- [ ] **CONF-03**: Missing fields use defaults; unknown fields are ignored (forward/backward compatible)
+- [x] **CONF-01**: All settings persist in JSON at `%APPDATA%/VoxFlow/config.json`
+- [x] **CONF-02**: Config includes: engine, active provider, API keys, models, language hints, hotkey, mic device, local model, injection method/speed, auto-fallback, autostart, indicator position, first-launch flag
+- [x] **CONF-03**: Missing fields use defaults; unknown fields are ignored (forward/backward compatible)
 
 ## v2 Requirements
 
@@ -186,10 +186,10 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 | INJC-09 | Phase 6 | Pending |
 | INJC-10 | Phase 6 | Pending |
 | INJC-11 | Phase 6 | Pending |
-| TRAY-01 | Phase 1 | Pending |
-| TRAY-02 | Phase 1 | Pending |
-| TRAY-03 | Phase 1 | Pending |
-| TRAY-04 | Phase 1 | Pending |
+| TRAY-01 | Phase 1 | Complete |
+| TRAY-02 | Phase 1 | Complete |
+| TRAY-03 | Phase 1 | Complete |
+| TRAY-04 | Phase 1 | Complete |
 | SETT-01 | Phase 8 | Pending |
 | SETT-02 | Phase 8 | Pending |
 | SETT-03 | Phase 8 | Pending |
@@ -207,9 +207,9 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 | NOTF-02 | Phase 7 | Pending |
 | NOTF-03 | Phase 7 | Pending |
 | NOTF-04 | Phase 7 | Pending |
-| CONF-01 | Phase 1 | Pending |
-| CONF-02 | Phase 1 | Pending |
-| CONF-03 | Phase 1 | Pending |
+| CONF-01 | Phase 1 | Complete |
+| CONF-02 | Phase 1 | Complete |
+| CONF-03 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 68 total
@@ -219,3 +219,4 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 ---
 *Requirements defined: 2026-03-14*
 *Last updated: 2026-03-14 after roadmap creation — all 68 requirements mapped*
+
