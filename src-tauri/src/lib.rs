@@ -1,5 +1,6 @@
 mod commands;
 mod config;
+mod hotkey;
 mod platform;
 mod state;
 mod tray;
@@ -16,8 +17,16 @@ pub fn run() {
             let app_state = AppState::load();
             app.manage(app_state);
 
+            // Global shortcut plugin (hotkey runtime relies on this in Phase 2).
+            #[cfg(desktop)]
+            app.handle()
+                .plugin(tauri_plugin_global_shortcut::Builder::new().build())?;
+
             // Build tray icon; tray drives all window visibility (tray-first bootstrap).
             tray::setup_tray(app)?;
+
+            // Register the startup hotkey from config.
+            hotkey::service::register_startup_hotkey(&app.handle());
 
             // Settings window is defined in tauri.conf.json with `visible: false`.
             // Register the close-to-hide handler so titlebar close hides rather than destroys.

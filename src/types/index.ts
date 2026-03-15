@@ -63,11 +63,19 @@ export interface AppConfig {
 export type RecordingState = "idle" | "recording" | "transcribing";
 
 // ---------------------------------------------------------------------------
-// IPC event payloads (Rust → Frontend)
+// IPC event payloads (Rust -> Frontend)
 // ---------------------------------------------------------------------------
 
+export type HotkeyWarningSource = "startup" | "save";
+
+export interface HotkeyWarningPayload {
+  hotkey: string;
+  message: string;
+  source: HotkeyWarningSource;
+}
+
 export interface AudioLevelPayload {
-  rms: number; // 0.0 – 1.0
+  rms: number; // 0.0 - 1.0
 }
 
 export interface InjectionDonePayload {

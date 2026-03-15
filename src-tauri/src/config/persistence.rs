@@ -196,7 +196,7 @@ mod tests {
     #[test]
     fn test_default_config_values() {
         let config = AppConfig::default();
-        assert_eq!(config.hotkey, "Alt+Shift+Space");
+        assert_eq!(config.hotkey, "Ctrl+Shift+Space");
         assert!(matches!(
             config.transcription.provider,
             TranscriptionProvider::Openai
@@ -228,7 +228,7 @@ mod tests {
     #[test]
     fn test_unknown_fields_preserved_on_round_trip() {
         let json_str = r#"{
-            "hotkey": "Alt+Shift+Space",
+            "hotkey": "Ctrl+Shift+Space",
             "audio": {
                 "device": null,
                 "vad_threshold": 0.01,
@@ -271,7 +271,7 @@ mod tests {
         // Directly test AppConfig::default() since we can't mock the path in
         // this unit-test context.
         let config = AppConfig::default();
-        assert_eq!(config.hotkey, "Alt+Shift+Space");
+        assert_eq!(config.hotkey, "Ctrl+Shift+Space");
         assert!(config.first_launch);
     }
 
@@ -291,13 +291,13 @@ mod tests {
 
     #[test]
     fn test_malformed_json_parse_produces_default_value() {
-        let malformed = r#"{ "hotkey": "Alt+Shift+Space", BROKEN"#;
+        let malformed = r#"{ "hotkey": "Ctrl+Shift+Space", BROKEN"#;
         let result: Result<serde_json::Value, _> = serde_json::from_str(malformed);
         // Should fail to parse.
         assert!(result.is_err());
         // Fallback: use AppConfig::default() — verify it's valid.
         let config = AppConfig::default();
-        assert_eq!(config.hotkey, "Alt+Shift+Space");
+        assert_eq!(config.hotkey, "Ctrl+Shift+Space");
     }
 
     // ----- save creates directory -----

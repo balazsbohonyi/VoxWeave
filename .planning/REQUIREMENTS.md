@@ -9,10 +9,10 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### Hotkey
 
-- [ ] **HOTK-01**: User can trigger recording via a global hotkey (default `Ctrl+Shift+Space`) from any application
-- [ ] **HOTK-02**: Hotkey operates in toggle mode — first press starts recording, second press stops and triggers transcription
-- [ ] **HOTK-03**: User can change the hotkey in settings and the new binding persists across restarts
-- [ ] **HOTK-04**: App detects and warns about hotkey conflicts with other applications
+- [x] **HOTK-01**: User can trigger recording via a global hotkey (default `Ctrl+Shift+Space`) from any application
+- [x] **HOTK-02**: Hotkey operates in toggle mode — first press starts recording, second press stops and triggers transcription
+- [x] **HOTK-03**: User can change the hotkey in settings and the new binding persists across restarts
+- [x] **HOTK-04**: App detects and warns about hotkey conflicts with other applications
 
 ### Audio
 
@@ -142,10 +142,10 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HOTK-01 | Phase 2 | Pending |
-| HOTK-02 | Phase 2 | Pending |
-| HOTK-03 | Phase 2 | Pending |
-| HOTK-04 | Phase 2 | Pending |
+| HOTK-01 | Phase 2 | Complete |
+| HOTK-02 | Phase 2 | Complete |
+| HOTK-03 | Phase 2 | Complete |
+| HOTK-04 | Phase 2 | Complete |
 | AUDI-01 | Phase 3 | Pending |
 | AUDI-02 | Phase 3 | Pending |
 | AUDI-03 | Phase 3 | Pending |

@@ -171,7 +171,7 @@ impl Default for IndicatorConfig {
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct AppConfig {
     /// Global push-to-talk hotkey in the format "Modifier+Key"
-    /// (e.g. "Alt+Shift+Space").
+    /// (e.g. "Ctrl+Shift+Space").
     #[serde(default = "default_hotkey")]
     pub hotkey: String,
 
@@ -219,7 +219,7 @@ impl Default for AppConfig {
 // ---------------------------------------------------------------------------
 
 fn default_hotkey() -> String {
-    "Alt+Shift+Space".to_string()
+    "Ctrl+Shift+Space".to_string()
 }
 fn default_openai_model() -> String {
     "whisper-1".to_string()

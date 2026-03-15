@@ -2,7 +2,25 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
+current_phase: 2
+current_phase_name: Hotkey
+current_plan: 2
+status: executing
+stopped_at: Completed 02-hotkey-02-03-PLAN.md
+last_updated: "2026-03-15T09:54:50.599Z"
+last_activity: 2026-03-15
+progress:
+  total_phases: 10
+  completed_phases: 2
+  total_plans: 6
+  completed_plans: 6
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: Ready to execute
 stopped_at: Completed 01-foundation-01-03-PLAN.md (tray and settings lifecycle)
 last_updated: "2026-03-14T22:23:07.536Z"
 last_activity: 2026-03-14 — Phase 1 context gathered
@@ -25,10 +43,14 @@ See: .planning/PROJECT.md (updated 2026-03-14)
 
 ## Current Position
 
-Phase: 1 of 10 (Foundation)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-03-14 — Phase 1 context gathered
+Phase: 2 of 10 (Hotkey)
+Plan: 1 of 2 in current phase
+Current Phase: 2
+Current Phase Name: Hotkey
+Current Plan: 2
+Total Plans in Phase: 2
+Status: Executing
+Last Activity: 2026-03-15
 
 Progress: [███░░░░░░░] 33%
 
@@ -53,6 +75,9 @@ Progress: [███░░░░░░░] 33%
 | Phase 01-foundation P01 | 6 | 5 tasks | 21 files |
 | Phase 01-foundation P01-02 | 6 | 5 tasks | 9 files |
 | Phase 01-foundation P01-03 | 25 | 5 tasks | 4 files |
+| Phase 02-hotkey P02-01 | 2940 | 3 tasks | 9 files |
+| Phase 02-hotkey P02-02 | 915 | 3 tasks | 9 files |
+| Phase 02 P03 | 25m | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -76,6 +101,7 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: AppState::load() replaces AppState::new() — config on disk from day one of phase 1
 - [Phase 01-foundation]: close-to-hide uses on_window_event CloseRequested with api.prevent_close() and Quit calls app.exit(0) to bypass it
 - [Phase 01-foundation]: show_settings_window checks get_webview_window by label — single instance guarantee without extra state
+- [Phase 02-hotkey]: Enable Tauri test feature to use mock_app for hotkey unit tests
 
 ### Pending Todos
 
@@ -86,9 +112,10 @@ None yet.
 - Tauri transparent/click-through window support needs early validation (Phase 4 risk)
 - whisper-rs MSVC build complexity is high — feature-gate from the start
 - Clipboard race condition in Electron apps (FlashPaste 500ms delay may be insufficient)
+- Phase 02-hotkey: Hotkey tests fail at runtime on this machine (STATUS_ENTRYPOINT_NOT_FOUND)
 
 ## Session Continuity
 
-Last session: 2026-03-14T21:57:57.723Z
-Stopped at: Completed 01-foundation-01-03-PLAN.md (tray and settings lifecycle)
+Last session: 2026-03-15T09:47:56.918Z
+Stopped at: Completed 02-hotkey-02-03-PLAN.md
 Resume file: None
