@@ -8,27 +8,22 @@ use tauri::{
     App, AppHandle, Manager, Runtime,
 };
 
+const TRAY_ID: &str = "main";
+const START_STOP_ID: &str = "start_stop_recording";
+
 pub fn setup_tray(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
-    let open_settings = MenuItem::with_id(app, "open_settings", "Settings", true, None::<&str>)?;
-
-    // Recording item is disabled until Phase 3 implements the recording state machine.
-    let start_stop = MenuItem::with_id(
-        app,
-        "start_stop_recording",
-        "Start / Stop Recording",
-        false, // disabled — placeholder only
-        None::<&str>,
-    )?;
-
-    let sep1 = PredefinedMenuItem::separator(app)?;
-    let quit = MenuItem::with_id(app, "quit", "Quit VoxFlow", true, None::<&str>)?;
-
-    let menu = Menu::with_items(app, &[&open_settings, &start_stop, &sep1, &quit])?;
+    let recording_state = app
+        .state::<crate::state::AppState>()
+        .recording_state
+        .lock()
+        .unwrap()
+        .clone();
+    let menu = build_tray_menu(app, recording_state)?;
 
     // Load the tray icon from the bundled icon
     let icon = Image::from_bytes(include_bytes!("../icons/32x32.png"))?;
 
-    let _tray = TrayIconBuilder::new()
+    let _tray = TrayIconBuilder::with_id(TRAY_ID)
         .icon(icon)
         .tooltip("VoxFlow — voice-to-text")
         .menu(&menu)
@@ -59,7 +54,9 @@ fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event: tauri::menu::MenuEve
                 app_for_exit.exit(0);
             });
         }
-        // "start_stop_recording" is disabled; no action needed.
+        START_STOP_ID => {
+            crate::hotkey::service::toggle_recording_state(app);
+        }
         _ => {}
     }
 }
@@ -81,5 +78,43 @@ pub fn show_settings_window<R: Runtime>(app: &AppHandle<R>) {
     if let Some(window) = app.get_webview_window("settings") {
         let _ = window.show();
         let _ = window.set_focus();
+    }
+}
+
+fn build_tray_menu<R: Runtime, M: Manager<R>>(
+    manager: &M,
+    recording_state: crate::state::RecordingState,
+) -> Result<Menu<R>, Box<dyn std::error::Error>> {
+    let open_settings = MenuItem::with_id(manager, "open_settings", "Settings", true, None::<&str>)?;
+
+    let start_stop = MenuItem::with_id(
+        manager,
+        START_STOP_ID,
+        recording_menu_label(&recording_state),
+        true,
+        None::<&str>,
+    )?;
+
+    let sep1 = PredefinedMenuItem::separator(manager)?;
+    let quit = MenuItem::with_id(manager, "quit", "Quit VoxFlow", true, None::<&str>)?;
+
+    let menu = Menu::with_items(manager, &[&open_settings, &start_stop, &sep1, &quit])?;
+    Ok(menu)
+}
+
+fn recording_menu_label(state: &crate::state::RecordingState) -> &'static str {
+    match state {
+        crate::state::RecordingState::Idle => "Start Recording",
+        crate::state::RecordingState::Recording | crate::state::RecordingState::Transcribing => {
+            "Stop Recording"
+        }
+    }
+}
+
+pub fn update_recording_menu<R: Runtime>(app: &AppHandle<R>, state: crate::state::RecordingState) {
+    if let Some(tray) = app.tray_by_id(TRAY_ID) {
+        if let Ok(menu) = build_tray_menu(app, state) {
+            let _ = tray.set_menu(Some(menu));
+        }
     }
 }

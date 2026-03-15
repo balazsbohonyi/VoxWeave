@@ -25,6 +25,9 @@ pub fn run() {
             // Build tray icon; tray drives all window visibility (tray-first bootstrap).
             tray::setup_tray(app)?;
 
+            // Register the startup hotkey from config.
+            hotkey::service::register_startup_hotkey(&app.handle());
+
             // Settings window is defined in tauri.conf.json with `visible: false`.
             // Register the close-to-hide handler so titlebar close hides rather than destroys.
             if let Some(settings_win) = app.get_webview_window("settings") {

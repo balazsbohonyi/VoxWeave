@@ -219,7 +219,7 @@ impl Default for AppConfig {
 // ---------------------------------------------------------------------------
 
 fn default_hotkey() -> String {
-    "Alt+Shift+Space".to_string()
+    "Ctrl+Shift+Space".to_string()
 }
 fn default_openai_model() -> String {
     "whisper-1".to_string()

@@ -79,19 +79,24 @@ impl AppState {
     /// Falls back to defaults if the file does not exist or is malformed.
     pub fn load() -> Self {
         match persistence::load() {
-            Ok(loaded) => Self {
-                config: Arc::new(Mutex::new(loaded.config)),
-                config_raw: Arc::new(Mutex::new(loaded.raw)),
-                recording_state: Arc::new(Mutex::new(RecordingState::default())),
-                hotkey_binding: Arc::new(Mutex::new(loaded.config.hotkey.clone())),
-                hotkey_availability: Arc::new(Mutex::new(HotkeyAvailability::default())),
-                hotkey_warning: Arc::new(Mutex::new(None)),
-                cancel_flag: Arc::new(Mutex::new(false)),
-                quitting: Arc::new(Mutex::new(false)),
-            },
+            Ok(loaded) => {
+                let config = loaded.config;
+                let hotkey = config.hotkey.clone();
+                Self {
+                    config: Arc::new(Mutex::new(config)),
+                    config_raw: Arc::new(Mutex::new(loaded.raw)),
+                    recording_state: Arc::new(Mutex::new(RecordingState::default())),
+                    hotkey_binding: Arc::new(Mutex::new(hotkey)),
+                    hotkey_availability: Arc::new(Mutex::new(HotkeyAvailability::default())),
+                    hotkey_warning: Arc::new(Mutex::new(None)),
+                    cancel_flag: Arc::new(Mutex::new(false)),
+                    quitting: Arc::new(Mutex::new(false)),
+                }
+            }
             Err(e) => {
                 log::error!("Failed to load config from disk: {e}. Using defaults.");
                 let config = AppConfig::default();
+                let hotkey = config.hotkey.clone();
                 let raw = serde_json::to_value(&config).unwrap_or(serde_json::Value::Object(
                     serde_json::Map::new(),
                 ));
@@ -99,7 +104,7 @@ impl AppState {
                     config: Arc::new(Mutex::new(config)),
                     config_raw: Arc::new(Mutex::new(raw)),
                     recording_state: Arc::new(Mutex::new(RecordingState::default())),
-                    hotkey_binding: Arc::new(Mutex::new(AppConfig::default().hotkey)),
+                    hotkey_binding: Arc::new(Mutex::new(hotkey)),
                     hotkey_availability: Arc::new(Mutex::new(HotkeyAvailability::default())),
                     hotkey_warning: Arc::new(Mutex::new(None)),
                     cancel_flag: Arc::new(Mutex::new(false)),
