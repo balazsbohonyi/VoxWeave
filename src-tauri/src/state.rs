@@ -81,6 +81,9 @@ pub struct AppState {
     /// Active recording session owned by the audio module while capturing.
     pub audio_session: Arc<Mutex<Option<AudioSessionState>>>,
 
+    /// Whether indicator drag mode is currently active (temporary interactivity).
+    pub indicator_drag_active: Arc<Mutex<bool>>,
+
     /// Set to `true` when the app is quitting via the tray Quit action.
     /// The close-to-hide handler checks this to allow window destruction
     /// instead of hiding, so WebView2 tears down cleanly before exit.
@@ -104,6 +107,7 @@ impl AppState {
                     hotkey_warning: Arc::new(Mutex::new(None)),
                     cancel_flag: Arc::new(Mutex::new(false)),
                     audio_session: Arc::new(Mutex::new(None)),
+                    indicator_drag_active: Arc::new(Mutex::new(false)),
                     quitting: Arc::new(Mutex::new(false)),
                 }
             }
@@ -123,6 +127,7 @@ impl AppState {
                     hotkey_warning: Arc::new(Mutex::new(None)),
                     cancel_flag: Arc::new(Mutex::new(false)),
                     audio_session: Arc::new(Mutex::new(None)),
+                    indicator_drag_active: Arc::new(Mutex::new(false)),
                     quitting: Arc::new(Mutex::new(false)),
                 }
             }

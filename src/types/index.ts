@@ -87,6 +87,16 @@ export interface AudioLevelPayload {
   rms: number; // 0.0 - 1.0
 }
 
+export type IndicatorVisualState =
+  | "recording"
+  | "processing"
+  | "injecting"
+  | "hidden";
+
+export interface IndicatorStatePayload {
+  state: IndicatorVisualState;
+}
+
 export interface InjectionDonePayload {
   success: boolean;
   error: string | null;

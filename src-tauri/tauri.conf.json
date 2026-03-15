@@ -14,7 +14,7 @@
       {
         "label": "settings",
         "title": "VoxFlow Settings",
-        "url": "index.html",
+        "url": "index.html?window=settings",
         "width": 800,
         "height": 600,
         "minWidth": 640,
@@ -23,6 +23,24 @@
         "skipTaskbar": false,
         "decorations": true,
         "resizable": true
+      },
+      {
+        "label": "indicator",
+        "title": "VoxFlow Indicator",
+        "url": "index.html?window=indicator",
+        "width": 260,
+        "height": 48,
+        "minWidth": 200,
+        "minHeight": 48,
+        "maxWidth": 420,
+        "maxHeight": 72,
+        "visible": false,
+        "skipTaskbar": true,
+        "alwaysOnTop": true,
+        "decorations": false,
+        "transparent": true,
+        "resizable": false,
+        "focus": false
       }
     ],
     "security": {
