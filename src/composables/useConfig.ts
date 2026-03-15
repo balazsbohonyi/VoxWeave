@@ -10,6 +10,7 @@ import type {
 } from "../types/index";
 
 export function useConfig() {
+  const AUDIO_DEVICE_POLL_INTERVAL_MS = 3_000;
   const config = ref<AppConfig | null>(null);
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -17,6 +18,8 @@ export function useConfig() {
   const audioWarning = ref<AudioWarningPayload | null>(null);
   const audioInputDevices = ref<string[]>([]);
   const audioDevicesLoadError = ref<string | null>(null);
+  let warnedUnavailableDevice: string | null = null;
+  let audioDevicePollTimer: ReturnType<typeof setInterval> | null = null;
   let unlistenHotkeyWarning: UnlistenFn | null = null;
   let unlistenAudioWarning: UnlistenFn | null = null;
 
@@ -47,6 +50,20 @@ export function useConfig() {
     try {
       const devices = await invoke<string[]>("list_audio_input_devices");
       audioInputDevices.value = devices;
+      const selectedDevice = config.value?.audio.device?.trim() ?? "";
+      if (selectedDevice.length > 0 && !devices.includes(selectedDevice)) {
+        if (warnedUnavailableDevice !== selectedDevice) {
+          audioWarning.value = {
+            code: "selected_device_unavailable",
+            message: `Selected microphone '${selectedDevice}' is unavailable. VoxFlow will use system default until a device is selected.`,
+            requested_device: selectedDevice,
+            active_device: null,
+          };
+          warnedUnavailableDevice = selectedDevice;
+        }
+      } else {
+        warnedUnavailableDevice = null;
+      }
     } catch (e) {
       const message = String(e);
       error.value = message;
@@ -103,6 +120,25 @@ export function useConfig() {
     audioWarning.value = null;
   }
 
+  function startAudioDevicePolling(): void {
+    if (audioDevicePollTimer) {
+      return;
+    }
+
+    void loadAudioInputDevices();
+    audioDevicePollTimer = setInterval(() => {
+      void loadAudioInputDevices();
+    }, AUDIO_DEVICE_POLL_INTERVAL_MS);
+  }
+
+  function stopAudioDevicePolling(): void {
+    if (!audioDevicePollTimer) {
+      return;
+    }
+    clearInterval(audioDevicePollTimer);
+    audioDevicePollTimer = null;
+  }
+
   return {
     config,
     loading,
@@ -115,6 +151,8 @@ export function useConfig() {
     clearAudioWarning,
     loadConfig,
     loadAudioInputDevices,
+    startAudioDevicePolling,
+    stopAudioDevicePolling,
     saveConfig,
   };
 }
