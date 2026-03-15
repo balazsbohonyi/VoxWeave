@@ -3,6 +3,7 @@
 
 use crate::config::{persistence, AppConfig};
 use std::sync::{Arc, Mutex};
+use std::time::SystemTime;
 
 /// Recording lifecycle state machine.
 /// Placeholder variants will be extended in Phase 3 (Recording).
@@ -42,6 +43,15 @@ pub struct HotkeyWarning {
     pub message: String,
 }
 
+/// Runtime-owned audio session details for active recording.
+#[derive(Debug, Clone)]
+pub struct AudioSessionState {
+    pub active_device: String,
+    pub sample_rate_hz: u32,
+    pub channels: u16,
+    pub started_at: SystemTime,
+}
+
 /// Top-level managed state stored in `tauri::Manager`.
 pub struct AppState {
     /// Typed, in-memory application configuration.
@@ -68,6 +78,9 @@ pub struct AppState {
     /// transcription. Checked by the transcription worker thread.
     pub cancel_flag: Arc<Mutex<bool>>,
 
+    /// Active recording session owned by the audio module while capturing.
+    pub audio_session: Arc<Mutex<Option<AudioSessionState>>>,
+
     /// Set to `true` when the app is quitting via the tray Quit action.
     /// The close-to-hide handler checks this to allow window destruction
     /// instead of hiding, so WebView2 tears down cleanly before exit.
@@ -90,6 +103,7 @@ impl AppState {
                     hotkey_availability: Arc::new(Mutex::new(HotkeyAvailability::default())),
                     hotkey_warning: Arc::new(Mutex::new(None)),
                     cancel_flag: Arc::new(Mutex::new(false)),
+                    audio_session: Arc::new(Mutex::new(None)),
                     quitting: Arc::new(Mutex::new(false)),
                 }
             }
@@ -108,6 +122,7 @@ impl AppState {
                     hotkey_availability: Arc::new(Mutex::new(HotkeyAvailability::default())),
                     hotkey_warning: Arc::new(Mutex::new(None)),
                     cancel_flag: Arc::new(Mutex::new(false)),
+                    audio_session: Arc::new(Mutex::new(None)),
                     quitting: Arc::new(Mutex::new(false)),
                 }
             }

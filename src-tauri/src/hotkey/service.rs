@@ -1,3 +1,4 @@
+use crate::audio;
 use crate::config::{persistence, AppConfig};
 use crate::hotkey::normalize::normalize_hotkey;
 use crate::state::{AppState, HotkeyAvailability, HotkeyWarning, RecordingState};
@@ -37,7 +38,7 @@ fn pretty_hotkey(hotkey: &str) -> String {
         .join("+")
 }
 
-fn humanize_registration_error(hotkey: &str, err: &str) -> String {
+pub(crate) fn humanize_registration_error(hotkey: &str, err: &str) -> String {
     let pretty = pretty_hotkey(hotkey);
     let lower = err.to_ascii_lowercase();
 
@@ -205,28 +206,43 @@ pub fn handle_shortcut_event<R: Runtime>(app: &AppHandle<R>, event: ShortcutStat
     }
 }
 
+pub(crate) fn next_recording_state(current: &RecordingState) -> Option<RecordingState> {
+    match current {
+        RecordingState::Idle => Some(RecordingState::Recording),
+        RecordingState::Recording => Some(RecordingState::Transcribing),
+        RecordingState::Transcribing => None,
+    }
+}
+
 pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
     let state = app.state::<AppState>();
-    let next_state = {
+    let previous_state = {
         let mut recording_state = state.recording_state.lock().unwrap();
-        match *recording_state {
-            RecordingState::Idle => {
-                *recording_state = RecordingState::Recording;
-                RecordingState::Recording
-            }
-            RecordingState::Recording => {
-                *recording_state = RecordingState::Transcribing;
-                RecordingState::Transcribing
-            }
-            RecordingState::Transcribing => {
-                return;
-            }
+        let previous = recording_state.clone();
+        if let Some(next) = next_recording_state(&previous) {
+            *recording_state = next;
+        } else {
+            return;
         }
+        previous
     };
 
+    let next_state = state.recording_state.lock().unwrap().clone();
     tray::update_recording_menu(app, next_state.clone());
 
-    if next_state == RecordingState::Transcribing {
+    if previous_state == RecordingState::Idle {
+        if let Err(err) = audio::start_recording(app) {
+            log::warn!("Failed to start recording: {err}");
+            *state.recording_state.lock().unwrap() = RecordingState::Idle;
+            tray::update_recording_menu(app, RecordingState::Idle);
+        }
+        return;
+    }
+
+    if previous_state == RecordingState::Recording {
+        if let Err(err) = audio::stop_recording_and_encode(app) {
+            log::warn!("Failed to finalize recording: {err}");
+        }
         complete_transcription_placeholder(app);
     }
 }

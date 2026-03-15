@@ -80,7 +80,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 - [ ] **SETT-01**: Settings window has sections: General, Audio, Transcription, Injection
 - [ ] **SETT-02**: General: hotkey capture input, "Launch on Windows startup" toggle (default OFF), minimize-to-tray toggle
-- [ ] **SETT-03**: Audio: microphone device dropdown listing all available devices
+- [ ] **SETT-03**: Audio: microphone device dropdown listing all available devices, plus `Auto-stop on silence` toggle and configurable silence-duration input
 - [ ] **SETT-04**: Transcription: Cloud/Local engine toggle; Cloud has tabbed interface (OpenAI, Groq, OpenRouter) each with API key (masked), model dropdown, "Test connection", "Set as active"; active provider visually highlighted
 - [ ] **SETT-05**: Transcription: Local sub-section with model variants, sizes, download/delete buttons, progress bar
 - [ ] **SETT-06**: Injection: method selector (FlashPaste/Keystrokes/Clipboard), speed selector (shown only for Keystrokes), auto-fallback checkbox

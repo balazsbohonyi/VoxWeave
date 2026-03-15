@@ -1,14 +1,21 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useConfig } from "../../composables/useConfig";
+import WarningCard from "./components/WarningCard.vue";
 
 const {
   config,
   loading,
   error,
   hotkeyWarning,
+  audioWarning,
+  audioInputDevices,
+  audioDevicesLoadError,
   clearHotkeyWarning,
+  clearAudioWarning,
   loadConfig,
+  startAudioDevicePolling,
+  stopAudioDevicePolling,
   saveConfig,
 } = useConfig();
 
@@ -16,6 +23,10 @@ const hotkeyDraft = ref("");
 const hotkeyApplyError = ref<string | null>(null);
 const hotkeyApplySuccess = ref<string | null>(null);
 const isApplyingHotkey = ref(false);
+const selectedAudioDevice = ref<string>("");
+const isSavingAudioDevice = ref(false);
+const previouslyUnavailableAudioDevice = ref<string | null>(null);
+const isAutoSyncingAudioDevice = ref(false);
 
 const hotkeyDirty = computed(() => {
   if (!config.value) {
@@ -61,45 +72,111 @@ async function applyHotkey(): Promise<void> {
   }
 }
 
+async function saveAudioDevice(): Promise<void> {
+  if (!config.value) {
+    return;
+  }
+
+  isSavingAudioDevice.value = true;
+  try {
+    const nextDevice = selectedAudioDevice.value.trim();
+    const saved = await saveConfig({
+      audio: {
+        ...config.value.audio,
+        device: nextDevice.length > 0 ? nextDevice : null,
+      },
+    });
+    if (saved) {
+      selectedAudioDevice.value = saved.audio.device ?? "";
+      previouslyUnavailableAudioDevice.value = null;
+      clearAudioWarning();
+    }
+  } finally {
+    isSavingAudioDevice.value = false;
+  }
+}
+
+async function syncAudioDeviceSelection(nextDevice: string | null): Promise<void> {
+  if (!config.value) {
+    return;
+  }
+  if ((config.value.audio.device ?? null) === nextDevice) {
+    return;
+  }
+
+  isAutoSyncingAudioDevice.value = true;
+  isSavingAudioDevice.value = true;
+  try {
+    await saveConfig({
+      audio: {
+        ...config.value.audio,
+        device: nextDevice,
+      },
+    });
+  } finally {
+    isSavingAudioDevice.value = false;
+    isAutoSyncingAudioDevice.value = false;
+  }
+}
+
 onMounted(() => {
   loadConfig().then(() => {
     if (config.value) {
       hotkeyDraft.value = config.value.hotkey;
+      selectedAudioDevice.value = config.value.audio.device ?? "";
     }
+    startAudioDevicePolling();
   });
+});
+
+onUnmounted(() => {
+  stopAudioDevicePolling();
+});
+
+watch(audioInputDevices, async (devices) => {
+  if (!config.value || isAutoSyncingAudioDevice.value) {
+    return;
+  }
+
+  if (selectedAudioDevice.value.length > 0 && !devices.includes(selectedAudioDevice.value)) {
+    previouslyUnavailableAudioDevice.value = selectedAudioDevice.value;
+    selectedAudioDevice.value = "";
+    await syncAudioDeviceSelection(null);
+    return;
+  }
+
+  if (
+    previouslyUnavailableAudioDevice.value &&
+    selectedAudioDevice.value.length === 0 &&
+    devices.includes(previouslyUnavailableAudioDevice.value)
+  ) {
+    const restoredDevice = previouslyUnavailableAudioDevice.value;
+    selectedAudioDevice.value = restoredDevice;
+    previouslyUnavailableAudioDevice.value = null;
+    clearAudioWarning();
+    await syncAudioDeviceSelection(restoredDevice);
+  }
 });
 </script>
 
 <template>
   <div class="flex h-screen flex-col bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
-    <header class="flex items-center border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-      <h1 class="text-xl font-semibold tracking-tight">VoxFlow Settings</h1>
-    </header>
-
     <main class="relative flex flex-1 items-center justify-center">
-      <div
-        v-if="hotkeyWarning"
-        class="absolute right-6 top-6 w-80 rounded-lg border border-amber-300 bg-amber-50 p-4 text-xs text-amber-900 shadow-lg dark:border-amber-500/60 dark:bg-amber-900/20 dark:text-amber-100"
-      >
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <p class="text-[11px] uppercase tracking-wide text-amber-700 dark:text-amber-200">
-              Hotkey Warning
-            </p>
-            <p class="mt-1 font-medium">
-              {{ hotkeyWarning.hotkey }} unavailable
-            </p>
-            <p class="mt-1 text-amber-700/90 dark:text-amber-200/90">
-              {{ hotkeyWarning.message }}
-            </p>
-          </div>
-          <button
-            class="text-[11px] font-semibold text-amber-700 hover:text-amber-900 dark:text-amber-200 dark:hover:text-amber-50"
-            @click="clearHotkeyWarning"
-          >
-            Dismiss
-          </button>
-        </div>
+      <div class="absolute right-6 top-6 z-20 space-y-3">
+        <WarningCard
+          v-if="hotkeyWarning"
+          label="Hotkey Warning"
+          :title="`${hotkeyWarning.hotkey} unavailable`"
+          :message="hotkeyWarning.message"
+          @dismiss="clearHotkeyWarning"
+        />
+        <WarningCard
+          v-if="audioWarning"
+          label="Audio Warning"
+          title="Microphone fallback"
+          :message="audioWarning.message"
+          @dismiss="clearAudioWarning"
+        />
       </div>
 
       <div v-if="loading && !config" class="text-center text-gray-400 dark:text-gray-500">
@@ -150,6 +227,37 @@ onMounted(() => {
           <div class="flex justify-between">
             <dt>Provider</dt>
             <dd class="font-mono text-gray-800 dark:text-gray-200">{{ config.transcription.provider }}</dd>
+          </div>
+          <div class="space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800/40">
+            <dt class="font-medium text-gray-700 dark:text-gray-300">Microphone</dt>
+            <div class="flex items-start gap-2">
+              <select
+                v-model="selectedAudioDevice"
+                class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-xs text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                :disabled="isSavingAudioDevice"
+              >
+                <option value="">System default</option>
+                <option v-for="device in audioInputDevices" :key="device" :value="device">
+                  {{ device }}
+                </option>
+              </select>
+              <button
+                class="rounded-md bg-blue-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400 dark:disabled:bg-gray-600"
+                :disabled="isSavingAudioDevice"
+                @click="saveAudioDevice"
+              >
+                {{ isSavingAudioDevice ? "Saving..." : "Save" }}
+              </button>
+            </div>
+            <p v-if="audioDevicesLoadError" class="text-xs text-red-600 dark:text-red-300">
+              Failed to refresh microphones: {{ audioDevicesLoadError }}
+            </p>
+            <p
+              v-else-if="audioInputDevices.length === 0"
+              class="text-xs text-amber-700 dark:text-amber-300"
+            >
+              No microphone devices detected. Connect a microphone to continue.
+            </p>
           </div>
           <div class="flex justify-between">
             <dt>Injection mode</dt>

@@ -74,6 +74,15 @@ export interface HotkeyWarningPayload {
   source: HotkeyWarningSource;
 }
 
+export type AudioWarningCode = "selected_device_unavailable";
+
+export interface AudioWarningPayload {
+  code: AudioWarningCode;
+  message: string;
+  requested_device: string | null;
+  active_device: string | null;
+}
+
 export interface AudioLevelPayload {
   rms: number; // 0.0 - 1.0
 }
