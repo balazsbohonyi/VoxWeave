@@ -102,7 +102,7 @@ pub fn begin_drag<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
 pub fn end_drag<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
     let window = get_window(app)?;
     window
-        .set_ignore_cursor_events(true)
+        .set_ignore_cursor_events(false)
         .map_err(|e| e.to_string())?;
     *app.state::<AppState>()
         .indicator_drag_active
@@ -112,12 +112,10 @@ pub fn end_drag<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
 }
 
 pub fn persist_position<R: Runtime>(app: &AppHandle<R>, x: i32, y: i32) -> Result<(), String> {
-    let window = get_window(app)?;
     let Some(primary) = app.primary_monitor().map_err(|e| e.to_string())? else {
         return Ok(());
     };
     let clamped = window::clamp_position_to_monitor(x, y, window::monitor_rect(&primary));
-    window::place_window(&window, clamped.0, clamped.1)?;
 
     let state = app.state::<AppState>();
     let mut config = state.config.lock().map_err(|e| e.to_string())?.clone();

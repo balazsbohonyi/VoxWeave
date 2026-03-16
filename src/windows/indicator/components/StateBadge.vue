@@ -7,13 +7,6 @@ const props = defineProps<{
   injectionMode: InjectionMode;
 }>();
 
-const label = computed(() => {
-  if (props.state === "recording") return "Recording";
-  if (props.state === "processing") return "Processing";
-  if (props.state === "injecting") return "Injecting";
-  return "Idle";
-});
-
 const icon = computed(() => {
   if (props.state === "recording") return "REC";
   if (props.state === "processing") return "...";
@@ -32,8 +25,6 @@ const methodHint = computed(() => {
 <template>
   <div class="indicator-badge">
     <span class="indicator-badge-icon">{{ icon }}</span>
-    <span class="indicator-badge-label">{{ label }}</span>
     <span v-if="methodHint" class="indicator-badge-hint">{{ methodHint }}</span>
   </div>
 </template>
-

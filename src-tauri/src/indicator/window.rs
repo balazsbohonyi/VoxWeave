@@ -3,7 +3,7 @@ use tauri::{AppHandle, LogicalPosition, Monitor, Position, Runtime, WebviewWindo
 pub const INDICATOR_WIDTH: i32 = 180;
 pub const INDICATOR_HEIGHT: i32 = 70;
 const EDGE_MARGIN_X: i32 = 20;
-const EDGE_MARGIN_Y: i32 = 92;
+const EDGE_MARGIN_Y: i32 = 120;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MonitorRect {
@@ -18,15 +18,16 @@ pub fn apply_window_policy<R: Runtime>(window: &WebviewWindow<R>) -> Result<(), 
     #[cfg(desktop)]
     let _ = window.set_shadow(false);
     window
-        .set_ignore_cursor_events(true)
+        .set_ignore_cursor_events(false)
         .map_err(|e| e.to_string())?;
     Ok(())
 }
 
 pub fn monitor_rect(monitor: &Monitor) -> MonitorRect {
     let scale = monitor.scale_factor();
-    let pos = monitor.position().to_logical::<f64>(scale);
-    let size = monitor.size().to_logical::<f64>(scale);
+    let work_area = monitor.work_area();
+    let pos = work_area.position.to_logical::<f64>(scale);
+    let size = work_area.size.to_logical::<f64>(scale);
     MonitorRect {
         x: pos.x.round() as i32,
         y: pos.y.round() as i32,

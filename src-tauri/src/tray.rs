@@ -1,5 +1,5 @@
-// Tray icon setup and menu event handling.
-// The tray is the primary app chrome — no main window opens on launch.
+﻿// Tray icon setup and menu event handling.
+// The tray is the primary app chrome - no main window opens on launch.
 
 use tauri::{
     image::Image,
@@ -25,7 +25,7 @@ pub fn setup_tray(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
 
     let _tray = TrayIconBuilder::with_id(TRAY_ID)
         .icon(icon)
-        .tooltip("VoxFlow — Voice to text dictation")
+        .tooltip("VoxFlow - Voice to text dictation")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(handle_menu_event)
@@ -40,16 +40,19 @@ fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event: tauri::menu::MenuEve
         "open_settings" => show_settings_window(app),
         "quit" => {
             // Signal quit intent so the close-to-hide handler lets the window
-            // destroy rather than hiding — WebView2 must tear down before exit.
+            // destroy rather than hiding - WebView2 must tear down before exit.
             if let Some(state) = app.try_state::<crate::state::AppState>() {
                 *state.quitting.lock().unwrap() = true;
             }
             if let Some(win) = app.get_webview_window("settings") {
                 let _ = win.close();
             }
+            if let Some(win) = app.get_webview_window("indicator") {
+                let _ = win.close();
+            }
             let app_for_exit = app.clone();
             std::thread::spawn(move || {
-                std::thread::sleep(std::time::Duration::from_millis(120));
+                std::thread::sleep(std::time::Duration::from_millis(250));
                 app_for_exit.cleanup_before_exit();
                 app_for_exit.exit(0);
             });
@@ -73,7 +76,7 @@ fn handle_tray_event<R: Runtime>(tray: &tauri::tray::TrayIcon<R>, event: TrayIco
 }
 
 /// Show the single settings window, creating it if hidden, focusing if already visible.
-/// Never creates a second instance — Tauri windows are identified by label.
+/// Never creates a second instance - Tauri windows are identified by label.
 pub fn show_settings_window<R: Runtime>(app: &AppHandle<R>) {
     if let Some(window) = app.get_webview_window("settings") {
         let _ = window.show();

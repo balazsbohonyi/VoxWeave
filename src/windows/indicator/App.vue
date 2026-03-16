@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import StateBadge from "./components/StateBadge.vue";
 import type {
   AppConfig,
   AudioLevelPayload,
@@ -14,56 +15,35 @@ import type {
 
 const state = ref<IndicatorVisualState>("hidden");
 const level = ref(0);
-const phase = ref(0);
 const WAVE_BAR_COUNT = 15;
-const noise = ref<number[]>(Array.from({ length: WAVE_BAR_COUNT }, () => Math.random()));
 const injectionMode = ref<InjectionMode>("flash_paste");
 const win = getCurrentWindow();
 
 let unlistenState: UnlistenFn | null = null;
 let unlistenHidden: UnlistenFn | null = null;
 let unlistenAudioLevel: UnlistenFn | null = null;
-let rafId = 0;
+let unlistenMoved: UnlistenFn | null = null;
+let persistTimer: ReturnType<typeof setTimeout> | null = null;
 
 const isRecording = computed(() => state.value === "recording");
-const isProcessing = computed(() => state.value === "processing");
-const isInjecting = computed(() => state.value === "injecting");
 const WAVE_SEGMENTS = 7;
-const RECORDING_BASELINE = 0.08;
 const RECORDING_STALE_MS = 260;
-const RECORDING_SMOOTHING = 0.42;
+const RECORDING_SMOOTHING = 0.75;
+const RECORDING_NOISE_GATE = 0.001;
+const RECORDING_GAIN = 30;
 const lastAudioLevelAt = ref(0);
 
-const statusLabel = computed(() => {
-  if (isRecording.value) return "Recording";
-  if (isProcessing.value) return "Transcribing";
-  if (isInjecting.value) return "Injecting";
-  return "Ready";
-});
-
-const methodHint = computed(() => {
-  if (!isInjecting.value) return "";
-  if (injectionMode.value === "flash_paste") return "FlashPaste";
-  if (injectionMode.value === "keystroke") return "Keystroke";
-  return "Clipboard";
-});
-
 const animatedLevel = computed(() => {
-  if (isRecording.value) {
-    const now = performance.now();
-    const hasFreshLevel = now - lastAudioLevelAt.value <= RECORDING_STALE_MS;
-    if (!hasFreshLevel) {
-      return RECORDING_BASELINE;
-    }
-    return RECORDING_BASELINE + level.value * 0.92;
+  if (!isRecording.value) {
+    return 0;
   }
-  if (isProcessing.value) {
-    return 0.18 + (Math.sin(phase.value * 0.12) + 1) * 0.05;
+  const now = performance.now();
+  const hasFreshLevel = now - lastAudioLevelAt.value <= RECORDING_STALE_MS;
+  if (!hasFreshLevel) {
+    return 0;
   }
-  if (isInjecting.value) {
-    return 0.1;
-  }
-  return 0.06;
+  const gated = level.value < RECORDING_NOISE_GATE ? 0 : level.value;
+  return Math.min(1, Math.sqrt(gated * RECORDING_GAIN));
 });
 
 const bars = computed(() => {
@@ -71,15 +51,10 @@ const bars = computed(() => {
   return Array.from({ length: WAVE_BAR_COUNT }, (_, index) => {
     const t = (index + 1) / WAVE_BAR_COUNT;
     const centerProfile = 1 - Math.abs(t - 0.5);
-    const wobble = 0.04 * Math.sin((phase.value + index * 7) * 0.14);
-    const jitter = (noise.value[index] - 0.5) * 0.58;
-    const spike = noise.value[index] > 0.86 ? 0.22 : 0;
-    const base = 0.1;
-    const value = Math.max(
-      0.08,
-      (base + clamped * (0.45 + centerProfile * 0.55 + wobble + jitter + spike)) * 1.4,
-    );
-    const activeSegments = Math.max(1, Math.min(WAVE_SEGMENTS, Math.round(value * WAVE_SEGMENTS)));
+    const envelope = 0.35 + centerProfile * 0.65;
+    const value = clamped * envelope;
+    const activeSegments =
+      value <= 0 ? 0 : Math.max(1, Math.min(WAVE_SEGMENTS, Math.ceil(value * WAVE_SEGMENTS)));
     return activeSegments;
   });
 });
@@ -91,12 +66,6 @@ async function loadInjectionMode(): Promise<void> {
   } catch {
     injectionMode.value = "flash_paste";
   }
-}
-
-function tick(): void {
-  phase.value += 1;
-  noise.value = noise.value.map((prev) => prev * 0.62 + Math.random() * 0.38);
-  rafId = requestAnimationFrame(tick);
 }
 
 async function onPointerDown(event: PointerEvent): Promise<void> {
@@ -113,11 +82,22 @@ async function onPointerDown(event: PointerEvent): Promise<void> {
   } finally {
     await invoke("end_indicator_drag");
   }
-  if (!dragCompleted) {
-    return;
-  }
-  const pos = await win.outerPosition();
-  await invoke("persist_indicator_position", { x: Math.round(pos.x), y: Math.round(pos.y) });
+  if (!dragCompleted) return;
+}
+
+function queuePersistPosition(): void {
+  if (persistTimer) clearTimeout(persistTimer);
+  persistTimer = setTimeout(async () => {
+    try {
+      const pos = await win.outerPosition();
+      const scale = await win.scaleFactor();
+      const logicalX = Math.round(pos.x / scale);
+      const logicalY = Math.round(pos.y / scale);
+      await invoke("persist_indicator_position", { x: logicalX, y: logicalY });
+    } catch {
+      // Ignore persistence failures while dragging/moving.
+    }
+  }, 180);
 }
 
 async function onRecordButtonClick(): Promise<void> {
@@ -131,10 +111,16 @@ onMounted(async () => {
   document.body.style.background = "transparent";
 
   await loadInjectionMode();
-  rafId = requestAnimationFrame(tick);
+  unlistenMoved = await win.onMoved(() => {
+    queuePersistPosition();
+  });
 
   unlistenState = await listen<IndicatorStatePayload>("indicator-state", (event) => {
     state.value = event.payload.state;
+    if (event.payload.state !== "recording") {
+      level.value = 0;
+      lastAudioLevelAt.value = 0;
+    }
   });
 
   unlistenHidden = await listen("indicator-hidden", () => {
@@ -172,10 +158,11 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-  cancelAnimationFrame(rafId);
   if (unlistenState) unlistenState();
   if (unlistenHidden) unlistenHidden();
   if (unlistenAudioLevel) unlistenAudioLevel();
+  if (unlistenMoved) unlistenMoved();
+  if (persistTimer) clearTimeout(persistTimer);
 });
 </script>
 
@@ -186,8 +173,7 @@ onBeforeUnmount(() => {
         <button class="indicator-record-button" type="button" @click.stop="onRecordButtonClick">
           <span class="indicator-record-dot" :class="{ 'indicator-record-dot-active': isRecording }" />
         </button>
-        <span class="indicator-label">{{ statusLabel }}</span>
-        <span v-if="methodHint" class="indicator-method">{{ methodHint }}</span>
+        <StateBadge :state="state" :injection-mode="injectionMode" />
       </div>
       <div class="indicator-waveform">
         <div

@@ -20,6 +20,7 @@ must_haves:
     - "Dragged indicator position persists using final drop coordinates."
     - "State transitions do not snap the window back to stale config coordinates."
     - "Position is restored after restart and clamped into visible bounds."
+    - "First-run placement defaults to bottom-right above taskbar when no valid saved coordinates exist."
   artifacts:
     - path: "src/windows/indicator/App.vue"
       provides: "Drag-end position persistence timing"
@@ -88,9 +89,19 @@ From src-tauri/src/indicator/mod.rs:
   <files>src-tauri/src/indicator/mod.rs, src-tauri/src/hotkey/service.rs</files>
   <action>Adjust indicator show/state flow so config-based `place_window_from_config` is not reapplied during intra-session transitions when window is already visible, or ensure config is synced before such transitions. Keep hide behavior deterministic for completion/error.</action>
   <verify>
-    <automated>cd src-tauri && cargo test indicator -- --nocapture</automated>
+    <automated>cd src-tauri && cargo test indicator::tests::state_transitions_do_not_snap_to_stale_position -- --exact</automated>
   </verify>
   <done>Runtime transitions preserve current on-screen position instead of snapping to stale saved values.</done>
+</task>
+
+<task type="auto">
+  <name>Task 3: Enforce first-run bottom-right-above-taskbar fallback</name>
+  <files>src-tauri/src/indicator/window.rs, src-tauri/src/indicator/mod.rs</files>
+  <action>When indicator position is unset or invalid (including monitor/layout changes), place it at bottom-right above the taskbar with safe margins rather than generic fallback coordinates. Keep this fallback deterministic and compatible with clamp logic.</action>
+  <verify>
+    <automated>cd src-tauri && cargo test indicator::tests::first_run_defaults_bottom_right_above_taskbar -- --exact</automated>
+  </verify>
+  <done>Locked decision is implemented: first-run indicator location is bottom-right above taskbar.</done>
 </task>
 
 </tasks>
@@ -112,4 +123,3 @@ After completion, create `.planning/phases/04-floating-indicator/04-05-floating-
 <unresolved_questions>
 None.
 </unresolved_questions>
-
