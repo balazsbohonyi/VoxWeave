@@ -40,6 +40,7 @@ export interface IndicatorConfig {
   show: boolean;
   position_x: number | null;
   position_y: number | null;
+  show_on_startup: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -85,6 +86,16 @@ export interface AudioWarningPayload {
 
 export interface AudioLevelPayload {
   rms: number; // 0.0 - 1.0
+}
+
+export type IndicatorVisualState =
+  | "recording"
+  | "processing"
+  | "injecting"
+  | "hidden";
+
+export interface IndicatorStatePayload {
+  state: IndicatorVisualState;
 }
 
 export interface InjectionDonePayload {

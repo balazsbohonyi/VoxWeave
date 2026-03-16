@@ -1,6 +1,7 @@
 use crate::audio;
 use crate::config::{persistence, AppConfig};
 use crate::hotkey::normalize::normalize_hotkey;
+use crate::indicator;
 use crate::state::{AppState, HotkeyAvailability, HotkeyWarning, RecordingState};
 use crate::tray;
 use serde::Serialize;
@@ -231,27 +232,36 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
     tray::update_recording_menu(app, next_state.clone());
 
     if previous_state == RecordingState::Idle {
+        if let Err(err) = indicator::show_recording(app) {
+            log::warn!("Failed to show indicator: {err}");
+        }
         if let Err(err) = audio::start_recording(app) {
             log::warn!("Failed to start recording: {err}");
             *state.recording_state.lock().unwrap() = RecordingState::Idle;
             tray::update_recording_menu(app, RecordingState::Idle);
+            indicator::hide(app);
+            return;
         }
         return;
     }
 
     if previous_state == RecordingState::Recording {
+        indicator::show_processing(app);
         if let Err(err) = audio::stop_recording_and_encode(app) {
             log::warn!("Failed to finalize recording: {err}");
+            indicator::hide(app);
         }
         complete_transcription_placeholder(app);
     }
 }
 
 fn complete_transcription_placeholder<R: Runtime>(app: &AppHandle<R>) {
+    indicator::show_injecting(app);
     if let Some(state) = app.try_state::<AppState>() {
         *state.recording_state.lock().unwrap() = RecordingState::Idle;
     }
     tray::update_recording_menu(app, RecordingState::Idle);
+    indicator::hide(app);
 }
 
 fn emit_hotkey_warning<R: Runtime>(

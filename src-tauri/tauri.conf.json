@@ -23,6 +23,24 @@
         "skipTaskbar": false,
         "decorations": true,
         "resizable": true
+      },
+      {
+        "label": "indicator",
+        "title": "VoxFlow Indicator",
+        "url": "indicator.html",
+        "width": 180,
+        "height": 70,
+        "minWidth": 180,
+        "minHeight": 70,
+        "maxWidth": 180,
+        "maxHeight": 70,
+        "visible": false,
+        "skipTaskbar": true,
+        "alwaysOnTop": true,
+        "decorations": false,
+        "transparent": true,
+        "resizable": false,
+        "focus": false
       }
     ],
     "security": {

@@ -25,12 +25,12 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### Floating Indicator
 
-- [ ] **FLOT-01**: A floating pill-shaped window (~200x48px) appears when recording starts
-- [ ] **FLOT-02**: Floating indicator is always-on-top, click-through, and does not steal focus
-- [ ] **FLOT-03**: Indicator displays real-time audio waveform (5-10 bars) reflecting mic input at ≥24fps
-- [ ] **FLOT-04**: Indicator shows distinct states: recording (red pulsing dot + waveform), processing (spinner), injecting (pasting/typing cue)
-- [ ] **FLOT-05**: Indicator is draggable and remembers its last position across sessions
-- [ ] **FLOT-06**: Indicator disappears after text injection completes (or error is shown)
+- [x] **FLOT-01**: A floating pill-shaped window (~200x48px) appears when recording starts
+- [x] **FLOT-02**: Floating indicator is always-on-top, click-through, and does not steal focus
+- [x] **FLOT-03**: Indicator displays real-time audio waveform (5-10 bars) reflecting mic input at ≥24fps
+- [x] **FLOT-04**: Indicator shows distinct states: recording (red pulsing dot + waveform), processing (spinner), injecting (pasting/typing cue)
+- [x] **FLOT-05**: Indicator is draggable and remembers its last position across sessions
+- [x] **FLOT-06**: Indicator disappears after text injection completes (or error is shown)
 
 ### Cloud Transcription
 
@@ -152,12 +152,12 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 | AUDI-04 | Phase 3 | Pending |
 | AUDI-05 | Phase 3 | Pending |
 | AUDI-06 | Phase 3 | Pending |
-| FLOT-01 | Phase 4 | Pending |
-| FLOT-02 | Phase 4 | Pending |
-| FLOT-03 | Phase 4 | Pending |
-| FLOT-04 | Phase 4 | Pending |
-| FLOT-05 | Phase 4 | Pending |
-| FLOT-06 | Phase 4 | Pending |
+| FLOT-01 | Phase 4 | Complete |
+| FLOT-02 | Phase 4 | Complete |
+| FLOT-03 | Phase 4 | Complete |
+| FLOT-04 | Phase 4 | Complete |
+| FLOT-05 | Phase 4 | Complete |
+| FLOT-06 | Phase 4 | Complete |
 | CLOD-01 | Phase 5 | Pending |
 | CLOD-02 | Phase 5 | Pending |
 | CLOD-03 | Phase 5 | Pending |
@@ -219,4 +219,5 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 ---
 *Requirements defined: 2026-03-14*
 *Last updated: 2026-03-14 after roadmap creation — all 68 requirements mapped*
+
 

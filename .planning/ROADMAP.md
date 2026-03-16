@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation** - Project scaffold, config persistence, and system tray presence (completed 2026-03-14)
 - [x] **Phase 2: Hotkey** - Global hotkey registration and toggle-mode recording trigger (completed 2026-03-15)
 - [ ] **Phase 3: Audio Capture** - Microphone capture, encoding, and device management
-- [ ] **Phase 4: Floating Indicator** - Always-on-top recording status window with waveform
+- [x] **Phase 4: Floating Indicator** - Always-on-top recording status window with waveform (completed 2026-03-15)
 - [ ] **Phase 5: Cloud Transcription** - OpenAI, Groq, and OpenRouter providers with error handling
 - [ ] **Phase 6: Text Injection** - FlashPaste, keystroke, and clipboard injection with fallback chain
 - [ ] **Phase 7: Pipeline Integration** - End-to-end hotkey-to-text pipeline with toast notifications
@@ -35,7 +35,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Double-clicking the tray icon opens the settings window
   4. Closing the settings window minimizes to tray rather than quitting
   5. Config is read from and written to `%APPDATA%/VoxFlow/config.json`; missing fields use defaults and unknown fields are preserved
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [x] 04-01-indicator-window-runtime-PLAN.md - indicator window runtime + lifecycle wiring
+- [x] 04-02-indicator-visual-states-waveform-PLAN.md - indicator UI states + waveform visuals
+- [x] 04-03-indicator-drag-persistence-hide-PLAN.md - drag interaction + persistence + hide hardening
+- [ ] 04-04-indicator-focus-clickthrough-gap-PLAN.md - close focus theft + default click-through gap
+- [ ] 04-05-indicator-position-snapback-gap-PLAN.md - close drag-end persistence + snap-back gap
 
 ### Phase 2: Hotkey
 **Goal**: A global hotkey that can be triggered from any application and drives a toggle-mode recording state machine
@@ -161,7 +167,7 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | 1. Foundation | 3/3 | Complete   | 2026-03-14 |
 | 2. Hotkey | 0/TBD | Complete    | 2026-03-15 |
 | 3. Audio Capture | 0/TBD | Not started | - |
-| 4. Floating Indicator | 0/TBD | Not started | - |
+| 4. Floating Indicator | 3/3 | Complete | 2026-03-15 |
 | 5. Cloud Transcription | 0/TBD | Not started | - |
 | 6. Text Injection | 0/TBD | Not started | - |
 | 7. Pipeline Integration | 0/TBD | Not started | - |

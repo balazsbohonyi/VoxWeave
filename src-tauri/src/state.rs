@@ -2,6 +2,7 @@
 // application data accessed across commands, tray, and window lifecycle.
 
 use crate::config::{persistence, AppConfig};
+use crate::indicator::events::IndicatorVisualState;
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 
@@ -44,12 +45,14 @@ pub struct HotkeyWarning {
 }
 
 /// Runtime-owned audio session details for active recording.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct AudioSessionState {
     pub active_device: String,
     pub sample_rate_hz: u32,
     pub channels: u16,
     pub started_at: SystemTime,
+    pub level_emitter_stop: Option<Arc<std::sync::atomic::AtomicBool>>,
+    pub level_emitter_thread: Option<std::thread::JoinHandle<()>>,
 }
 
 /// Top-level managed state stored in `tauri::Manager`.
@@ -81,6 +84,12 @@ pub struct AppState {
     /// Active recording session owned by the audio module while capturing.
     pub audio_session: Arc<Mutex<Option<AudioSessionState>>>,
 
+    /// Whether indicator drag mode is currently active (temporary interactivity).
+    pub indicator_drag_active: Arc<Mutex<bool>>,
+
+    /// Last known indicator visual state for late frontend subscribers.
+    pub indicator_visual_state: Arc<Mutex<IndicatorVisualState>>,
+
     /// Set to `true` when the app is quitting via the tray Quit action.
     /// The close-to-hide handler checks this to allow window destruction
     /// instead of hiding, so WebView2 tears down cleanly before exit.
@@ -104,6 +113,8 @@ impl AppState {
                     hotkey_warning: Arc::new(Mutex::new(None)),
                     cancel_flag: Arc::new(Mutex::new(false)),
                     audio_session: Arc::new(Mutex::new(None)),
+                    indicator_drag_active: Arc::new(Mutex::new(false)),
+                    indicator_visual_state: Arc::new(Mutex::new(IndicatorVisualState::Hidden)),
                     quitting: Arc::new(Mutex::new(false)),
                 }
             }
@@ -123,6 +134,8 @@ impl AppState {
                     hotkey_warning: Arc::new(Mutex::new(None)),
                     cancel_flag: Arc::new(Mutex::new(false)),
                     audio_session: Arc::new(Mutex::new(None)),
+                    indicator_drag_active: Arc::new(Mutex::new(false)),
+                    indicator_visual_state: Arc::new(Mutex::new(IndicatorVisualState::Hidden)),
                     quitting: Arc::new(Mutex::new(false)),
                 }
             }

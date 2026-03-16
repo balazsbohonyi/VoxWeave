@@ -112,6 +112,21 @@ export function useConfig() {
     }
   }
 
+  async function saveIndicatorPosition(x: number, y: number): Promise<AppConfig | null> {
+    if (!config.value) {
+      error.value = "Config not loaded - call loadConfig() first";
+      return null;
+    }
+
+    return saveConfig({
+      indicator: {
+        ...config.value.indicator,
+        position_x: Math.round(x),
+        position_y: Math.round(y),
+      },
+    });
+  }
+
   function clearHotkeyWarning(): void {
     hotkeyWarning.value = null;
   }
@@ -154,5 +169,6 @@ export function useConfig() {
     startAudioDevicePolling,
     stopAudioDevicePolling,
     saveConfig,
+    saveIndicatorPosition,
   };
 }

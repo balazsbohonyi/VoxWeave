@@ -2,6 +2,7 @@ mod audio;
 mod commands;
 mod config;
 mod hotkey;
+mod indicator;
 mod platform;
 mod state;
 mod tray;
@@ -47,12 +48,35 @@ pub fn run() {
                 });
             }
 
+            // Indicator window is pre-defined in tauri.conf and starts hidden.
+            // Enforce non-focus/click-through defaults at runtime to avoid input theft.
+            if let Some(indicator_win) = app.get_webview_window("indicator") {
+                let _ = indicator::window::apply_window_policy(&indicator_win);
+            }
+
+            // Optional startup visibility (default true) so users can keep the
+            // indicator pinned even before recording starts.
+            let show_on_startup = {
+                let app_state = app.state::<AppState>();
+                let cfg = app_state.config.lock().unwrap();
+                cfg.indicator.show && cfg.indicator.show_on_startup
+            };
+            if show_on_startup {
+                let _ = indicator::show_idle(&app.handle());
+            }
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             commands::config::get_config,
             commands::config::save_config,
             commands::audio::list_audio_input_devices,
+            commands::indicator::begin_indicator_drag,
+            commands::indicator::end_indicator_drag,
+            commands::indicator::persist_indicator_position,
+            commands::indicator::get_indicator_state,
+            commands::indicator::get_recording_state,
+            commands::indicator::toggle_recording_from_indicator,
         ])
         .run(tauri::generate_context!())
         .expect("error while running VoxFlow");
