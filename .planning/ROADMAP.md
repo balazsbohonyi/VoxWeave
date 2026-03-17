@@ -89,11 +89,12 @@ Plans:
   3. An invalid API key triggers a notification that opens settings with the offending provider's tab highlighted
   4. Rate-limit errors (429) retry with exponential backoff up to 3 times before surfacing an error
   5. If the active provider fails after retries and another provider is configured, a toast offers to retry with the fallback provider
-**Plans**: 3 plans
+**Plans**: 4 plans
 Plans:
 - [ ] 05-01-PLAN.md — provider trait, config extension, and OpenAI/Groq/OpenRouter HTTP impls
 - [ ] 05-02-PLAN.md — transcription service: retry loop, fallback logic, error event emission
 - [ ] 05-03-PLAN.md — hotkey wiring, retry command, frontend error event handler
+- [ ] 05-04-PLAN.md — gap closure: fix hotkey warning focus + error toast indicator visibility
 
 ### Phase 6: Text Injection
 **Goal**: Transcribed text lands in the target window using the most reliable available method, with terminal-aware shortcuts, elevation checks, Unicode handling, and a resilient fallback chain
