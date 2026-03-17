@@ -53,8 +53,8 @@ impl TranscriptionProviderTrait for OpenAiProvider {
         config: &TranscriptionConfig,
     ) -> Result<String, TranscriptionError> {
         let file_part = reqwest::multipart::Part::bytes(audio.bytes.clone())
-            .file_name("audio.ogg")
-            .mime_str("audio/ogg")
+            .file_name("audio.wav")
+            .mime_str("audio/wav")
             .map_err(|e| TranscriptionError::Network {
                 message: e.to_string(),
             })?;

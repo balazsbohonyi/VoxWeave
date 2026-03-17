@@ -58,10 +58,54 @@ impl EncoderBackend for DefaultEncoderBackend {
 
 pub fn format_for_provider(provider: &TranscriptionProvider) -> EncodedFormat {
     match provider {
-        TranscriptionProvider::Local => EncodedFormat::Wav,
-        TranscriptionProvider::Openai
-        | TranscriptionProvider::Groq
-        | TranscriptionProvider::Openrouter => EncodedFormat::Opus,
+        TranscriptionProvider::Local | TranscriptionProvider::Openai => EncodedFormat::Wav,
+        TranscriptionProvider::Groq | TranscriptionProvider::Openrouter => EncodedFormat::Opus,
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::TranscriptionProvider;
+
+    #[test]
+    fn test_format_for_provider_openai_returns_wav() {
+        assert_eq!(
+            format_for_provider(&TranscriptionProvider::Openai),
+            EncodedFormat::Wav,
+            "OpenAI requires WAV format (not Opus/Ogg)"
+        );
+    }
+
+    #[test]
+    fn test_format_for_provider_groq_returns_opus() {
+        assert_eq!(
+            format_for_provider(&TranscriptionProvider::Groq),
+            EncodedFormat::Opus,
+            "Groq accepts Opus/Ogg format"
+        );
+    }
+
+    #[test]
+    fn test_format_for_provider_openrouter_returns_opus() {
+        assert_eq!(
+            format_for_provider(&TranscriptionProvider::Openrouter),
+            EncodedFormat::Opus,
+            "OpenRouter accepts Opus/Ogg format"
+        );
+    }
+
+    #[test]
+    fn test_format_for_provider_local_returns_wav() {
+        assert_eq!(
+            format_for_provider(&TranscriptionProvider::Local),
+            EncodedFormat::Wav,
+            "Local whisper.cpp requires WAV format"
+        );
     }
 }
 
