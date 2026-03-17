@@ -236,9 +236,10 @@ pub async fn transcribe_with_retry<R: tauri::Runtime>(
                         TranscriptionErrorCode::RateLimit,
                         "Rate limit reached after 3 attempts.".into(),
                     ),
-                    TranscriptionError::Network { message } => {
-                        (TranscriptionErrorCode::Network, message.clone())
-                    }
+                    TranscriptionError::Network { .. } => (
+                        TranscriptionErrorCode::Network,
+                        "Network error. Check your connection and try again.".into(),
+                    ),
                     TranscriptionError::Server { status, message } => (
                         TranscriptionErrorCode::Server,
                         format!("Server error {status}: {message}"),
@@ -306,9 +307,10 @@ pub async fn transcribe_with_provider<R: tauri::Runtime>(
                 crate::transcription::provider::TranscriptionError::RateLimit => {
                     (TranscriptionErrorCode::RateLimit, "Rate limit reached.".into())
                 }
-                crate::transcription::provider::TranscriptionError::Network { message } => {
-                    (TranscriptionErrorCode::Network, message.clone())
-                }
+                crate::transcription::provider::TranscriptionError::Network { .. } => (
+                    TranscriptionErrorCode::Network,
+                    "Network error. Check your connection and try again.".into(),
+                ),
                 crate::transcription::provider::TranscriptionError::Server { status, message } => (
                     TranscriptionErrorCode::Server,
                     format!("Server error {status}: {message}"),
