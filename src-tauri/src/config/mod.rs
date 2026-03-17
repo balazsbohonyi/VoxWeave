@@ -39,6 +39,19 @@ impl Default for TranscriptionProvider {
     }
 }
 
+impl std::str::FromStr for TranscriptionProvider {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, ()> {
+        match s {
+            "openai" => Ok(Self::Openai),
+            "groq" => Ok(Self::Groq),
+            "openrouter" => Ok(Self::Openrouter),
+            "local" => Ok(Self::Local),
+            _ => Err(()),
+        }
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Nested config sections
 // ---------------------------------------------------------------------------
