@@ -39,10 +39,10 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 - [x] **CLOD-03**: OpenAI sends to `/v1/audio/transcriptions` with models: whisper-1, gpt-4o-transcribe, gpt-4o-mini-transcribe
 - [x] **CLOD-04**: Groq sends to its transcription endpoint with hardcoded models: whisper-large-v3-turbo (default), whisper-large-v3, distil-whisper-large-v3-en
 - [x] **CLOD-05**: OpenRouter sends to chat completions endpoint with audio as input_audio content; models: google/gemini-2.5-flash (default), google/gemini-2.5-pro, google/gemini-2.5-flash-lite, openai/gpt-4o-audio-preview, openai/gpt-audio, openai/gpt-audio-mini
-- [ ] **CLOD-06**: Invalid API key errors prompt user to open settings with the offending provider tab highlighted
-- [ ] **CLOD-07**: Rate limit errors (429) retry with exponential backoff, max 3 retries
-- [ ] **CLOD-08**: Network errors show a notification with a retry button
-- [ ] **CLOD-09**: If the active provider fails after retries and another provider is configured, offer to retry with the fallback provider via toast action
+- [x] **CLOD-06**: Invalid API key errors prompt user to open settings with the offending provider tab highlighted
+- [x] **CLOD-07**: Rate limit errors (429) retry with exponential backoff, max 3 retries
+- [x] **CLOD-08**: Network errors show a notification with a retry button
+- [x] **CLOD-09**: If the active provider fails after retries and another provider is configured, offer to retry with the fallback provider via toast action
 - [x] **CLOD-10**: User can configure a language hint per provider (or leave on auto-detect)
 
 ### Local Transcription
@@ -163,10 +163,10 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 | CLOD-03 | Phase 5 | Complete |
 | CLOD-04 | Phase 5 | Complete |
 | CLOD-05 | Phase 5 | Complete |
-| CLOD-06 | Phase 5 | Pending |
-| CLOD-07 | Phase 5 | Pending |
-| CLOD-08 | Phase 5 | Pending |
-| CLOD-09 | Phase 5 | Pending |
+| CLOD-06 | Phase 5 | Complete |
+| CLOD-07 | Phase 5 | Complete |
+| CLOD-08 | Phase 5 | Complete |
+| CLOD-09 | Phase 5 | Complete |
 | CLOD-10 | Phase 5 | Complete |
 | LOCL-01 | Phase 10 | Pending |
 | LOCL-02 | Phase 10 | Pending |

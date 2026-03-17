@@ -6,14 +6,14 @@ current_phase: 5
 current_phase_name: Cloud Transcription
 current_plan: 2
 status: executing
-stopped_at: Completed 05-cloud-transcription 05-01-PLAN.md
-last_updated: "2026-03-17T11:32:34.856Z"
+stopped_at: Completed 05-cloud-transcription 05-02-PLAN.md
+last_updated: "2026-03-17T11:47:01.960Z"
 last_activity: 2026-03-17
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 19
-  completed_plans: 17
+  completed_plans: 18
 ---
 
 ---
@@ -82,6 +82,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 04-floating-indicator P04-05 | 3m | 3 tasks | 3 files |
 | Phase 04-floating-indicator P04-06 | 14m | 2 tasks | 4 files |
 | Phase 05-cloud-transcription P05-01 | 1289 | 3 tasks | 8 files |
+| Phase 05-cloud-transcription P02 | 540 | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -117,6 +118,8 @@ Recent decisions affecting current work:
 - [Phase 05-cloud-transcription]: async-trait crate used for object-safe async TranscriptionProviderTrait
 - [Phase 05-cloud-transcription]: Testable helper functions extracted (form_field_names, build_body, status_to_error) to avoid HTTP mocking
 - [Phase 05-cloud-transcription]: OpenRouter format='ogg' (identifier, not MIME type audio/ogg)
+- [Phase 05-cloud-transcription]: Pure helper run_with_retry_inner extracted so retry logic is unit-testable without AppHandle mocking
+- [Phase 05-cloud-transcription]: Explicit MutexGuard intermediate used to satisfy borrow checker without holding across await points
 
 ### Pending Todos
 
@@ -131,7 +134,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T11:32:34.850Z
-Stopped at: Completed 05-cloud-transcription 05-01-PLAN.md
+Last session: 2026-03-17T11:47:01.957Z
+Stopped at: Completed 05-cloud-transcription 05-02-PLAN.md
 Resume file: None
 
