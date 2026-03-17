@@ -5,6 +5,7 @@ mod hotkey;
 mod indicator;
 mod platform;
 mod state;
+mod transcription;
 mod tray;
 
 use state::AppState;

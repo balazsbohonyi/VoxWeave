@@ -102,6 +102,11 @@ pub struct TranscriptionConfig {
     /// Path to local whisper.cpp model file. Used only when provider = Local.
     #[serde(default)]
     pub local_model_path: Option<String>,
+
+    /// Ordered list of providers to try when the primary provider fails.
+    /// Deserialized from old configs that lack this field using the default.
+    #[serde(default = "default_fallback_order")]
+    pub fallback_order: Vec<TranscriptionProvider>,
 }
 
 impl Default for TranscriptionConfig {
@@ -116,6 +121,7 @@ impl Default for TranscriptionConfig {
             openrouter_model: String::new(),
             language: String::new(),
             local_model_path: None,
+            fallback_order: default_fallback_order(),
         }
     }
 }
@@ -240,4 +246,11 @@ fn default_vad_threshold() -> f32 {
 }
 fn default_vad_silence_ms() -> u32 {
     1500
+}
+fn default_fallback_order() -> Vec<TranscriptionProvider> {
+    vec![
+        TranscriptionProvider::Openai,
+        TranscriptionProvider::Groq,
+        TranscriptionProvider::Openrouter,
+    ]
 }
