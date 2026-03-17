@@ -175,7 +175,7 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | 2. Hotkey | 0/TBD | Complete    | 2026-03-15 |
 | 3. Audio Capture | 0/TBD | Not started | - |
 | 4. Floating Indicator | 3/3 | Complete | 2026-03-15 |
-| 5. Cloud Transcription | 4/6 | In progress (gap closure) | - |
+| 5. Cloud Transcription | 5/6 | In Progress|  |
 | 6. Text Injection | 0/TBD | Not started | - |
 | 7. Pipeline Integration | 0/TBD | Not started | - |
 | 8. Settings UI | 0/TBD | Not started | - |

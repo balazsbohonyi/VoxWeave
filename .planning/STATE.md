@@ -6,14 +6,14 @@ current_phase: 5
 current_phase_name: Cloud Transcription
 current_plan: 2
 status: executing
-stopped_at: Completed 05-cloud-transcription 05-04-PLAN.md
-last_updated: "2026-03-17T21:39:12.967Z"
+stopped_at: Completed 05-cloud-transcription 05-06-PLAN.md
+last_updated: "2026-03-17T22:38:40.468Z"
 last_activity: 2026-03-17
 progress:
   total_phases: 10
-  completed_phases: 5
-  total_plans: 20
-  completed_plans: 20
+  completed_phases: 4
+  total_plans: 22
+  completed_plans: 21
 ---
 
 ---
@@ -85,6 +85,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 05-cloud-transcription P02 | 540 | 3 tasks | 2 files |
 | Phase 05-cloud-transcription P03 | 15 | 3 tasks | 10 files |
 | Phase 05-cloud-transcription P04 | 4 | 2 tasks | 4 files |
+| Phase 05-cloud-transcription P06 | 3 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -127,6 +128,8 @@ Recent decisions affecting current work:
 - [Phase 05-cloud-transcription]: last_encoded_audio stored before async spawn in AppState so retry commands can re-send without new recording
 - [Phase 05-cloud-transcription]: Indicator stays in show_idle after transcription error so JS event loop delivers toast before indicator hides
 - [Phase 05-cloud-transcription]: hide_indicator is frontend-invoked after toast clears — keeps error UX in frontend control
+- [Phase 05-cloud-transcription]: invalid_key shows toast with Open Settings action button (not auto-opens Settings)
+- [Phase 05-cloud-transcription]: Toast CSS appended to styles.css matching existing indicator colour palette
 
 ### Pending Todos
 
@@ -141,7 +144,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T21:39:12.964Z
-Stopped at: Completed 05-cloud-transcription 05-04-PLAN.md
+Last session: 2026-03-17T22:38:40.465Z
+Stopped at: Completed 05-cloud-transcription 05-06-PLAN.md
 Resume file: None
 
