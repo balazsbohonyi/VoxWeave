@@ -51,3 +51,9 @@ pub fn toggle_recording_from_indicator(app: AppHandle) -> Result<(), String> {
     service::toggle_recording_state(&app);
     Ok(())
 }
+
+#[tauri::command]
+pub fn hide_indicator(app: AppHandle) -> Result<(), String> {
+    indicator::hide(&app);
+    Ok(())
+}

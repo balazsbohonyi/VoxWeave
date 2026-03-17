@@ -5,6 +5,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import StateBadge from "./components/StateBadge.vue";
 import { useToast } from "../../composables/useToast";
+import type { ShowToastOptions } from "../../composables/useToast";
 import type {
   AppConfig,
   AudioLevelPayload,
@@ -28,6 +29,23 @@ const WAVE_BAR_COUNT = 15;
 const injectionMode = ref<InjectionMode>("flash_paste");
 const win = getCurrentWindow();
 const { toasts, showToast, dismissToast } = useToast();
+
+function handleDismissToast(id: number): void {
+  dismissToast(id);
+  if (toasts.value.length === 0) {
+    void invoke("hide_indicator");
+  }
+}
+
+function showTranscriptionErrorToast(opts: ShowToastOptions): void {
+  showToast(opts);
+  const ms = opts.durationMs ?? 5000;
+  setTimeout(() => {
+    if (toasts.value.length === 0) {
+      void invoke("hide_indicator");
+    }
+  }, ms + 50);
+}
 
 let unlistenState: UnlistenFn | null = null;
 let unlistenHidden: UnlistenFn | null = null;
@@ -165,7 +183,7 @@ onMounted(async () => {
       // Build toast with action button depending on error type
       if (payload.fallback_provider) {
         const fallbackProvider = payload.fallback_provider;
-        showToast({
+        showTranscriptionErrorToast({
           message: payload.message,
           type: "error",
           action: {
@@ -176,7 +194,7 @@ onMounted(async () => {
           },
         });
       } else if (payload.retryable) {
-        showToast({
+        showTranscriptionErrorToast({
           message: payload.message,
           type: "error",
           action: {
@@ -187,7 +205,7 @@ onMounted(async () => {
           },
         });
       } else {
-        showToast({ message: payload.message, type: "error" });
+        showTranscriptionErrorToast({ message: payload.message, type: "error" });
       }
     },
   );
@@ -261,7 +279,7 @@ onBeforeUnmount(() => {
           v-if="toast.action"
           class="indicator-toast-action"
           type="button"
-          @click.stop="() => { toast.action!.onClick(); dismissToast(toast.id); }"
+          @click.stop="() => { toast.action!.onClick(); handleDismissToast(toast.id); }"
         >
           {{ toast.action.label }}
         </button>
@@ -269,7 +287,7 @@ onBeforeUnmount(() => {
           class="indicator-toast-dismiss"
           type="button"
           aria-label="Dismiss"
-          @click.stop="dismissToast(toast.id)"
+          @click.stop="handleDismissToast(toast.id)"
         >
           &times;
         </button>
