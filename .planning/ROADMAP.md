@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Hotkey** - Global hotkey registration and toggle-mode recording trigger (completed 2026-03-15)
 - [ ] **Phase 3: Audio Capture** - Microphone capture, encoding, and device management
 - [x] **Phase 4: Floating Indicator** - Always-on-top recording status window with waveform (completed 2026-03-15)
-- [ ] **Phase 5: Cloud Transcription** - OpenAI, Groq, and OpenRouter providers with error handling
+- [x] **Phase 5: Cloud Transcription** - OpenAI, Groq, and OpenRouter providers with error handling (completed 2026-03-17)
 - [ ] **Phase 6: Text Injection** - FlashPaste, keystroke, and clipboard injection with fallback chain
 - [ ] **Phase 7: Pipeline Integration** - End-to-end hotkey-to-text pipeline with toast notifications
 - [ ] **Phase 8: Settings UI** - Full settings window for all configurable parameters
@@ -172,7 +172,7 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | 2. Hotkey | 0/TBD | Complete    | 2026-03-15 |
 | 3. Audio Capture | 0/TBD | Not started | - |
 | 4. Floating Indicator | 3/3 | Complete | 2026-03-15 |
-| 5. Cloud Transcription | 2/3 | In Progress|  |
+| 5. Cloud Transcription | 3/3 | Complete   | 2026-03-17 |
 | 6. Text Injection | 0/TBD | Not started | - |
 | 7. Pipeline Integration | 0/TBD | Not started | - |
 | 8. Settings UI | 0/TBD | Not started | - |

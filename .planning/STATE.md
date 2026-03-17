@@ -6,14 +6,14 @@ current_phase: 5
 current_phase_name: Cloud Transcription
 current_plan: 2
 status: executing
-stopped_at: Completed 05-cloud-transcription 05-02-PLAN.md
-last_updated: "2026-03-17T11:47:01.960Z"
+stopped_at: Completed 05-cloud-transcription 05-03-PLAN.md
+last_updated: "2026-03-17T12:01:53.834Z"
 last_activity: 2026-03-17
 progress:
   total_phases: 10
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 19
-  completed_plans: 18
+  completed_plans: 19
 ---
 
 ---
@@ -83,6 +83,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 04-floating-indicator P04-06 | 14m | 2 tasks | 4 files |
 | Phase 05-cloud-transcription P05-01 | 1289 | 3 tasks | 8 files |
 | Phase 05-cloud-transcription P02 | 540 | 3 tasks | 2 files |
+| Phase 05-cloud-transcription P03 | 15 | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -120,6 +121,9 @@ Recent decisions affecting current work:
 - [Phase 05-cloud-transcription]: OpenRouter format='ogg' (identifier, not MIME type audio/ogg)
 - [Phase 05-cloud-transcription]: Pure helper run_with_retry_inner extracted so retry logic is unit-testable without AppHandle mocking
 - [Phase 05-cloud-transcription]: Explicit MutexGuard intermediate used to satisfy borrow checker without holding across await points
+- [Phase 05-cloud-transcription]: tauri::async_runtime::spawn used (not tokio::spawn) to avoid reactor panics in Tauri v2 for transcription task
+- [Phase 05-cloud-transcription]: transcribe_with_provider clones TranscriptionConfig and overrides provider field — no AppState mutation for single fallback call
+- [Phase 05-cloud-transcription]: last_encoded_audio stored before async spawn in AppState so retry commands can re-send without new recording
 
 ### Pending Todos
 
@@ -134,7 +138,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T11:47:01.957Z
-Stopped at: Completed 05-cloud-transcription 05-02-PLAN.md
+Last session: 2026-03-17T12:01:26.819Z
+Stopped at: Completed 05-cloud-transcription 05-03-PLAN.md
 Resume file: None
 
