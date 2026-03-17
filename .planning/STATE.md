@@ -6,14 +6,14 @@ current_phase: 5
 current_phase_name: Cloud Transcription
 current_plan: 2
 status: executing
-stopped_at: Completed 05-cloud-transcription 05-06-PLAN.md
-last_updated: "2026-03-17T22:38:40.468Z"
+stopped_at: Completed 05-cloud-transcription 05-05-PLAN.md
+last_updated: "2026-03-17T22:41:48.632Z"
 last_activity: 2026-03-17
 progress:
   total_phases: 10
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 22
-  completed_plans: 21
+  completed_plans: 22
 ---
 
 ---
@@ -86,6 +86,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 05-cloud-transcription P03 | 15 | 3 tasks | 10 files |
 | Phase 05-cloud-transcription P04 | 4 | 2 tasks | 4 files |
 | Phase 05-cloud-transcription P06 | 3 | 2 tasks | 2 files |
+| Phase 05-cloud-transcription P05-05 | 15 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -130,6 +131,8 @@ Recent decisions affecting current work:
 - [Phase 05-cloud-transcription]: hide_indicator is frontend-invoked after toast clears — keeps error UX in frontend control
 - [Phase 05-cloud-transcription]: invalid_key shows toast with Open Settings action button (not auto-opens Settings)
 - [Phase 05-cloud-transcription]: Toast CSS appended to styles.css matching existing indicator colour palette
+- [Phase 05-cloud-transcription]: OpenAI Whisper requires WAV not Opus -- format_for_provider routes Openai to EncodedFormat::Wav
+- [Phase 05-cloud-transcription]: Network error arms in service.rs emit friendly string, not raw reqwest error URL
 
 ### Pending Todos
 
@@ -144,7 +147,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T22:38:40.465Z
-Stopped at: Completed 05-cloud-transcription 05-06-PLAN.md
+Last session: 2026-03-17T22:41:48.629Z
+Stopped at: Completed 05-cloud-transcription 05-05-PLAN.md
 Resume file: None
 
