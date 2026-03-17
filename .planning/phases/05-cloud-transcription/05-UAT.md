@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: resolved
 phase: 05-cloud-transcription
 source: 05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md
 started: 2026-03-17T12:00:00Z
-updated: 2026-03-17T12:30:00Z
+updated: 2026-03-17T14:00:00Z
 ---
 
 ## Current Test
@@ -45,7 +45,7 @@ skipped: 2
 ## Gaps
 
 - truth: "Stopping recording does not open the Settings window; recording stop only triggers transcription"
-  status: failed
+  status: resolved
   reason: "User reported: after pressing the hotkey for the second time to stop the recording, the Settings window appears unexpectedly."
   severity: major
   test: 1
@@ -59,7 +59,7 @@ skipped: 2
   debug_session: ".planning/debug/settings-opens-on-hotkey-stop.md"
 
 - truth: "On transcription error, indicator shows error toast with Retry button"
-  status: failed
+  status: resolved
   reason: "User reported: I disconnected the network, and after recording, I saw the processing ellipsis dots, then for a couple of seconds the pill disappeared and after that reappeared with the IDLE state, and I saw no error toast with a Retry inside the indicator."
   severity: major
   test: 3
