@@ -170,8 +170,17 @@ onMounted(async () => {
       const payload = event.payload;
 
       if (payload.code === "invalid_key") {
-        // Open settings focused on the transcription tab with the offending provider highlighted
-        void invoke("open_settings_on_transcription_tab", { provider: payload.provider });
+        const provider = payload.provider;
+        showTranscriptionErrorToast({
+          message: "Invalid API key. Open Settings to fix.",
+          type: "error",
+          action: {
+            label: "Open Settings",
+            onClick: () => {
+              void invoke("open_settings_on_transcription_tab", { provider });
+            },
+          },
+        });
         return;
       }
 
