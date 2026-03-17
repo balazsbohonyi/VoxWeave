@@ -1,6 +1,7 @@
 // AppState — Tauri managed state. Single source of truth for all mutable
 // application data accessed across commands, tray, and window lifecycle.
 
+use crate::audio::encode::EncodedAudio;
 use crate::config::{persistence, AppConfig};
 use crate::indicator::events::IndicatorVisualState;
 use std::sync::{Arc, Mutex};
@@ -94,6 +95,11 @@ pub struct AppState {
     /// The close-to-hide handler checks this to allow window destruction
     /// instead of hiding, so WebView2 tears down cleanly before exit.
     pub quitting: Arc<Mutex<bool>>,
+
+    /// Last successfully encoded audio blob. Stored before spawning transcription
+    /// so the retry and fallback commands can re-send the same audio without
+    /// requiring the user to record again.
+    pub last_encoded_audio: Arc<Mutex<Option<EncodedAudio>>>,
 }
 
 impl AppState {
@@ -116,6 +122,7 @@ impl AppState {
                     indicator_drag_active: Arc::new(Mutex::new(false)),
                     indicator_visual_state: Arc::new(Mutex::new(IndicatorVisualState::Hidden)),
                     quitting: Arc::new(Mutex::new(false)),
+                    last_encoded_audio: Arc::new(Mutex::new(None)),
                 }
             }
             Err(e) => {
@@ -137,6 +144,7 @@ impl AppState {
                     indicator_drag_active: Arc::new(Mutex::new(false)),
                     indicator_visual_state: Arc::new(Mutex::new(IndicatorVisualState::Hidden)),
                     quitting: Arc::new(Mutex::new(false)),
+                    last_encoded_audio: Arc::new(Mutex::new(None)),
                 }
             }
         }

@@ -267,6 +267,72 @@ pub async fn transcribe_with_retry<R: tauri::Runtime>(
 }
 
 // ---------------------------------------------------------------------------
+// Single-provider override entry point (used by fallback command)
+// ---------------------------------------------------------------------------
+
+/// Transcribe audio using a specific provider, overriding the configured active provider
+/// for this call only. Does not mutate AppState config. Used by the fallback flow.
+pub async fn transcribe_with_provider<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+    audio: &EncodedAudio,
+    target_provider: TranscriptionProvider,
+) -> Result<String, ()> {
+    use crate::state::AppState;
+    use tauri::Emitter;
+    use tauri::Manager;
+
+    // Clone config and override provider for this single invocation
+    let mut call_config = {
+        let state = app.state::<AppState>();
+        let guard = state.config.lock().unwrap();
+        guard.transcription.clone()
+    };
+    call_config.provider = target_provider;
+
+    // Delegate to the provider implementation directly (no retry — fallback gets one attempt)
+    let provider_impl = make_provider(&call_config.provider);
+    match provider_impl.transcribe(audio, &call_config).await {
+        Ok(text) => {
+            let _ = app.emit(TRANSCRIPTION_DONE_EVENT, text.clone());
+            Ok(text)
+        }
+        Err(err) => {
+            // Emit error with no further fallback_provider (fallback already tried)
+            let (code, message) = match &err {
+                crate::transcription::provider::TranscriptionError::InvalidKey { provider } => (
+                    TranscriptionErrorCode::InvalidKey,
+                    format!("Invalid API key for {provider}."),
+                ),
+                crate::transcription::provider::TranscriptionError::RateLimit => {
+                    (TranscriptionErrorCode::RateLimit, "Rate limit reached.".into())
+                }
+                crate::transcription::provider::TranscriptionError::Network { message } => {
+                    (TranscriptionErrorCode::Network, message.clone())
+                }
+                crate::transcription::provider::TranscriptionError::Server { status, message } => (
+                    TranscriptionErrorCode::Server,
+                    format!("Server error {status}: {message}"),
+                ),
+                crate::transcription::provider::TranscriptionError::Cancelled => {
+                    (TranscriptionErrorCode::Cancelled, "Transcription cancelled.".into())
+                }
+            };
+            let _ = app.emit(
+                TRANSCRIPTION_ERROR_EVENT,
+                TranscriptionErrorPayload {
+                    code,
+                    message,
+                    provider: Some(provider_display_name(&call_config.provider)),
+                    fallback_provider: None,
+                    retryable: false,
+                },
+            );
+            Err(())
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Internal helper
 // ---------------------------------------------------------------------------
 

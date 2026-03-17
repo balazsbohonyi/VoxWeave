@@ -1,5 +1,6 @@
 use crate::audio;
 use crate::config::{persistence, AppConfig};
+use crate::transcription;
 use crate::hotkey::normalize::normalize_hotkey;
 use crate::indicator;
 use crate::state::{AppState, HotkeyAvailability, HotkeyWarning, RecordingState};
@@ -246,22 +247,43 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
     }
 
     if previous_state == RecordingState::Recording {
-        indicator::show_processing(app);
-        if let Err(err) = audio::stop_recording_and_encode(app) {
-            log::warn!("Failed to finalize recording: {err}");
-            indicator::hide(app);
+        match audio::stop_recording_and_encode(app) {
+            Err(err) => {
+                log::warn!("Failed to finalize recording: {err}");
+                indicator::hide(app);
+                let state = app.state::<AppState>();
+                *state.recording_state.lock().unwrap() = RecordingState::Idle;
+                tray::update_recording_menu(app, RecordingState::Idle);
+            }
+            Ok(encoded) => {
+                // Store audio for retry commands before spawning
+                {
+                    let state = app.state::<AppState>();
+                    *state.last_encoded_audio.lock().unwrap() = Some(encoded.clone());
+                }
+                // Show processing state on indicator while transcription runs
+                indicator::show_processing(app);
+                let app_clone = app.clone();
+                tauri::async_runtime::spawn(async move {
+                    match transcription::transcribe_with_retry(&app_clone, &encoded).await {
+                        Ok(_text) => {
+                            // Phase 6 will handle injection here.
+                            // For now: show injecting state briefly then hide.
+                            indicator::show_injecting(&app_clone);
+                        }
+                        Err(()) => {
+                            indicator::hide(&app_clone);
+                        }
+                    }
+                    // Always reset state after transcription attempt completes
+                    if let Some(state) = app_clone.try_state::<AppState>() {
+                        *state.recording_state.lock().unwrap() = RecordingState::Idle;
+                    }
+                    tray::update_recording_menu(&app_clone, RecordingState::Idle);
+                });
+            }
         }
-        complete_transcription_placeholder(app);
     }
-}
-
-fn complete_transcription_placeholder<R: Runtime>(app: &AppHandle<R>) {
-    indicator::show_injecting(app);
-    if let Some(state) = app.try_state::<AppState>() {
-        *state.recording_state.lock().unwrap() = RecordingState::Idle;
-    }
-    tray::update_recording_menu(app, RecordingState::Idle);
-    indicator::hide(app);
 }
 
 fn emit_hotkey_warning<R: Runtime>(

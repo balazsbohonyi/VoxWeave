@@ -10,4 +10,5 @@ pub mod service;
 
 pub use provider::TranscriptionError;
 pub use provider::TranscriptionProviderTrait;
+pub use service::transcribe_with_provider;
 pub use service::transcribe_with_retry;
