@@ -94,7 +94,7 @@ pub(crate) fn register_startup_hotkey_with<R: Runtime, F>(
             };
             *state.hotkey_availability.lock().unwrap() = HotkeyAvailability::Unavailable;
             *state.hotkey_warning.lock().unwrap() = Some(warning.clone());
-            emit_hotkey_warning(app, &warning, HotkeyWarningSource::Startup, true);
+            emit_hotkey_warning(app, &warning, HotkeyWarningSource::Startup, false);
             log::warn!("Failed to register global hotkey: {err}");
         }
     }
@@ -195,7 +195,7 @@ where
                 .lock()
                 .map_err(|e| e.to_string())? = Some(warning.clone());
 
-            emit_hotkey_warning(app, &warning, HotkeyWarningSource::Save, true);
+            emit_hotkey_warning(app, &warning, HotkeyWarningSource::Save, false);
 
             Ok(current_config)
         }
@@ -272,7 +272,7 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                             indicator::show_injecting(&app_clone);
                         }
                         Err(()) => {
-                            indicator::hide(&app_clone);
+                            let _ = indicator::show_idle(&app_clone);
                         }
                     }
                     // Always reset state after transcription attempt completes
