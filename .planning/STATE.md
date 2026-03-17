@@ -6,14 +6,14 @@ current_phase: 5
 current_phase_name: Cloud Transcription
 current_plan: 2
 status: executing
-stopped_at: Phase 5 context gathered
-last_updated: "2026-03-17T10:30:33.659Z"
-last_activity: 2026-03-15
+stopped_at: Completed 05-cloud-transcription 05-01-PLAN.md
+last_updated: "2026-03-17T11:32:34.856Z"
+last_activity: 2026-03-17
 progress:
   total_phases: 10
   completed_phases: 4
-  total_plans: 16
-  completed_plans: 16
+  total_plans: 19
+  completed_plans: 17
 ---
 
 ---
@@ -50,7 +50,7 @@ Current Phase Name: Cloud Transcription
 Current Plan: 2
 Total Plans in Phase: 2
 status: ready_to_execute
-Last Activity: 2026-03-15
+Last Activity: 2026-03-17
 
 Progress: [███░░░░░░░] 33%
 
@@ -81,6 +81,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 04-floating-indicator P04-04 | 9m | 2 tasks | 4 files |
 | Phase 04-floating-indicator P04-05 | 3m | 3 tasks | 3 files |
 | Phase 04-floating-indicator P04-06 | 14m | 2 tasks | 4 files |
+| Phase 05-cloud-transcription P05-01 | 1289 | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -113,6 +114,9 @@ Recent decisions affecting current work:
 - [Phase 04-floating-indicator]: Treat off-screen saved coordinates as invalid and fallback to deterministic bottom-right placement.
 - [Phase 04-floating-indicator]: Keep cpal::Stream ownership inside dedicated capture thread; AppState stores stop/join controls only.
 - [Phase 04-floating-indicator]: Recording waveform now requires fresh backend audio-level events and drops to baseline on stale data.
+- [Phase 05-cloud-transcription]: async-trait crate used for object-safe async TranscriptionProviderTrait
+- [Phase 05-cloud-transcription]: Testable helper functions extracted (form_field_names, build_body, status_to_error) to avoid HTTP mocking
+- [Phase 05-cloud-transcription]: OpenRouter format='ogg' (identifier, not MIME type audio/ogg)
 
 ### Pending Todos
 
@@ -127,7 +131,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T10:30:33.636Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-cloud-transcription/05-CONTEXT.md
+Last session: 2026-03-17T11:32:34.850Z
+Stopped at: Completed 05-cloud-transcription 05-01-PLAN.md
+Resume file: None
 
