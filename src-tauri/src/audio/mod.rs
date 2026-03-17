@@ -469,11 +469,15 @@ mod tests {
     fn selects_encoder_from_provider() {
         assert_eq!(
             encode::format_for_provider(&TranscriptionProvider::Openai),
-            encode::EncodedFormat::Opus
+            encode::EncodedFormat::Wav
         );
         assert_eq!(
             encode::format_for_provider(&TranscriptionProvider::Local),
             encode::EncodedFormat::Wav
+        );
+        assert_eq!(
+            encode::format_for_provider(&TranscriptionProvider::Groq),
+            encode::EncodedFormat::Opus
         );
     }
 
@@ -498,7 +502,7 @@ mod tests {
     #[test]
     fn opus_output_contract() {
         let backend = encode::DefaultEncoderBackend;
-        let bytes = encode::encode_for_provider(&TranscriptionProvider::Openai, &[0.0; 8], &backend)
+        let bytes = encode::encode_for_provider(&TranscriptionProvider::Groq, &[0.0; 8], &backend)
             .unwrap()
             .bytes;
         assert_eq!(&bytes[0..4], b"OggS");
@@ -509,7 +513,7 @@ mod tests {
         let backend = FailOnceBackend {
             failed: std::sync::Mutex::new(false),
         };
-        let encoded = encode_with_retry_once(&TranscriptionProvider::Openai, &[0.0; 16], &backend)
+        let encoded = encode_with_retry_once(&TranscriptionProvider::Groq, &[0.0; 16], &backend)
             .unwrap();
         assert_eq!(encoded.format, encode::EncodedFormat::Opus);
     }
