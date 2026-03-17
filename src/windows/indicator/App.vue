@@ -4,6 +4,7 @@ import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import StateBadge from "./components/StateBadge.vue";
+import { useToast } from "../../composables/useToast";
 import type {
   AppConfig,
   AudioLevelPayload,
@@ -13,16 +14,26 @@ import type {
   RecordingState,
 } from "../../types";
 
+interface TranscriptionErrorPayload {
+  code: "invalid_key" | "rate_limit" | "network" | "server" | "cancelled";
+  message: string;
+  provider?: string;
+  fallback_provider?: string;
+  retryable: boolean;
+}
+
 const state = ref<IndicatorVisualState>("hidden");
 const level = ref(0);
 const WAVE_BAR_COUNT = 15;
 const injectionMode = ref<InjectionMode>("flash_paste");
 const win = getCurrentWindow();
+const { toasts, showToast, dismissToast } = useToast();
 
 let unlistenState: UnlistenFn | null = null;
 let unlistenHidden: UnlistenFn | null = null;
 let unlistenAudioLevel: UnlistenFn | null = null;
 let unlistenMoved: UnlistenFn | null = null;
+let unlistenTranscriptionError: UnlistenFn | null = null;
 let persistTimer: ReturnType<typeof setTimeout> | null = null;
 
 const isRecording = computed(() => state.value === "recording");
@@ -135,6 +146,52 @@ onMounted(async () => {
     lastAudioLevelAt.value = performance.now();
   });
 
+  unlistenTranscriptionError = await listen<TranscriptionErrorPayload>(
+    "transcription-error",
+    (event) => {
+      const payload = event.payload;
+
+      if (payload.code === "invalid_key") {
+        // Open settings focused on the transcription tab with the offending provider highlighted
+        void invoke("open_settings_on_transcription_tab", { provider: payload.provider });
+        return;
+      }
+
+      if (payload.code === "cancelled") {
+        // No toast for cancellation — silent UX
+        return;
+      }
+
+      // Build toast with action button depending on error type
+      if (payload.fallback_provider) {
+        const fallbackProvider = payload.fallback_provider;
+        showToast({
+          message: payload.message,
+          type: "error",
+          action: {
+            label: `Try with ${fallbackProvider}?`,
+            onClick: () => {
+              void invoke("retry_transcription_with_fallback", { provider: fallbackProvider });
+            },
+          },
+        });
+      } else if (payload.retryable) {
+        showToast({
+          message: payload.message,
+          type: "error",
+          action: {
+            label: "Retry",
+            onClick: () => {
+              void invoke("retry_transcription");
+            },
+          },
+        });
+      } else {
+        showToast({ message: payload.message, type: "error" });
+      }
+    },
+  );
+
   const syncState = async () => {
     try {
       const snapshot = await invoke<IndicatorStatePayload>("get_indicator_state");
@@ -162,6 +219,7 @@ onBeforeUnmount(() => {
   if (unlistenHidden) unlistenHidden();
   if (unlistenAudioLevel) unlistenAudioLevel();
   if (unlistenMoved) unlistenMoved();
+  if (unlistenTranscriptionError) unlistenTranscriptionError();
   if (persistTimer) clearTimeout(persistTimer);
 });
 </script>
@@ -190,5 +248,32 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </section>
+    <!-- Transcription error toasts -->
+    <div class="indicator-toasts">
+      <div
+        v-for="toast in toasts"
+        :key="toast.id"
+        class="indicator-toast"
+        :class="`indicator-toast--${toast.type}`"
+      >
+        <span class="indicator-toast-message">{{ toast.message }}</span>
+        <button
+          v-if="toast.action"
+          class="indicator-toast-action"
+          type="button"
+          @click.stop="() => { toast.action!.onClick(); dismissToast(toast.id); }"
+        >
+          {{ toast.action.label }}
+        </button>
+        <button
+          class="indicator-toast-dismiss"
+          type="button"
+          aria-label="Dismiss"
+          @click.stop="dismissToast(toast.id)"
+        >
+          &times;
+        </button>
+      </div>
+    </div>
   </main>
 </template>

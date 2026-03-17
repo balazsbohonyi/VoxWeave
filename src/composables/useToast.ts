@@ -1,11 +1,23 @@
-// useToast — lightweight toast notification composable.
-// Placeholder: full implementation in Phase 5 (Injection).
+// useToast — lightweight toast notification composable with optional action button.
 import { ref } from "vue";
+
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
 
 export interface Toast {
   id: number;
   message: string;
   type: "success" | "error" | "info";
+  action?: ToastAction;
+}
+
+export interface ShowToastOptions {
+  message: string;
+  type?: Toast["type"];
+  durationMs?: number;
+  action?: ToastAction;
 }
 
 let nextId = 0;
@@ -14,16 +26,30 @@ export function useToast() {
   const toasts = ref<Toast[]>([]);
 
   function showToast(
-    message: string,
+    messageOrOptions: string | ShowToastOptions,
     type: Toast["type"] = "info",
     durationMs = 3000,
   ) {
     const id = nextId++;
-    toasts.value.push({ id, message, type });
+    if (typeof messageOrOptions === "string") {
+      toasts.value.push({ id, message: messageOrOptions, type });
+    } else {
+      toasts.value.push({
+        id,
+        message: messageOrOptions.message,
+        type: messageOrOptions.type ?? "info",
+        action: messageOrOptions.action,
+      });
+      durationMs = messageOrOptions.durationMs ?? 5000;
+    }
     setTimeout(() => {
       toasts.value = toasts.value.filter((t) => t.id !== id);
     }, durationMs);
   }
 
-  return { toasts, showToast };
+  function dismissToast(id: number) {
+    toasts.value = toasts.value.filter((t) => t.id !== id);
+  }
+
+  return { toasts, showToast, dismissToast };
 }
