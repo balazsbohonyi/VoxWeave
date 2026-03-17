@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Hotkey** - Global hotkey registration and toggle-mode recording trigger (completed 2026-03-15)
 - [ ] **Phase 3: Audio Capture** - Microphone capture, encoding, and device management
 - [x] **Phase 4: Floating Indicator** - Always-on-top recording status window with waveform (completed 2026-03-15)
-- [x] **Phase 5: Cloud Transcription** - OpenAI, Groq, and OpenRouter providers with error handling (completed 2026-03-17)
+- [x] **Phase 5: Cloud Transcription** - OpenAI, Groq, and OpenRouter providers with error handling (completed 2026-03-17)
 - [ ] **Phase 6: Text Injection** - FlashPaste, keystroke, and clipboard injection with fallback chain
 - [ ] **Phase 7: Pipeline Integration** - End-to-end hotkey-to-text pipeline with toast notifications
 - [ ] **Phase 8: Settings UI** - Full settings window for all configurable parameters
@@ -89,12 +89,14 @@ Plans:
   3. An invalid API key triggers a notification that opens settings with the offending provider's tab highlighted
   4. Rate-limit errors (429) retry with exponential backoff up to 3 times before surfacing an error
   5. If the active provider fails after retries and another provider is configured, a toast offers to retry with the fallback provider
-**Plans**: 4 plans
+**Plans**: 6 plans
 Plans:
 - [ ] 05-01-PLAN.md — provider trait, config extension, and OpenAI/Groq/OpenRouter HTTP impls
 - [ ] 05-02-PLAN.md — transcription service: retry loop, fallback logic, error event emission
 - [ ] 05-03-PLAN.md — hotkey wiring, retry command, frontend error event handler
 - [ ] 05-04-PLAN.md — gap closure: fix hotkey warning focus + error toast indicator visibility
+- [ ] 05-05-PLAN.md — gap closure: fix OpenAI audio format (WAV) + friendly Network error message
+- [ ] 05-06-PLAN.md — gap closure: fix invalid_key toast handler + add toast CSS
 
 ### Phase 6: Text Injection
 **Goal**: Transcribed text lands in the target window using the most reliable available method, with terminal-aware shortcuts, elevation checks, Unicode handling, and a resilient fallback chain
@@ -173,7 +175,7 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | 2. Hotkey | 0/TBD | Complete    | 2026-03-15 |
 | 3. Audio Capture | 0/TBD | Not started | - |
 | 4. Floating Indicator | 3/3 | Complete | 2026-03-15 |
-| 5. Cloud Transcription | 4/4 | Complete   | 2026-03-17 |
+| 5. Cloud Transcription | 4/6 | In progress (gap closure) | - |
 | 6. Text Injection | 0/TBD | Not started | - |
 | 7. Pipeline Integration | 0/TBD | Not started | - |
 | 8. Settings UI | 0/TBD | Not started | - |
