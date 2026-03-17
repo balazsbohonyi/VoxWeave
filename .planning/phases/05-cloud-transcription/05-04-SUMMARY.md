@@ -103,6 +103,16 @@ None - no external service configuration required.
 - Transcription error toast is visible and indicator auto-hides cleanly after acknowledgement.
 - Phase 6 text injection is unblocked.
 
+## Self-Check: PASSED
+
+- FOUND: src-tauri/src/hotkey/service.rs
+- FOUND: src-tauri/src/commands/indicator.rs
+- FOUND: src-tauri/src/lib.rs
+- FOUND: src/windows/indicator/App.vue
+- FOUND: .planning/phases/05-cloud-transcription/05-04-SUMMARY.md
+- FOUND: commit 5b28c7b (fix: hotkey warning + error branch)
+- FOUND: commit 861b66a (feat: hide_indicator command + frontend auto-hide)
+
 ---
 *Phase: 05-cloud-transcription*
 *Completed: 2026-03-17*
