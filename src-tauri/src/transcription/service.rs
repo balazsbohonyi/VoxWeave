@@ -155,11 +155,12 @@ pub async fn transcribe_with_retry<R: tauri::Runtime>(
     use tauri::Manager;
 
     // Clone config before first .await — never hold a MutexGuard across await.
+    // Explicit intermediate binding forces the MutexGuard to drop before the
+    // block end, satisfying the borrow checker without holding across .await.
     let config = {
         let state = app.state::<AppState>();
         let guard = state.config.lock().unwrap();
-        let cloned = guard.transcription.clone();
-        cloned
+        guard.transcription.clone()
     };
 
     let provider_impl = make_provider(&config.provider);
