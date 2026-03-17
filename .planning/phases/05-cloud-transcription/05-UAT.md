@@ -1,5 +1,5 @@
 ---
-status: diagnosed
+status: resolved
 phase: 05-cloud-transcription
 source: 05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md, 05-04-SUMMARY.md
 started: 2026-03-17T14:30:00Z
@@ -47,7 +47,7 @@ skipped: 0
 ## Gaps
 
 - truth: "Audio is successfully transcribed via OpenAI using the user's API key and returned as text"
-  status: failed
+  status: resolved
   reason: "User reported: After the processing state I see the error 'Unexpected status 400: { \"error\": { \"message\": \"Invalid file...' in the indicator, then the pill returns to idle state."
   severity: major
   test: 1
@@ -63,7 +63,7 @@ skipped: 0
   debug_session: ".planning/debug/openai-audio-format-rejected.md"
 
 - truth: "On invalid API key, indicator shows error toast with Open Settings button; Settings window does not open automatically"
-  status: failed
+  status: resolved
   reason: "User reported: no error toast appearing, but the Settings window still appears after stopping the recording"
   severity: major
   test: 2
@@ -76,7 +76,7 @@ skipped: 0
   debug_session: ".planning/debug/invalid-key-opens-settings-no-toast.md"
 
 - truth: "On retryable network error, indicator shows styled error toast with Retry button and friendly error message"
-  status: failed
+  status: resolved
   reason: "User reported: toast appears but unstyled, shows raw reqwest error string 'error sending request for url (https://api.openai.com/v1/audio/transcriptions)', no Retry button visible, toast disappears after a couple of seconds"
   severity: major
   test: 3
@@ -92,7 +92,7 @@ skipped: 0
   debug_session: ".planning/debug/toast-unstyled-raw-message-no-retry.md"
 
 - truth: "On fallback provider scenario, indicator shows error toast with Try with [Provider]? button; Settings window does not open automatically"
-  status: failed
+  status: resolved
   reason: "User reported: toast is not appearing at all, instead the Settings window appears"
   severity: major
   test: 4
