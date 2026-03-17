@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 05-cloud-transcription
 source: 05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md, 05-04-SUMMARY.md, 05-05-SUMMARY.md, 05-06-SUMMARY.md
 started: 2026-03-18T01:10:00Z
@@ -49,5 +49,10 @@ skipped: 0
   reason: "User reported (tests 2 & 3): no toast displayed for either invalid_key or network errors. Indicator returns to IDLE silently. No raw error shown (CSS loading works), but showTranscriptionErrorToast produces no visible output."
   severity: major
   test: 2
-  artifacts: []
-  missing: []
+  root_cause: "src/styles.css .indicator-toasts uses 'position: absolute; bottom: calc(100% + 8px)' — this places the toast container above the pill's top edge. The OS compositor clips anything outside the physical Tauri window rectangle (~200×48px). The toast IS in the DOM but occupies pixels the window does not own. Introduced in 05-06 when toast CSS was first added."
+  artifacts:
+    - path: "src/styles.css"
+      issue: "bottom: calc(100% + 8px) positions toasts above the window boundary — OS clips them"
+  missing:
+    - "Reposition toast to render within the existing window bounds, OR dynamically resize the window when toasts are active"
+  debug_session: ".planning/debug/toast-not-rendering-05-06.md"
