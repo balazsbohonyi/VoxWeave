@@ -106,9 +106,17 @@ async function onRecordButtonClick(): Promise<void> {
 
 onMounted(async () => {
   document.documentElement.style.overflow = "hidden";
+  document.documentElement.style.height = "100%";
   document.body.style.margin = "0";
   document.body.style.overflow = "hidden";
+  document.body.style.height = "100%";
   document.body.style.background = "transparent";
+  const appEl = document.getElementById("app");
+  if (appEl) {
+    appEl.style.height = "100%";
+    appEl.style.display = "flex";
+    appEl.style.flexDirection = "column";
+  }
 
   await loadInjectionMode();
   unlistenMoved = await win.onMoved(() => {

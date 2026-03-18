@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
-import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { onBeforeUnmount, onMounted } from "vue";
+import { onMounted } from "vue";
 import { useToast } from "../../composables/useToast";
 import type { ShowToastOptions } from "../../composables/useToast";
 
@@ -14,7 +13,6 @@ interface TranscriptionErrorPayload {
 }
 
 const { toasts, showToast, dismissToast } = useToast();
-let unlistenTranscriptionError: UnlistenFn | null = null;
 
 async function handleDismissToast(id: number): Promise<void> {
   dismissToast(id);
@@ -23,74 +21,65 @@ async function handleDismissToast(id: number): Promise<void> {
   }
 }
 
-async function showTranscriptionErrorToast(opts: ShowToastOptions): Promise<void> {
-  const wasEmpty = toasts.value.length === 0;
+function showTranscriptionErrorToast(opts: ShowToastOptions): void {
   showToast(opts);
-  if (wasEmpty) {
-    await invoke("show_toast_window");
-  }
 }
 
-onMounted(async () => {
+onMounted(() => {
   document.documentElement.style.overflow = "hidden";
   document.body.style.margin = "0";
   document.body.style.overflow = "hidden";
   document.body.style.background = "transparent";
 
-  unlistenTranscriptionError = await listen<TranscriptionErrorPayload>(
-    "transcription-error",
-    (event) => {
-      const payload = event.payload;
+  // Rust delivers toast payloads via eval() instead of Tauri events because
+  // WebView2 may not deliver events to hidden windows before they are shown.
+  (window as unknown as Record<string, unknown>).__voxflowShowToast = (
+    payload: TranscriptionErrorPayload,
+  ) => {
+    if (payload.code === "cancelled") return;
 
-      if (payload.code === "cancelled") return;
-
-      if (payload.code === "invalid_key") {
-        const provider = payload.provider;
-        void showTranscriptionErrorToast({
-          message: "Invalid API key. Open Settings to fix.",
-          type: "error",
-          action: {
-            label: "Open Settings",
-            onClick: () => {
-              void invoke("open_settings_on_transcription_tab", { provider });
-            },
+    if (payload.code === "invalid_key") {
+      const provider = payload.provider;
+      showTranscriptionErrorToast({
+        message: "Invalid API key. Open Settings to fix.",
+        type: "error",
+        action: {
+          label: "Open Settings",
+          onClick: () => {
+            void invoke("open_settings_on_transcription_tab", { provider });
           },
-        });
-        return;
-      }
+        },
+      });
+      return;
+    }
 
-      if (payload.fallback_provider) {
-        const fallbackProvider = payload.fallback_provider;
-        void showTranscriptionErrorToast({
-          message: payload.message,
-          type: "error",
-          action: {
-            label: `Try with ${fallbackProvider}?`,
-            onClick: () => {
-              void invoke("retry_transcription_with_fallback", { provider: fallbackProvider });
-            },
+    if (payload.fallback_provider) {
+      const fallbackProvider = payload.fallback_provider;
+      showTranscriptionErrorToast({
+        message: payload.message,
+        type: "error",
+        action: {
+          label: `Try with ${fallbackProvider}?`,
+          onClick: () => {
+            void invoke("retry_transcription_with_fallback", { provider: fallbackProvider });
           },
-        });
-      } else if (payload.retryable) {
-        void showTranscriptionErrorToast({
-          message: payload.message,
-          type: "error",
-          action: {
-            label: "Retry",
-            onClick: () => {
-              void invoke("retry_transcription");
-            },
+        },
+      });
+    } else if (payload.retryable) {
+      showTranscriptionErrorToast({
+        message: payload.message,
+        type: "error",
+        action: {
+          label: "Retry",
+          onClick: () => {
+            void invoke("retry_transcription");
           },
-        });
-      } else {
-        void showTranscriptionErrorToast({ message: payload.message, type: "error" });
-      }
-    },
-  );
-});
-
-onBeforeUnmount(() => {
-  if (unlistenTranscriptionError) unlistenTranscriptionError();
+        },
+      });
+    } else {
+      showTranscriptionErrorToast({ message: payload.message, type: "error" });
+    }
+  };
 });
 </script>
 
@@ -103,14 +92,17 @@ onBeforeUnmount(() => {
         class="indicator-toast"
         :class="`indicator-toast--${toast.type}`"
       >
-        <button
-          class="indicator-toast-dismiss"
-          type="button"
-          aria-label="Dismiss"
-          @click.stop="handleDismissToast(toast.id)"
-        >
-          &times;
-        </button>
+        <div class="indicator-toast-header">
+          <span class="indicator-toast-title">VoxFlow</span>
+          <button
+            class="indicator-toast-dismiss"
+            type="button"
+            aria-label="Dismiss"
+            @click.stop="handleDismissToast(toast.id)"
+          >
+            &times;
+          </button>
+        </div>
         <span class="indicator-toast-message">{{ toast.message }}</span>
         <button
           v-if="toast.action"

@@ -59,11 +59,6 @@ pub fn hide_indicator(app: AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn show_toast_window(app: AppHandle) -> Result<(), String> {
-    indicator::show_toast_window(&app)
-}
-
-#[tauri::command]
 pub fn hide_toast_window(app: AppHandle) -> Result<(), String> {
     indicator::hide_toast_window(&app)
 }

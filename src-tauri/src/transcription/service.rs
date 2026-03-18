@@ -140,15 +140,14 @@ where
 // Internal emit helper
 // ---------------------------------------------------------------------------
 
-/// Shows the toast window (so its WebView is visible and ready for IPC) and
-/// then emits the transcription-error event. The order matters: Tauri/WebView2
-/// may not deliver events to hidden windows, so we make the window visible first.
+/// Shows the toast window and delivers the payload via eval (not Tauri events).
+/// WebView2 may not deliver events to hidden windows, so the payload is pushed
+/// via `window.__voxflowShowToast` after the window is made visible.
 fn emit_transcription_error<R: tauri::Runtime>(
     app: &tauri::AppHandle<R>,
     payload: TranscriptionErrorPayload,
 ) {
-    let _ = indicator::show_toast_window(app);
-    let _ = app.emit(TRANSCRIPTION_ERROR_EVENT, payload);
+    let _ = indicator::show_toast_window(app, &payload);
 }
 
 // ---------------------------------------------------------------------------

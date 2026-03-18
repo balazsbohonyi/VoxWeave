@@ -43,9 +43,6 @@ fn show_with_state<R: Runtime>(
 
     let window = get_window(app)?;
     window::apply_window_policy(&window)?;
-    // Always enforce correct size — guards against stale height from a previous
-    // session that ended while the indicator was in an expanded state.
-    window::resize_window(&window, window::INDICATOR_WIDTH as f64, window::INDICATOR_HEIGHT as f64)?;
     let is_visible = window.is_visible().map_err(|e| e.to_string())?;
     if should_place_window_from_config(is_visible) {
         window::place_window_from_config(app, &window, position_x, position_y)?;
@@ -91,15 +88,26 @@ pub fn hide<R: Runtime>(app: &AppHandle<R>) {
     let _ = app.emit(INDICATOR_HIDDEN_EVENT, ());
 }
 
-/// Shows the toast window adjacent to the indicator, and hides the indicator.
-/// If the toast window is already visible, this is a no-op (caller adds more toasts directly).
-pub fn show_toast_window<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
+/// Shows the toast window adjacent to the indicator, delivers the payload via eval,
+/// and hides the indicator. Uses eval (not Tauri events) because WebView2 may not
+/// deliver events to hidden windows before they are made visible.
+pub fn show_toast_window<R: Runtime, S: serde::Serialize>(
+    app: &AppHandle<R>,
+    payload: &S,
+) -> Result<(), String> {
     let toast_win = app
         .get_webview_window(TOAST_LABEL)
         .ok_or_else(|| "Toast window not available".to_string())?;
 
-    // Already visible — no repositioning needed.
+    let json = serde_json::to_string(payload).map_err(|e| e.to_string())?;
+    let eval_script = format!(
+        "window.__voxflowShowToast && window.__voxflowShowToast({})",
+        json
+    );
+
+    // Already visible — deliver payload directly without repositioning.
     if toast_win.is_visible().map_err(|e| e.to_string())? {
+        let _ = toast_win.eval(&eval_script);
         return Ok(());
     }
 
@@ -113,6 +121,7 @@ pub fn show_toast_window<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
         // No monitor info — show at fallback position without repositioning.
         window::apply_window_policy(&toast_win)?;
         toast_win.show().map_err(|e| e.to_string())?;
+        let _ = toast_win.eval(&eval_script);
         hide_indicator_window(app);
         return Ok(());
     };
@@ -129,6 +138,7 @@ pub fn show_toast_window<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
     window::apply_window_policy(&toast_win)?;
     window::place_window(&toast_win, indicator_x, toast_y)?;
     toast_win.show().map_err(|e| e.to_string())?;
+    let _ = toast_win.eval(&eval_script);
     hide_indicator_window(app);
 
     Ok(())

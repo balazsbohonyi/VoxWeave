@@ -272,7 +272,16 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                             indicator::show_injecting(&app_clone);
                         }
                         Err(()) => {
-                            let _ = indicator::show_idle(&app_clone);
+                            // show_toast_window already showed the toast and hid the indicator.
+                            // Only restore idle indicator if the toast is not currently visible
+                            // (e.g. cancelled errors skip the toast entirely).
+                            let toast_visible = app_clone
+                                .get_webview_window("toast")
+                                .and_then(|w| w.is_visible().ok())
+                                .unwrap_or(false);
+                            if !toast_visible {
+                                let _ = indicator::show_idle(&app_clone);
+                            }
                         }
                     }
                     // Always reset state after transcription attempt completes
