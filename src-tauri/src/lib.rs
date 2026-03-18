@@ -50,9 +50,15 @@ pub fn run() {
             }
 
             // Indicator window is pre-defined in tauri.conf and starts hidden.
-            // Enforce non-focus/click-through defaults at runtime to avoid input theft.
+            // Enforce non-focus/click-through defaults and reset to normal size (in case
+            // the window was left at expanded toast height in a previous session).
             if let Some(indicator_win) = app.get_webview_window("indicator") {
                 let _ = indicator::window::apply_window_policy(&indicator_win);
+                let _ = indicator::window::resize_window(
+                    &indicator_win,
+                    indicator::window::INDICATOR_WIDTH as f64,
+                    indicator::window::INDICATOR_HEIGHT as f64,
+                );
             }
 
             // Optional startup visibility (default true) so users can keep the
@@ -82,6 +88,8 @@ pub fn run() {
             commands::transcription::retry_transcription,
             commands::transcription::retry_transcription_with_fallback,
             commands::transcription::open_settings_on_transcription_tab,
+            commands::indicator::show_toast_window,
+            commands::indicator::hide_toast_window,
         ])
         .run(tauri::generate_context!())
         .expect("error while running VoxFlow");

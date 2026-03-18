@@ -6,10 +6,12 @@
 
 use crate::audio::encode::EncodedAudio;
 use crate::config::{TranscriptionConfig, TranscriptionProvider};
+use crate::indicator;
 use crate::transcription::groq::GroqProvider;
 use crate::transcription::openai::OpenAiProvider;
 use crate::transcription::openrouter::OpenRouterProvider;
 use crate::transcription::provider::{TranscriptionError, TranscriptionProviderTrait};
+use tauri::Emitter;
 
 // ---------------------------------------------------------------------------
 // Event name constants
@@ -135,6 +137,21 @@ where
 }
 
 // ---------------------------------------------------------------------------
+// Internal emit helper
+// ---------------------------------------------------------------------------
+
+/// Shows the toast window (so its WebView is visible and ready for IPC) and
+/// then emits the transcription-error event. The order matters: Tauri/WebView2
+/// may not deliver events to hidden windows, so we make the window visible first.
+fn emit_transcription_error<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+    payload: TranscriptionErrorPayload,
+) {
+    let _ = indicator::show_toast_window(app);
+    let _ = app.emit(TRANSCRIPTION_ERROR_EVENT, payload);
+}
+
+// ---------------------------------------------------------------------------
 // Public transcription entry point
 // ---------------------------------------------------------------------------
 
@@ -151,7 +168,6 @@ pub async fn transcribe_with_retry<R: tauri::Runtime>(
     audio: &EncodedAudio,
 ) -> Result<String, ()> {
     use crate::state::AppState;
-    use tauri::Emitter;
     use tauri::Manager;
 
     // Clone config before first .await — never hold a MutexGuard across await.
@@ -194,16 +210,13 @@ pub async fn transcribe_with_retry<R: tauri::Runtime>(
             }
 
             Err(TranscriptionError::InvalidKey { provider }) => {
-                let _ = app.emit(
-                    TRANSCRIPTION_ERROR_EVENT,
-                    TranscriptionErrorPayload {
-                        code: TranscriptionErrorCode::InvalidKey,
-                        message: "Invalid API key. Open settings to fix.".into(),
-                        provider: Some(provider),
-                        fallback_provider: None,
-                        retryable: false,
-                    },
-                );
+                emit_transcription_error(app, TranscriptionErrorPayload {
+                    code: TranscriptionErrorCode::InvalidKey,
+                    message: "Invalid API key. Open settings to fix.".into(),
+                    provider: Some(provider),
+                    fallback_provider: None,
+                    retryable: false,
+                });
                 return Err(());
             }
 
@@ -251,16 +264,13 @@ pub async fn transcribe_with_retry<R: tauri::Runtime>(
                         "Unknown transcription error.".into(),
                     ),
                 };
-                let _ = app.emit(
-                    TRANSCRIPTION_ERROR_EVENT,
-                    TranscriptionErrorPayload {
-                        code,
-                        message,
-                        provider: None,
-                        fallback_provider: fallback,
-                        retryable: true,
-                    },
-                );
+                emit_transcription_error(app, TranscriptionErrorPayload {
+                    code,
+                    message,
+                    provider: None,
+                    fallback_provider: fallback,
+                    retryable: true,
+                });
                 return Err(());
             }
         }
@@ -279,7 +289,6 @@ pub async fn transcribe_with_provider<R: tauri::Runtime>(
     target_provider: TranscriptionProvider,
 ) -> Result<String, ()> {
     use crate::state::AppState;
-    use tauri::Emitter;
     use tauri::Manager;
 
     // Clone config and override provider for this single invocation
@@ -319,16 +328,13 @@ pub async fn transcribe_with_provider<R: tauri::Runtime>(
                     (TranscriptionErrorCode::Cancelled, "Transcription cancelled.".into())
                 }
             };
-            let _ = app.emit(
-                TRANSCRIPTION_ERROR_EVENT,
-                TranscriptionErrorPayload {
-                    code,
-                    message,
-                    provider: Some(provider_display_name(&call_config.provider)),
-                    fallback_provider: None,
-                    retryable: false,
-                },
-            );
+            emit_transcription_error(app, TranscriptionErrorPayload {
+                code,
+                message,
+                provider: Some(provider_display_name(&call_config.provider)),
+                fallback_provider: None,
+                retryable: false,
+            });
             Err(())
         }
     }

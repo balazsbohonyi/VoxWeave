@@ -2,6 +2,8 @@ use tauri::{AppHandle, LogicalPosition, Monitor, Position, Runtime, WebviewWindo
 
 pub const INDICATOR_WIDTH: i32 = 180;
 pub const INDICATOR_HEIGHT: i32 = 70;
+pub const TOAST_HEIGHT: i32 = 88;
+pub const TOAST_GAP: i32 = 6;
 const EDGE_MARGIN_X: i32 = 20;
 const EDGE_MARGIN_Y: i32 = 120;
 
@@ -69,6 +71,28 @@ fn saved_position_is_valid(x: i32, y: i32, monitor: MonitorRect) -> bool {
     let max_x = monitor.x + (monitor.width - INDICATOR_WIDTH).max(0);
     let max_y = monitor.y + (monitor.height - INDICATOR_HEIGHT).max(0);
     x >= min_x && x <= max_x && y >= min_y && y <= max_y
+}
+
+/// Determines whether the toast should appear above or below the indicator.
+/// Default is below; falls back to above if there is not enough space.
+pub fn compute_toast_direction(indicator_y: i32, monitor: MonitorRect) -> &'static str {
+    let space_below = (monitor.y + monitor.height) - (indicator_y + INDICATOR_HEIGHT);
+    if space_below >= TOAST_GAP + TOAST_HEIGHT {
+        "below"
+    } else {
+        "above"
+    }
+}
+
+/// Resize a potentially non-resizable window by temporarily enabling resizability.
+/// Direct `set_size` calls silently fail on `resizable: false` windows in Tauri v2 on Windows.
+pub fn resize_window<R: Runtime>(window: &WebviewWindow<R>, width: f64, height: f64) -> Result<(), String> {
+    window.set_resizable(true).map_err(|e| e.to_string())?;
+    window
+        .set_size(tauri::LogicalSize::new(width, height))
+        .map_err(|e| e.to_string())?;
+    window.set_resizable(false).map_err(|e| e.to_string())?;
+    Ok(())
 }
 
 pub fn place_window<R: Runtime>(window: &WebviewWindow<R>, x: i32, y: i32) -> Result<(), String> {

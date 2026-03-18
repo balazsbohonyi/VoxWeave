@@ -16,7 +16,6 @@ export interface Toast {
 export interface ShowToastOptions {
   message: string;
   type?: Toast["type"];
-  durationMs?: number;
   action?: ToastAction;
 }
 
@@ -25,11 +24,7 @@ let nextId = 0;
 export function useToast() {
   const toasts = ref<Toast[]>([]);
 
-  function showToast(
-    messageOrOptions: string | ShowToastOptions,
-    type: Toast["type"] = "info",
-    durationMs = 3000,
-  ) {
+  function showToast(messageOrOptions: string | ShowToastOptions, type: Toast["type"] = "info") {
     const id = nextId++;
     if (typeof messageOrOptions === "string") {
       toasts.value.push({ id, message: messageOrOptions, type });
@@ -40,11 +35,7 @@ export function useToast() {
         type: messageOrOptions.type ?? "info",
         action: messageOrOptions.action,
       });
-      durationMs = messageOrOptions.durationMs ?? 5000;
     }
-    setTimeout(() => {
-      toasts.value = toasts.value.filter((t) => t.id !== id);
-    }, durationMs);
   }
 
   function dismissToast(id: number) {
