@@ -138,7 +138,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+- `2026-03-18-implement-real-pcm-accumulation-and-opus-encoder.md` — Implement real PCM accumulation and Opus encoder (Phase 3 gap: synthetic_capture_pcm stub + fake Opus encoder + no log backend)
 
 ### Blockers/Concerns
 
