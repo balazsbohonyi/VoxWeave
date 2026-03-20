@@ -6,6 +6,24 @@ current_phase: 5
 current_phase_name: Cloud Transcription
 current_plan: 2
 status: executing
+stopped_at: Phase 05.1 context gathered
+last_updated: "2026-03-20T18:44:35.460Z"
+last_activity: 2026-03-17
+progress:
+  total_phases: 11
+  completed_phases: 5
+  total_plans: 23
+  completed_plans: 23
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+current_phase: 5
+current_phase_name: Cloud Transcription
+current_plan: 2
+status: executing
 stopped_at: Completed 05-cloud-transcription 05-07-PLAN.md
 last_updated: "2026-03-17T23:56:00.291Z"
 last_activity: 2026-03-17
@@ -136,6 +154,10 @@ Recent decisions affecting current work:
 - [Phase 05-cloud-transcription]: Network error arms in service.rs emit friendly string, not raw reqwest error URL
 - [Phase 05-cloud-transcription]: Toast container uses inset:0 relative to .indicator-root (position:relative) so it stays within OS window rectangle and is never clipped by compositor
 
+### Roadmap Evolution
+
+- Phase 05.1 inserted after Phase 5: implement real PCM accumulation and Opus encoder (URGENT)
+
 ### Pending Todos
 
 - `2026-03-18-implement-real-pcm-accumulation-and-opus-encoder.md` — Implement real PCM accumulation and Opus encoder (Phase 3 gap: synthetic_capture_pcm stub + fake Opus encoder + no log backend)
@@ -149,7 +171,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-17T23:48:36.603Z
-Stopped at: Completed 05-cloud-transcription 05-07-PLAN.md
-Resume file: None
+Last session: 2026-03-20T18:44:35.457Z
+Stopped at: Phase 05.1 context gathered
+Resume file: .planning/phases/05.1-implement-real-pcm-accumulation-and-opus-encoder/05.1-CONTEXT.md
 
