@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useConfig } from "../../composables/useConfig";
 import WarningCard from "./components/WarningCard.vue";
+import LanguageSelect from "./components/LanguageSelect.vue";
 
 const {
   config,
@@ -25,6 +26,8 @@ const hotkeyApplySuccess = ref<string | null>(null);
 const isApplyingHotkey = ref(false);
 const selectedAudioDevice = ref<string>("");
 const isSavingAudioDevice = ref(false);
+const selectedLanguage = ref<string>("");
+const isSavingLanguage = ref(false);
 const previouslyUnavailableAudioDevice = ref<string | null>(null);
 const isAutoSyncingAudioDevice = ref(false);
 
@@ -96,6 +99,24 @@ async function saveAudioDevice(): Promise<void> {
   }
 }
 
+async function saveLanguage(): Promise<void> {
+  if (!config.value) return;
+  isSavingLanguage.value = true;
+  try {
+    const saved = await saveConfig({
+      transcription: {
+        ...config.value.transcription,
+        language: selectedLanguage.value,
+      },
+    });
+    if (saved) {
+      selectedLanguage.value = saved.transcription.language;
+    }
+  } finally {
+    isSavingLanguage.value = false;
+  }
+}
+
 async function saveIndicatorVisibility(showOnStartup: boolean): Promise<void> {
   if (!config.value) return;
   await saveConfig({
@@ -134,6 +155,7 @@ onMounted(() => {
     if (config.value) {
       hotkeyDraft.value = config.value.hotkey;
       selectedAudioDevice.value = config.value.audio.device ?? "";
+      selectedLanguage.value = config.value.transcription.language;
     }
     startAudioDevicePolling();
   });
@@ -237,6 +259,14 @@ watch(audioInputDevices, async (devices) => {
           <div class="flex justify-between">
             <dt>Provider</dt>
             <dd class="font-mono text-gray-800 dark:text-gray-200">{{ config.transcription.provider }}</dd>
+          </div>
+          <div class="flex items-center justify-between">
+            <dt>Language</dt>
+            <LanguageSelect
+              v-model="selectedLanguage"
+              :disabled="isSavingLanguage"
+              @change="saveLanguage"
+            />
           </div>
           <div class="space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800/40">
             <dt class="font-medium text-gray-700 dark:text-gray-300">Microphone</dt>
