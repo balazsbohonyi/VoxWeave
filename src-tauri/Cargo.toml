@@ -34,6 +34,10 @@ reqwest = { version = "0.12", features = ["multipart", "json"] }
 base64 = "0.22"
 async-trait = "0.1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+audiopus = "0.2"
+ogg = "0.9"
+rubato = "0.15"
+tauri-plugin-log = "2"
 
 [dev-dependencies]
 tempfile = "3"

@@ -54,6 +54,13 @@ pub struct AudioSessionState {
     pub started_at: SystemTime,
     pub level_emitter_stop: Option<Arc<std::sync::atomic::AtomicBool>>,
     pub level_emitter_thread: Option<std::thread::JoinHandle<()>>,
+    /// Shared PCM accumulation buffer. The capture thread pushes 16kHz mono f32
+    /// samples into this buffer; the stop path drains it for encoding.
+    pub pcm_buffer: Arc<Mutex<Vec<f32>>>,
+    /// Stop flag shared with the PCM capture path. Mirrors level_emitter_stop
+    /// — the same AtomicBool signals both the level emitter loop and the
+    /// PCM accumulation path to stop.
+    pub pcm_emitter_stop: Option<Arc<std::sync::atomic::AtomicBool>>,
 }
 
 /// Top-level managed state stored in `tauri::Manager`.

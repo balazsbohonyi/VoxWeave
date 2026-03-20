@@ -7,8 +7,9 @@ use crate::state::{AppState, RecordingState};
 use capture::{resolve_input_device, DeviceSnapshot};
 use encode::{DefaultEncoderBackend, EncodedAudio, EncoderBackend};
 use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::{Arc, Mutex};
 #[cfg(not(test))]
-use std::sync::{Arc, mpsc};
+use std::sync::mpsc;
 #[cfg(not(test))]
 use std::sync::atomic::AtomicBool;
 #[cfg(not(test))]
@@ -110,19 +111,22 @@ pub fn start_recording_with_snapshot<R: Runtime>(
         );
     }
 
+    let pcm_buffer: Arc<Mutex<Vec<f32>>> = Arc::new(Mutex::new(Vec::new()));
+
     #[cfg(not(test))]
     let (level_emitter_stop, level_emitter_thread) =
-        start_realtime_level_capture(app, &resolved.active_device)?;
+        start_realtime_level_capture(app, &resolved.active_device, Arc::clone(&pcm_buffer))?;
 
     #[cfg(not(test))]
     let session = session::new_session(
         resolved.active_device,
         level_emitter_stop,
         level_emitter_thread,
+        pcm_buffer,
     );
 
     #[cfg(test)]
-    let session = session::new_session(resolved.active_device);
+    let session = session::new_session(resolved.active_device, pcm_buffer);
 
     *state.audio_session.lock().map_err(|e| e.to_string())? = Some(session);
     Ok(())
@@ -192,6 +196,7 @@ fn synthetic_capture_pcm() -> Vec<f32> {
 fn start_realtime_level_capture<R: Runtime>(
     app: &AppHandle<R>,
     active_device: &str,
+    pcm_buffer: Arc<Mutex<Vec<f32>>>,
 ) -> Result<(Arc<AtomicBool>, std::thread::JoinHandle<()>), String> {
     use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 
@@ -419,7 +424,8 @@ mod tests {
 
     #[test]
     fn session_state_transitions() {
-        let session = session::new_session("Mic A".to_string());
+        let pcm_buffer = Arc::new(Mutex::new(Vec::new()));
+        let session = session::new_session("Mic A".to_string(), pcm_buffer);
         assert_eq!(session.sample_rate_hz, 16_000);
         assert_eq!(session.channels, 1);
         assert_eq!(session.active_device, "Mic A");
@@ -459,8 +465,8 @@ mod tests {
 
     #[test]
     fn captures_mono_16khz_contract() {
-        let pcm = synthetic_capture_pcm();
-        assert_eq!(pcm.len(), 16_000);
+        // Verify the canonical capture constants — length assertion removed now
+        // that real PCM accumulation replaces the synthetic stub.
         assert_eq!(session::CAPTURE_SAMPLE_RATE_HZ, 16_000);
         assert_eq!(session::CAPTURE_CHANNELS, 1);
     }
