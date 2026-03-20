@@ -6,14 +6,14 @@ current_phase: 5
 current_phase_name: Cloud Transcription
 current_plan: 2
 status: executing
-stopped_at: Completed 05.1-implement-real-pcm-accumulation-and-opus-encoder 05.1-01-PLAN.md
-last_updated: "2026-03-20T19:12:01.760Z"
+stopped_at: Completed 05.1-implement-real-pcm-accumulation-and-opus-encoder 05.1-02-PLAN.md
+last_updated: "2026-03-20T19:16:34.403Z"
 last_activity: 2026-03-20
 progress:
   total_phases: 11
   completed_phases: 5
   total_plans: 26
-  completed_plans: 24
+  completed_plans: 25
 ---
 
 ---
@@ -107,6 +107,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 05-cloud-transcription P05-05 | 15 | 2 tasks | 4 files |
 | Phase 05-cloud-transcription P07 | 3 | 1 tasks | 1 files |
 | Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder P01 | 10 | 2 tasks | 4 files |
+| Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder P02 | 8 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -156,6 +157,8 @@ Recent decisions affecting current work:
 - [Phase 05-cloud-transcription]: Toast container uses inset:0 relative to .indicator-root (position:relative) so it stays within OS window rectangle and is never clipped by compositor
 - [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: Integer decimation for rates cleanly divisible by 16kHz (48k); rubato FftFixedInOut for fractional ratios; nearest-neighbour fallback
 - [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: pcm_emitter_stop shares the same AtomicBool as level_emitter_stop — one flag stops both capture paths
+- [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: audiopus error types mapped with format\!('{e:?}') since they do not implement Display
+- [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: Empty PCM produces headers-only Ogg output (no audio packets) - valid per RFC 7845
 
 ### Roadmap Evolution
 
@@ -174,7 +177,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-20T19:12:01.757Z
-Stopped at: Completed 05.1-implement-real-pcm-accumulation-and-opus-encoder 05.1-01-PLAN.md
+Last session: 2026-03-20T19:16:34.400Z
+Stopped at: Completed 05.1-implement-real-pcm-accumulation-and-opus-encoder 05.1-02-PLAN.md
 Resume file: None
 
