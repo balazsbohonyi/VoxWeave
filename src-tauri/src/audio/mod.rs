@@ -165,9 +165,16 @@ pub fn stop_recording_and_encode_with_backend<R: Runtime>(
         drain_pcm_buffer(&session.pcm_buffer)
     };
     if capture_pcm.len() < 8_000 {
-        return Err(
-            "Recording too short (under 0.5 seconds). Please hold the hotkey longer.".to_string(),
+        let msg = "Recording too short (under 0.5 seconds). Please hold the hotkey longer."
+            .to_string();
+        emit_audio_error(
+            app,
+            AudioErrorPayload {
+                code: AudioErrorCode::EncodeFailed,
+                message: msg.clone(),
+            },
         );
+        return Err(msg);
     }
 
     match encode_with_retry_once(&provider, &capture_pcm, encoder_backend) {
