@@ -19,7 +19,7 @@ Text lands in any window — terminals, editors, browsers — without friction. 
 - [ ] Global hotkey (default `Ctrl+Shift+Space`) triggers toggle-mode recording from any application
 - [ ] Audio captured from selected microphone at 16kHz mono, encoded as Opus (cloud) or WAV (local)
 - [ ] Floating always-on-top indicator with real-time waveform during recording
-- [ ] Cloud transcription via OpenAI, Groq, and OpenRouter with per-provider API key and model config
+- [ ] Cloud transcription via OpenAI and Groq with per-provider API key and model config
 - [ ] Local transcription via whisper.cpp with on-demand model download (tiny/base/small/medium)
 - [ ] FlashPaste injection (default): clipboard save → paste → restore, with terminal-aware shortcuts
 - [ ] Simulated keystroke injection via SendInput with KEYEVENTF_UNICODE and configurable speed
@@ -52,7 +52,8 @@ Text lands in any window — terminals, editors, browsers — without friction. 
 - **Competitive context**: Wispr Flow is the commercial incumbent. VoxFlow differentiates on BYOK model, zero cost (beyond API usage), privacy (audio never touches third-party servers beyond the user's chosen provider), and terminal support.
 - **Distribution**: Pre-built Windows installer via GitHub Releases. Open source.
 - **Cross-platform intent**: Windows is the MVP, but macOS is the next planned platform. The architecture must use proper abstractions for platform-specific code (audio capture, text injection, clipboard operations, hotkey registration, elevation checks) so adding macOS requires implementing platform traits — not rewriting core logic.
-- **Provider model lists**: Hardcoded model lists for all providers. OpenAI: whisper-1, gpt-4o-transcribe, gpt-4o-mini-transcribe. Groq: whisper-large-v3-turbo (default), whisper-large-v3, distil-whisper-large-v3-en. OpenRouter: uses chat completions endpoint (no Whisper) — google/gemini-2.5-flash (default), google/gemini-2.5-pro, google/gemini-2.5-flash-lite, openai/gpt-4o-audio-preview, openai/gpt-audio, openai/gpt-audio-mini.
+- **Provider model lists**: Hardcoded model lists for all providers. OpenAI: whisper-1, gpt-4o-transcribe, gpt-4o-mini-transcribe. Groq: whisper-large-v3-turbo (default), whisper-large-v3, distil-whisper-large-v3-en.
+- **OpenRouter dropped**: OpenRouter has no Whisper-style STT endpoint. Its chat completions approach (base64 audio) produced inconsistent results and is not purpose-built for dictation. Confirmed by user testing — do not re-add without re-evaluation.
 
 ## Constraints
 

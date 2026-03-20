@@ -29,7 +29,6 @@ impl Default for InjectionMode {
 pub enum TranscriptionProvider {
     Openai,
     Groq,
-    Openrouter,
     Local,
 }
 
@@ -45,7 +44,6 @@ impl std::str::FromStr for TranscriptionProvider {
         match s {
             "openai" => Ok(Self::Openai),
             "groq" => Ok(Self::Groq),
-            "openrouter" => Ok(Self::Openrouter),
             "local" => Ok(Self::Local),
             _ => Err(()),
         }
@@ -95,17 +93,12 @@ pub struct TranscriptionConfig {
     pub openai_api_key: String,
     #[serde(default)]
     pub groq_api_key: String,
-    #[serde(default)]
-    pub openrouter_api_key: String,
 
     // --- Model selections (hardcoded lists in UI, stored as string) ---
     #[serde(default = "default_openai_model")]
     pub openai_model: String,
     #[serde(default = "default_groq_model")]
     pub groq_model: String,
-    /// OpenRouter model identifier (e.g. "openai/whisper-large-v3").
-    #[serde(default)]
-    pub openrouter_model: String,
 
     /// BCP-47 language hint sent to the transcription API (e.g. "en", "hu").
     /// Empty string means auto-detect.
@@ -128,10 +121,8 @@ impl Default for TranscriptionConfig {
             provider: TranscriptionProvider::default(),
             openai_api_key: String::new(),
             groq_api_key: String::new(),
-            openrouter_api_key: String::new(),
             openai_model: default_openai_model(),
             groq_model: default_groq_model(),
-            openrouter_model: String::new(),
             language: String::new(),
             local_model_path: None,
             fallback_order: default_fallback_order(),
@@ -264,6 +255,5 @@ fn default_fallback_order() -> Vec<TranscriptionProvider> {
     vec![
         TranscriptionProvider::Openai,
         TranscriptionProvider::Groq,
-        TranscriptionProvider::Openrouter,
     ]
 }

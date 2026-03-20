@@ -27,7 +27,7 @@ pub async fn retry_transcription<R: Runtime>(app: AppHandle<R>) -> Result<(), St
 
 /// Run transcription with a specific fallback provider (one attempt, no further fallback).
 /// Called by the frontend "Try with X?" button from a transcription-error event.
-/// `provider` is a serialized TranscriptionProvider string — "openai", "groq", or "openrouter".
+/// `provider` is a serialized TranscriptionProvider string — "openai" or "groq".
 #[tauri::command]
 pub async fn retry_transcription_with_fallback<R: Runtime>(
     app: AppHandle<R>,

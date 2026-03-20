@@ -9,7 +9,6 @@ use crate::config::{TranscriptionConfig, TranscriptionProvider};
 use crate::indicator;
 use crate::transcription::groq::GroqProvider;
 use crate::transcription::openai::OpenAiProvider;
-use crate::transcription::openrouter::OpenRouterProvider;
 use crate::transcription::provider::{TranscriptionError, TranscriptionProviderTrait};
 use tauri::Emitter;
 
@@ -56,7 +55,6 @@ pub fn make_provider(p: &TranscriptionProvider) -> Box<dyn TranscriptionProvider
     match p {
         TranscriptionProvider::Openai => Box::new(OpenAiProvider::new()),
         TranscriptionProvider::Groq => Box::new(GroqProvider::new()),
-        TranscriptionProvider::Openrouter => Box::new(OpenRouterProvider::new()),
         TranscriptionProvider::Local => {
             unimplemented!("local transcription is phase 10")
         }
@@ -84,7 +82,6 @@ pub fn find_fallback_provider(
         let has_key = match candidate {
             TranscriptionProvider::Openai => !config.openai_api_key.is_empty(),
             TranscriptionProvider::Groq => !config.groq_api_key.is_empty(),
-            TranscriptionProvider::Openrouter => !config.openrouter_api_key.is_empty(),
             TranscriptionProvider::Local => false,
         };
 
@@ -350,7 +347,6 @@ fn provider_display_name(p: &TranscriptionProvider) -> String {
     match p {
         TranscriptionProvider::Openai => "openai".to_string(),
         TranscriptionProvider::Groq => "groq".to_string(),
-        TranscriptionProvider::Openrouter => "openrouter".to_string(),
         TranscriptionProvider::Local => "local".to_string(),
     }
 }
@@ -385,15 +381,14 @@ mod tests {
             fallback_order: vec![
                 TranscriptionProvider::Openai,
                 TranscriptionProvider::Groq,
-                TranscriptionProvider::Openrouter,
             ],
-            // Groq key is empty — should be skipped.
+            // Groq key is empty — should be skipped, leaving no eligible fallback.
+            openai_api_key: "sk-key".to_string(),
             groq_api_key: "".to_string(),
-            openrouter_api_key: "or-key".to_string(),
             ..TranscriptionConfig::default()
         };
         let result = find_fallback_provider(&TranscriptionProvider::Openai, &config);
-        assert_eq!(result, Some("openrouter".to_string()));
+        assert_eq!(result, None);
     }
 
     #[test]

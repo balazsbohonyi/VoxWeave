@@ -129,7 +129,7 @@ impl EncoderBackend for DefaultEncoderBackend {
 pub fn format_for_provider(provider: &TranscriptionProvider) -> EncodedFormat {
     match provider {
         TranscriptionProvider::Local | TranscriptionProvider::Openai => EncodedFormat::Wav,
-        TranscriptionProvider::Groq | TranscriptionProvider::Openrouter => EncodedFormat::Opus,
+        TranscriptionProvider::Groq => EncodedFormat::Opus,
     }
 }
 
@@ -212,15 +212,6 @@ mod tests {
             format_for_provider(&TranscriptionProvider::Groq),
             EncodedFormat::Opus,
             "Groq accepts Opus/Ogg format"
-        );
-    }
-
-    #[test]
-    fn test_format_for_provider_openrouter_returns_opus() {
-        assert_eq!(
-            format_for_provider(&TranscriptionProvider::Openrouter),
-            EncodedFormat::Opus,
-            "OpenRouter accepts Opus/Ogg format"
         );
     }
 

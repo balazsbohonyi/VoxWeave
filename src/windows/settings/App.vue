@@ -28,6 +28,8 @@ const selectedAudioDevice = ref<string>("");
 const isSavingAudioDevice = ref(false);
 const selectedLanguage = ref<string>("");
 const isSavingLanguage = ref(false);
+const selectedProvider = ref<string>("");
+const isSavingProvider = ref(false);
 const previouslyUnavailableAudioDevice = ref<string | null>(null);
 const isAutoSyncingAudioDevice = ref(false);
 
@@ -99,6 +101,24 @@ async function saveAudioDevice(): Promise<void> {
   }
 }
 
+async function saveProvider(): Promise<void> {
+  if (!config.value) return;
+  isSavingProvider.value = true;
+  try {
+    const saved = await saveConfig({
+      transcription: {
+        ...config.value.transcription,
+        provider: selectedProvider.value as "openai" | "groq",
+      },
+    });
+    if (saved) {
+      selectedProvider.value = saved.transcription.provider;
+    }
+  } finally {
+    isSavingProvider.value = false;
+  }
+}
+
 async function saveLanguage(): Promise<void> {
   if (!config.value) return;
   isSavingLanguage.value = true;
@@ -156,6 +176,7 @@ onMounted(() => {
       hotkeyDraft.value = config.value.hotkey;
       selectedAudioDevice.value = config.value.audio.device ?? "";
       selectedLanguage.value = config.value.transcription.language;
+      selectedProvider.value = config.value.transcription.provider;
     }
     startAudioDevicePolling();
   });
@@ -256,9 +277,17 @@ watch(audioInputDevices, async (devices) => {
               {{ error }}
             </p>
           </div>
-          <div class="flex justify-between">
+          <div class="flex items-center justify-between">
             <dt>Provider</dt>
-            <dd class="font-mono text-gray-800 dark:text-gray-200">{{ config.transcription.provider }}</dd>
+            <select
+              v-model="selectedProvider"
+              class="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+              :disabled="isSavingProvider"
+              @change="saveProvider"
+            >
+              <option value="openai">OpenAI</option>
+              <option value="groq">Groq</option>
+            </select>
           </div>
           <div class="flex items-center justify-between">
             <dt>Language</dt>

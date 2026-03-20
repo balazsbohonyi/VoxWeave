@@ -4,7 +4,6 @@
 
 pub mod groq;
 pub mod openai;
-pub mod openrouter;
 pub mod provider;
 pub mod service;
 

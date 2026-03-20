@@ -118,7 +118,6 @@ mod tests {
             vec![
                 TranscriptionProvider::Openai,
                 TranscriptionProvider::Groq,
-                TranscriptionProvider::Openrouter,
             ]
         );
     }

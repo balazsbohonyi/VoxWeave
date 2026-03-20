@@ -126,8 +126,9 @@ Terminal window classes for FlashPaste paste shortcut switching: `ConsoleWindowC
 | No `pinia` | Tauri managed state + Vue reactivity is sufficient; Pinia is overkill |
 | No heavy UI libraries (Vuetify, PrimeVue) | Custom Tailwind UI keeps the floating indicator lightweight |
 | Hardcoded model lists (not dynamic API calls) | Avoids API calls just to populate dropdowns |
-| OpenRouter uses chat completions endpoint (not Whisper endpoint) | OpenRouter has no Whisper-style STT API |
+| OpenRouter support dropped (never add back without re-evaluation) | OpenRouter has no Whisper-style STT endpoint; chat completions with base64 audio is a poor fit for dictation — inconsistent results, not purpose-built for STT. Confirmed by user testing. |
 | Feature-gate `whisper-rs` behind cargo feature | Avoids MSVC + CMake build requirement during cloud-only phases |
+| `transcription.provider` in config controls the active provider; `fallback_order` is the failover chain | These are separate concerns — changing fallback order does not change the active provider. The full Settings UI (Phase 8) must make this distinction clear to users. |
 
 ## Config
 
