@@ -1,6 +1,7 @@
 use crate::audio;
 use crate::config::{persistence, AppConfig};
 use crate::transcription;
+use crate::transcription::service::{TranscriptionErrorCode, TranscriptionErrorPayload};
 use crate::hotkey::normalize::normalize_hotkey;
 use crate::indicator;
 use crate::state::{AppState, HotkeyAvailability, HotkeyWarning, RecordingState};
@@ -250,10 +251,24 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
         match audio::stop_recording_and_encode(app) {
             Err(err) => {
                 log::warn!("Failed to finalize recording: {err}");
-                indicator::hide(app);
                 let state = app.state::<AppState>();
                 *state.recording_state.lock().unwrap() = RecordingState::Idle;
                 tray::update_recording_menu(app, RecordingState::Idle);
+                // Show the error as a toast in the indicator overlay.
+                // show_toast_window positions, shows, and hides the indicator itself.
+                // Use TranscriptionErrorPayload because that is what the toast JS expects.
+                let payload = TranscriptionErrorPayload {
+                    code: TranscriptionErrorCode::TooShort,
+                    message: err.clone(),
+                    provider: None,
+                    fallback_provider: None,
+                    retryable: false,
+                };
+                if let Err(toast_err) = indicator::show_toast_window(app, &payload) {
+                    log::warn!("Failed to show error toast: {toast_err}");
+                    // Fallback: hide the indicator so it is not left dangling.
+                    indicator::hide(app);
+                }
             }
             Ok(encoded) => {
                 // Store audio for retry commands before spawning
