@@ -6,14 +6,14 @@ current_phase: 5
 current_phase_name: Cloud Transcription
 current_plan: 2
 status: executing
-stopped_at: Completed 05.1-implement-real-pcm-accumulation-and-opus-encoder 05.1-04-PLAN.md
-last_updated: "2026-03-20T20:38:40.723Z"
+stopped_at: Completed 05.1-implement-real-pcm-accumulation-and-opus-encoder 05.1-05-PLAN.md
+last_updated: "2026-03-20T20:43:36.621Z"
 last_activity: 2026-03-20
 progress:
   total_phases: 11
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 28
-  completed_plans: 27
+  completed_plans: 28
 ---
 
 ---
@@ -110,6 +110,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder P02 | 8 | 1 tasks | 2 files |
 | Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder P03 | 2 | 1 tasks | 2 files |
 | Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder P04 | 8 | 2 tasks | 3 files |
+| Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder P05 | 2 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -164,6 +165,8 @@ Recent decisions affecting current work:
 - [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: Log plugin must be first in the plugin chain to capture early-phase log calls before .setup() runs
 - [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: TranscriptionErrorCode::TooShort added as new variant — short-recording toasts use TooShort code to let frontend distinguish from network/key errors
 - [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: AudioErrorCode::EncodeFailed reused for too-short audio-error telemetry — no TooShort variant in AudioErrorCode, consistent with existing pattern
+- [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: attachConsole() return value (UnlistenFn) deliberately ignored — app-lifetime listener needs no cleanup
+- [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: top-level await valid in window entry points since package.json has type:module and Vite handles it
 
 ### Roadmap Evolution
 
@@ -182,7 +185,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-20T20:38:40.719Z
-Stopped at: Completed 05.1-implement-real-pcm-accumulation-and-opus-encoder 05.1-04-PLAN.md
+Last session: 2026-03-20T20:43:36.618Z
+Stopped at: Completed 05.1-implement-real-pcm-accumulation-and-opus-encoder 05.1-05-PLAN.md
 Resume file: None
 
