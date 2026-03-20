@@ -104,7 +104,7 @@ Plans:
 **Goal:** Replace three audio stubs (synthetic PCM, fake Opus encoder, silent log backend) so recordings contain real microphone audio that cloud transcription providers can decode
 **Requirements**: AUDI-01, AUDI-02, AUDI-03
 **Depends on:** Phase 5
-**Plans:** 7/7 plans complete
+**Plans:** 5/5 plans complete
 
 Plans:
 - [ ] 05.1-01-PLAN.md — Cargo.toml deps + AudioSessionState PCM buffer + real PCM accumulation in capture thread
