@@ -127,7 +127,12 @@ Plans:
   5. Pressing Escape during keystroke injection cancels immediately and shows a toast with the count of characters typed
   6. The automatic fallback chain (Keystrokes → FlashPaste → Clipboard) engages when the selected method fails
   7. Unicode characters (accented letters, symbols) are injected correctly in all three modes
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 06-01-PLAN.md — Cargo.toml deps (arboard + windows crate) + InjectionConfig extension + AppState.foreground_window
+- [ ] 06-02-PLAN.md — Windows platform trait implementations (all stubs replaced with real Win32 + arboard)
+- [ ] 06-03-PLAN.md — injection/service.rs: flashpaste, keystroke, clipboard, fallback chain, elevation check, cancel loop + tests
+- [ ] 06-04-PLAN.md — hotkey wiring: foreground capture at start, inject_text() call, Success indicator state, toast handling
 
 ### Phase 7: Pipeline Integration
 **Goal**: The complete hotkey-to-text pipeline works end-to-end as a seamless user experience, with toast notifications confirming every outcome
@@ -194,7 +199,7 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | 4. Floating Indicator | 3/3 | Complete | 2026-03-15 |
 | 5. Cloud Transcription | 7/7 | Complete   | 2026-03-20 |
 | 5.1. PCM + Opus | 5/5 | Complete   | 2026-03-20 |
-| 6. Text Injection | 0/TBD | Not started | - |
+| 6. Text Injection | 0/4 | Not started | - |
 | 7. Pipeline Integration | 0/TBD | Not started | - |
 | 8. Settings UI | 0/TBD | Not started | - |
 | 9. Setup Wizard | 0/TBD | Not started | - |
