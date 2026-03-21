@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Project scaffold, config persistence, and system tray presence (completed 2026-03-14)
 - [x] **Phase 2: Hotkey** - Global hotkey registration and toggle-mode recording trigger (completed 2026-03-15)
-- [ ] **Phase 3: Audio Capture** - Microphone capture, encoding, and device management
+- [x] **Phase 3: Audio Capture** - Microphone capture, encoding, and device management (completed 2026-03-18)
 - [x] **Phase 4: Floating Indicator** - Always-on-top recording status window with waveform (completed 2026-03-15)
 - [x] **Phase 5: Cloud Transcription** - OpenAI, Groq, and OpenRouter providers with error handling (completed 2026-03-17)
 - [ ] **Phase 6: Text Injection** - FlashPaste, keystroke, and clipboard injection with fallback chain
@@ -40,8 +40,8 @@ Plans:
 - [x] 04-01-indicator-window-runtime-PLAN.md - indicator window runtime + lifecycle wiring
 - [x] 04-02-indicator-visual-states-waveform-PLAN.md - indicator UI states + waveform visuals
 - [x] 04-03-indicator-drag-persistence-hide-PLAN.md - drag interaction + persistence + hide hardening
-- [ ] 04-04-indicator-focus-clickthrough-gap-PLAN.md - close focus theft + default click-through gap
-- [ ] 04-05-indicator-position-snapback-gap-PLAN.md - close drag-end persistence + snap-back gap
+- [x] 04-04-indicator-focus-clickthrough-gap-PLAN.md - close focus theft + default click-through gap
+- [x] 04-05-indicator-position-snapback-gap-PLAN.md - close drag-end persistence + snap-back gap
 
 ### Phase 2: Hotkey
 **Goal**: A global hotkey that can be triggered from any application and drives a toggle-mode recording state machine
@@ -91,13 +91,13 @@ Plans:
   5. If the active provider fails after retries and another provider is configured, a toast offers to retry with the fallback provider
 **Plans**: 7 plans
 Plans:
-- [ ] 05-01-PLAN.md — provider trait, config extension, and OpenAI/Groq/OpenRouter HTTP impls
-- [ ] 05-02-PLAN.md — transcription service: retry loop, fallback logic, error event emission
-- [ ] 05-03-PLAN.md — hotkey wiring, retry command, frontend error event handler
-- [ ] 05-04-PLAN.md — gap closure: fix hotkey warning focus + error toast indicator visibility
-- [ ] 05-05-PLAN.md — gap closure: fix OpenAI audio format (WAV) + friendly Network error message
-- [ ] 05-06-PLAN.md — gap closure: fix invalid_key toast handler + add toast CSS
-- [ ] 05-07-PLAN.md — gap closure: reposition toast as in-pill overlay to fix compositor clipping
+- [x] 05-01-PLAN.md — provider trait, config extension, and OpenAI/Groq/OpenRouter HTTP impls
+- [x] 05-02-PLAN.md — transcription service: retry loop, fallback logic, error event emission
+- [x] 05-03-PLAN.md — hotkey wiring, retry command, frontend error event handler
+- [x] 05-04-PLAN.md — gap closure: fix hotkey warning focus + error toast indicator visibility
+- [x] 05-05-PLAN.md — gap closure: fix OpenAI audio format (WAV) + friendly Network error message
+- [x] 05-06-PLAN.md — gap closure: fix invalid_key toast handler + add toast CSS
+- [x] 05-07-PLAN.md — gap closure: reposition toast as in-pill overlay to fix compositor clipping
 
 ### Phase 05.1: implement real PCM accumulation and Opus encoder (INSERTED)
 
@@ -107,9 +107,13 @@ Plans:
 **Plans:** 5/5 plans complete
 
 Plans:
-- [ ] 05.1-01-PLAN.md — Cargo.toml deps + AudioSessionState PCM buffer + real PCM accumulation in capture thread
-- [ ] 05.1-02-PLAN.md — Real Opus encoder (audiopus + ogg) replacing DefaultEncoderBackend stub
-- [ ] 05.1-03-PLAN.md — tauri-plugin-log wiring (lib.rs + capabilities)
+- [x] 05.1-01-PLAN.md — Cargo.toml deps + AudioSessionState PCM buffer + real PCM accumulation in capture thread
+- [x] 05.1-02-PLAN.md — Real Opus encoder (audiopus + ogg) replacing DefaultEncoderBackend stub
+- [x] 05.1-03-PLAN.md — tauri-plugin-log wiring (lib.rs + capabilities)
+- [x] 05.1-04-PLAN.md — gap closure: surface recording-too-short error as toast
+- [x] 05.1-05-PLAN.md — gap closure: attachConsole() in both window entry points
+- [x] 05.1-06-PLAN.md — expose language selector in Settings as searchable autocomplete
+- [x] 05.1-07-PLAN.md — drop OpenRouter, add provider selector to Settings
 
 ### Phase 6: Text Injection
 **Goal**: Transcribed text lands in the target window using the most reliable available method, with terminal-aware shortcuts, elevation checks, Unicode handling, and a resilient fallback chain
@@ -186,7 +190,7 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete   | 2026-03-14 |
 | 2. Hotkey | 0/TBD | Complete    | 2026-03-15 |
-| 3. Audio Capture | 0/TBD | Not started | - |
+| 3. Audio Capture | 0/TBD | Complete | 2026-03-18 |
 | 4. Floating Indicator | 3/3 | Complete | 2026-03-15 |
 | 5. Cloud Transcription | 7/7 | Complete   | 2026-03-20 |
 | 5.1. PCM + Opus | 5/5 | Complete   | 2026-03-20 |
