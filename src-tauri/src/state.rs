@@ -4,6 +4,7 @@
 use crate::audio::encode::EncodedAudio;
 use crate::config::{persistence, AppConfig};
 use crate::indicator::events::IndicatorVisualState;
+use crate::platform::ForegroundWindowInfo;
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 
@@ -107,6 +108,10 @@ pub struct AppState {
     /// so the retry and fallback commands can re-send the same audio without
     /// requiring the user to record again.
     pub last_encoded_audio: Arc<Mutex<Option<EncodedAudio>>>,
+
+    /// The foreground window captured at recording START (before the indicator
+    /// shows). Injection uses this to restore focus to the correct window.
+    pub foreground_window: Arc<Mutex<Option<ForegroundWindowInfo>>>,
 }
 
 impl AppState {
@@ -130,6 +135,7 @@ impl AppState {
                     indicator_visual_state: Arc::new(Mutex::new(IndicatorVisualState::Hidden)),
                     quitting: Arc::new(Mutex::new(false)),
                     last_encoded_audio: Arc::new(Mutex::new(None)),
+                    foreground_window: Arc::new(Mutex::new(None)),
                 }
             }
             Err(e) => {
@@ -152,6 +158,7 @@ impl AppState {
                     indicator_visual_state: Arc::new(Mutex::new(IndicatorVisualState::Hidden)),
                     quitting: Arc::new(Mutex::new(false)),
                     last_encoded_audio: Arc::new(Mutex::new(None)),
+                    foreground_window: Arc::new(Mutex::new(None)),
                 }
             }
         }

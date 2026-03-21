@@ -26,6 +26,30 @@ impl Default for InjectionMode {
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
+pub enum KeystrokeSpeed {
+    Slow,    // 10ms/char
+    Normal,  // 5ms/char
+    Fast,    // 2ms/char
+}
+
+impl Default for KeystrokeSpeed {
+    fn default() -> Self {
+        Self::Normal
+    }
+}
+
+impl KeystrokeSpeed {
+    pub fn delay_ms(&self) -> u64 {
+        match self {
+            Self::Slow   => 10,
+            Self::Normal => 5,
+            Self::Fast   => 2,
+        }
+    }
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq)]
+#[serde(rename_all = "snake_case")]
 pub enum TranscriptionProvider {
     Openai,
     Groq,
@@ -135,12 +159,24 @@ impl Default for TranscriptionConfig {
 pub struct InjectionConfig {
     #[serde(default)]
     pub mode: InjectionMode,
+
+    #[serde(default)]
+    pub keystroke_speed: KeystrokeSpeed,
+
+    #[serde(default = "default_true")]
+    pub auto_fallback: bool,
+
+    #[serde(default = "default_paste_delay_ms")]
+    pub paste_delay_ms: u64,
 }
 
 impl Default for InjectionConfig {
     fn default() -> Self {
         Self {
             mode: InjectionMode::default(),
+            keystroke_speed: KeystrokeSpeed::default(),
+            auto_fallback: true,
+            paste_delay_ms: default_paste_delay_ms(),
         }
     }
 }
@@ -250,6 +286,9 @@ fn default_vad_threshold() -> f32 {
 }
 fn default_vad_silence_ms() -> u32 {
     1500
+}
+fn default_paste_delay_ms() -> u64 {
+    500
 }
 fn default_fallback_order() -> Vec<TranscriptionProvider> {
     vec![
