@@ -257,3 +257,38 @@ fn default_fallback_order() -> Vec<TranscriptionProvider> {
         TranscriptionProvider::Groq,
     ]
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn keystroke_speed_delay_ms() {
+        assert_eq!(KeystrokeSpeed::Slow.delay_ms(), 10);
+        assert_eq!(KeystrokeSpeed::Normal.delay_ms(), 5);
+        assert_eq!(KeystrokeSpeed::Fast.delay_ms(), 2);
+    }
+
+    #[test]
+    fn injection_config_defaults() {
+        let cfg = InjectionConfig::default();
+        assert_eq!(cfg.keystroke_speed, KeystrokeSpeed::Normal);
+        assert_eq!(cfg.auto_fallback, true);
+        assert_eq!(cfg.paste_delay_ms, 500);
+    }
+
+    #[test]
+    fn injection_config_serde_round_trip() {
+        let cfg = InjectionConfig {
+            mode: InjectionMode::Keystroke,
+            keystroke_speed: KeystrokeSpeed::Fast,
+            auto_fallback: false,
+            paste_delay_ms: 250,
+        };
+        let json = serde_json::to_string(&cfg).unwrap();
+        let back: InjectionConfig = serde_json::from_str(&json).unwrap();
+        assert_eq!(back.keystroke_speed, KeystrokeSpeed::Fast);
+        assert_eq!(back.auto_fallback, false);
+        assert_eq!(back.paste_delay_ms, 250);
+    }
+}
