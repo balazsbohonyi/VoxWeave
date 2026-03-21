@@ -92,6 +92,7 @@ export type IndicatorVisualState =
   | "recording"
   | "processing"
   | "injecting"
+  | "success"
   | "hidden";
 
 export interface IndicatorStatePayload {
@@ -105,4 +106,20 @@ export interface InjectionDonePayload {
 
 export interface StateChangedPayload {
   state: RecordingState;
+}
+
+// ---------------------------------------------------------------------------
+// Injection result payloads (Rust -> Frontend)
+// ---------------------------------------------------------------------------
+
+export type InjectionErrorCode =
+  | "cancelled"
+  | "all_methods_failed"
+  | "elevation_required";
+
+export interface InjectionErrorPayload {
+  code: InjectionErrorCode;
+  message: string;
+  typed_chars: number | null;
+  total_chars: number | null;
 }

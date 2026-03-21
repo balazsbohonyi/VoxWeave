@@ -5,11 +5,23 @@ import { useToast } from "../../composables/useToast";
 import type { ShowToastOptions } from "../../composables/useToast";
 
 interface TranscriptionErrorPayload {
-  code: "invalid_key" | "rate_limit" | "network" | "server" | "cancelled";
+  code: "invalid_key" | "rate_limit" | "network" | "server" | "cancelled" | "too_short";
   message: string;
   provider?: string;
   fallback_provider?: string;
   retryable: boolean;
+}
+
+interface InjectionErrorPayload {
+  code: "cancelled" | "all_methods_failed" | "elevation_required";
+  message: string;
+  typed_chars: number | null;
+  total_chars: number | null;
+}
+
+interface PlainToastPayload {
+  type: "info" | "warning" | "error";
+  message: string;
 }
 
 const { toasts, showToast, dismissToast } = useToast();
@@ -25,6 +37,23 @@ function showTranscriptionErrorToast(opts: ShowToastOptions): void {
   showToast(opts);
 }
 
+function isInjectionPayload(payload: unknown): payload is InjectionErrorPayload {
+  if (typeof payload !== "object" || payload === null) return false;
+  const p = payload as Record<string, unknown>;
+  // Injection payloads have typed_chars/total_chars fields (even if null),
+  // or have injection-specific codes that transcription never uses.
+  if (p.code === "all_methods_failed" || p.code === "elevation_required") return true;
+  // Injection cancelled has typed_chars field present (transcription cancelled does not)
+  if (p.code === "cancelled" && "typed_chars" in p) return true;
+  return false;
+}
+
+function isPlainToast(payload: unknown): payload is PlainToastPayload {
+  if (typeof payload !== "object" || payload === null) return false;
+  const p = payload as Record<string, unknown>;
+  return typeof p.type === "string" && typeof p.message === "string" && !("code" in p);
+}
+
 onMounted(() => {
   document.documentElement.style.overflow = "hidden";
   document.body.style.margin = "0";
@@ -34,12 +63,33 @@ onMounted(() => {
   // Rust delivers toast payloads via eval() instead of Tauri events because
   // WebView2 may not deliver events to hidden windows before they are shown.
   (window as unknown as Record<string, unknown>).__voxflowShowToast = (
-    payload: TranscriptionErrorPayload,
+    payload: TranscriptionErrorPayload | InjectionErrorPayload | PlainToastPayload,
   ) => {
-    if (payload.code === "cancelled") return;
+    // Handle plain {type, message} toasts (e.g. "Copied to clipboard — paste manually")
+    if (isPlainToast(payload)) {
+      showToast({ message: payload.message, type: payload.type });
+      return;
+    }
 
-    if (payload.code === "invalid_key") {
-      const provider = payload.provider;
+    // Handle injection error payloads
+    if (isInjectionPayload(payload)) {
+      if (payload.code === "cancelled") {
+        // message is already formatted as "Cancelled — N of M chars typed" by Rust
+        showToast({ message: payload.message, type: "info" });
+      } else if (payload.code === "all_methods_failed") {
+        showToast({ message: payload.message, type: "error" });
+      } else if (payload.code === "elevation_required") {
+        showToast({ message: payload.message, type: "warning" });
+      }
+      return;
+    }
+
+    // Handle transcription error payloads
+    const transcriptionPayload = payload as TranscriptionErrorPayload;
+    if (transcriptionPayload.code === "cancelled") return;
+
+    if (transcriptionPayload.code === "invalid_key") {
+      const provider = transcriptionPayload.provider;
       showTranscriptionErrorToast({
         message: "Invalid API key. Open Settings to fix.",
         type: "error",
@@ -53,10 +103,10 @@ onMounted(() => {
       return;
     }
 
-    if (payload.fallback_provider) {
-      const fallbackProvider = payload.fallback_provider;
+    if (transcriptionPayload.fallback_provider) {
+      const fallbackProvider = transcriptionPayload.fallback_provider;
       showTranscriptionErrorToast({
-        message: payload.message,
+        message: transcriptionPayload.message,
         type: "error",
         action: {
           label: `Try with ${fallbackProvider}?`,
@@ -65,9 +115,9 @@ onMounted(() => {
           },
         },
       });
-    } else if (payload.retryable) {
+    } else if (transcriptionPayload.retryable) {
       showTranscriptionErrorToast({
-        message: payload.message,
+        message: transcriptionPayload.message,
         type: "error",
         action: {
           label: "Retry",
@@ -77,7 +127,7 @@ onMounted(() => {
         },
       });
     } else {
-      showTranscriptionErrorToast({ message: payload.message, type: "error" });
+      showTranscriptionErrorToast({ message: transcriptionPayload.message, type: "error" });
     }
   };
 });
