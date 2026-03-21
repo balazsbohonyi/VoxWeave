@@ -31,6 +31,7 @@ pub fn get_indicator_state(state: State<AppState>) -> Result<IndicatorStatePaylo
             IndicatorVisualState::Recording => IndicatorVisualState::Recording,
             IndicatorVisualState::Processing => IndicatorVisualState::Processing,
             IndicatorVisualState::Injecting => IndicatorVisualState::Injecting,
+            IndicatorVisualState::Success => IndicatorVisualState::Success,
             IndicatorVisualState::Hidden => IndicatorVisualState::Hidden,
         },
     })

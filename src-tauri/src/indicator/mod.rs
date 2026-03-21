@@ -64,6 +64,10 @@ pub fn show_injecting<R: Runtime>(app: &AppHandle<R>) {
     emit_state(app, IndicatorVisualState::Injecting);
 }
 
+pub fn show_success<R: Runtime>(app: &AppHandle<R>) {
+    emit_state(app, IndicatorVisualState::Success);
+}
+
 pub fn hide<R: Runtime>(app: &AppHandle<R>) {
     let keep_visible = {
         let app_state = app.state::<AppState>();

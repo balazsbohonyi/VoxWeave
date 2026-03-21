@@ -234,6 +234,14 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
     tray::update_recording_menu(app, next_state.clone());
 
     if previous_state == RecordingState::Idle {
+        // Capture foreground window BEFORE indicator shows so we record the
+        // correct target window (INJC-10). The indicator show must not steal focus.
+        {
+            let platform = app.state::<crate::platform::PlatformProvider>();
+            use crate::platform::WindowInfo as _;
+            let fw = platform.get_foreground_window();
+            *state.foreground_window.lock().unwrap() = fw;
+        }
         if let Err(err) = indicator::show_recording(app) {
             log::warn!("Failed to show indicator: {err}");
         }
@@ -281,10 +289,125 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                 let app_clone = app.clone();
                 tauri::async_runtime::spawn(async move {
                     match transcription::transcribe_with_retry(&app_clone, &encoded).await {
-                        Ok(_text) => {
-                            // Phase 6 will handle injection here.
-                            // For now: show injecting state briefly then hide.
+                        Ok(text) => {
+                            // Show injecting state while injection runs
                             indicator::show_injecting(&app_clone);
+
+                            // Extract all needed data from AppState BEFORE spawn_blocking
+                            // (never hold MutexGuard across thread boundary)
+                            let fw_info = app_clone
+                                .state::<crate::state::AppState>()
+                                .foreground_window
+                                .lock()
+                                .unwrap()
+                                .clone();
+                            let injection_config = app_clone
+                                .state::<crate::state::AppState>()
+                                .config
+                                .lock()
+                                .unwrap()
+                                .injection
+                                .clone();
+                            let cancel_flag = app_clone
+                                .state::<crate::state::AppState>()
+                                .cancel_flag
+                                .clone();
+                            let app_for_inject = app_clone.clone();
+
+                            tauri::async_runtime::spawn(async move {
+                                // Use tauri::async_runtime::spawn_blocking (not tokio::task::spawn_blocking)
+                                // so blocking injection work does not block the Tokio runtime.
+                                let result = tauri::async_runtime::spawn_blocking({
+                                    let app_inner = app_for_inject.clone();
+                                    let text_clone = text.clone();
+                                    let fw_clone = fw_info.clone();
+                                    let cfg_clone = injection_config.clone();
+                                    let cancel_clone = cancel_flag.clone();
+                                    move || {
+                                        // Retrieve PlatformProvider from Tauri managed state
+                                        // inside the closure. AppHandle is Clone + Send + 'static.
+                                        let platform = app_inner
+                                            .state::<crate::platform::PlatformProvider>();
+                                        // WindowsProvider implements all four platform traits directly.
+                                        let p: &crate::platform::PlatformProvider = &*platform;
+                                        crate::injection::inject_text(
+                                            p,
+                                            p,
+                                            p,
+                                            p,
+                                            fw_clone.as_ref(),
+                                            &text_clone,
+                                            &cfg_clone,
+                                            cancel_clone,
+                                        )
+                                    }
+                                })
+                                .await
+                                .unwrap_or(Err(crate::injection::InjectionErrorPayload {
+                                    code: crate::injection::InjectionErrorCode::AllMethodsFailed,
+                                    message: "Injection task panicked".to_string(),
+                                    typed_chars: None,
+                                    total_chars: None,
+                                }));
+
+                                match result {
+                                    Ok(crate::injection::InjectionResult::Ok) => {
+                                        // Green success flash for ~1 second then hide (INJC-08)
+                                        indicator::show_success(&app_for_inject);
+                                        tokio::time::sleep(
+                                            std::time::Duration::from_millis(1000),
+                                        )
+                                        .await;
+                                        indicator::hide(&app_for_inject);
+                                    }
+                                    Ok(crate::injection::InjectionResult::CopiedToClipboard) => {
+                                        // Elevation dialog: user chose "Copy to clipboard".
+                                        // Show info toast, NOT the green success flash.
+                                        indicator::hide(&app_for_inject);
+                                        let plain_toast = serde_json::json!({
+                                            "type": "info",
+                                            "message": "Copied to clipboard \u{2014} paste manually"
+                                        });
+                                        if let Err(e) =
+                                            indicator::show_toast_window(&app_for_inject, &plain_toast)
+                                        {
+                                            log::warn!("Failed to show clipboard toast: {e}");
+                                        }
+                                    }
+                                    Ok(crate::injection::InjectionResult::Cancelled {
+                                        typed,
+                                        total,
+                                    }) => {
+                                        // Show cancelled info toast with char counts
+                                        let payload = crate::injection::InjectionErrorPayload {
+                                            code: crate::injection::InjectionErrorCode::Cancelled,
+                                            message: format!(
+                                                "Cancelled \u{2014} {typed} of {total} chars typed"
+                                            ),
+                                            typed_chars: Some(typed),
+                                            total_chars: Some(total),
+                                        };
+                                        indicator::hide(&app_for_inject);
+                                        if let Err(e) =
+                                            indicator::show_toast_window(&app_for_inject, &payload)
+                                        {
+                                            log::warn!("Failed to show cancel toast: {e}");
+                                        }
+                                    }
+                                    Ok(crate::injection::InjectionResult::Err(msg)) => {
+                                        log::warn!("Injection error (non-payload): {msg}");
+                                        indicator::hide(&app_for_inject);
+                                    }
+                                    Err(payload) => {
+                                        indicator::hide(&app_for_inject);
+                                        if let Err(e) =
+                                            indicator::show_toast_window(&app_for_inject, &payload)
+                                        {
+                                            log::warn!("Failed to show injection error toast: {e}");
+                                        }
+                                    }
+                                }
+                            });
                         }
                         Err(()) => {
                             // show_toast_window already showed the toast and hid the indicator.
