@@ -3,6 +3,7 @@ mod commands;
 mod config;
 mod hotkey;
 mod indicator;
+mod injection;
 mod platform;
 mod state;
 mod transcription;
