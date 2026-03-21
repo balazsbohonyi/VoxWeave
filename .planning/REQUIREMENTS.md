@@ -19,9 +19,9 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 - [x] **AUDI-01**: App captures audio from the selected microphone (or system default) at 16kHz mono
 - [x] **AUDI-02**: Recording starts within 200ms of hotkey press
 - [x] **AUDI-03**: Audio is encoded as Opus for cloud providers and WAV for local whisper.cpp
-- [ ] **AUDI-04**: User can select audio input device from a dropdown in settings
-- [ ] **AUDI-05**: If the selected device is disconnected, app falls back to system default with a notification
-- [ ] **AUDI-06**: If no microphone is available, app shows an error notification
+- [x] **AUDI-04**: User can select audio input device from a dropdown in settings
+- [x] **AUDI-05**: If the selected device is disconnected, app falls back to system default with a notification
+- [x] **AUDI-06**: If no microphone is available, app shows an error notification
 
 ### Floating Indicator
 

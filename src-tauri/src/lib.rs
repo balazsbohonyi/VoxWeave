@@ -9,6 +9,7 @@ mod state;
 mod transcription;
 mod tray;
 
+use platform::PlatformProvider;
 use state::AppState;
 use tauri::{Manager, WindowEvent};
 use tauri_plugin_log::{Builder as LogBuilder, Target, TargetKind};
@@ -37,6 +38,7 @@ pub fn run() {
             // Managed state — single source of truth across commands and tray
             let app_state = AppState::load();
             app.manage(app_state);
+            app.manage(PlatformProvider::default());
 
             // Global shortcut plugin (hotkey runtime relies on this in Phase 2).
             #[cfg(desktop)]
