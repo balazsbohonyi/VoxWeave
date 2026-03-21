@@ -199,7 +199,7 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | 4. Floating Indicator | 3/3 | Complete | 2026-03-15 |
 | 5. Cloud Transcription | 7/7 | Complete   | 2026-03-20 |
 | 5.1. PCM + Opus | 5/5 | Complete   | 2026-03-20 |
-| 6. Text Injection | 0/4 | Not started | - |
+| 6. Text Injection | 1/4 | In Progress|  |
 | 7. Pipeline Integration | 0/TBD | Not started | - |
 | 8. Settings UI | 0/TBD | Not started | - |
 | 9. Setup Wizard | 0/TBD | Not started | - |
