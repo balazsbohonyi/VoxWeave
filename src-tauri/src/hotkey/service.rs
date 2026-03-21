@@ -219,6 +219,17 @@ pub(crate) fn next_recording_state(current: &RecordingState) -> Option<Recording
 
 pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
     let state = app.state::<AppState>();
+
+    // Hotkey pressed while transcribing or injecting: cancel in-flight work.
+    // The injection/transcription task polls cancel_flag and will clean up state itself.
+    {
+        let recording_state = state.recording_state.lock().unwrap();
+        if *recording_state == RecordingState::Transcribing {
+            *state.cancel_flag.lock().unwrap() = true;
+            return;
+        }
+    }
+
     let previous_state = {
         let mut recording_state = state.recording_state.lock().unwrap();
         let previous = recording_state.clone();
@@ -407,7 +418,18 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                         }
                                     }
                                 }
+
+                                // Injection complete — reset recording state here so the
+                                // Transcribing state stays live during injection and the hotkey
+                                // cancel path (which checks for Transcribing) works correctly.
+                                if let Some(st) = app_for_inject.try_state::<AppState>() {
+                                    *st.recording_state.lock().unwrap() = RecordingState::Idle;
+                                }
+                                tray::update_recording_menu(&app_for_inject, RecordingState::Idle);
                             });
+                            // Return early so the outer spawn's unconditional reset below is
+                            // skipped — the inner spawn owns the reset for the injection path.
+                            return;
                         }
                         Err(()) => {
                             // show_toast_window already showed the toast and hid the indicator.

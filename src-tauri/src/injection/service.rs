@@ -47,6 +47,22 @@ enum ElevationDialogResult {
 // Platform helpers
 // ---------------------------------------------------------------------------
 
+/// Returns false if the window handle is no longer valid (window was closed).
+/// Always returns true on non-Windows so injection proceeds without a check.
+#[cfg(target_os = "windows")]
+fn is_window_open(handle: usize) -> bool {
+    unsafe {
+        use windows::Win32::Foundation::HWND;
+        use windows::Win32::UI::WindowsAndMessaging::IsWindow;
+        IsWindow(HWND(handle as isize as *mut _)).as_bool()
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn is_window_open(_handle: usize) -> bool {
+    true
+}
+
 #[cfg(target_os = "windows")]
 fn is_escape_pressed() -> bool {
     unsafe {
@@ -217,8 +233,16 @@ pub fn inject_text(
     config: &InjectionConfig,
     cancel_flag: Arc<Mutex<bool>>,
 ) -> Result<InjectionResult, InjectionErrorPayload> {
-    // 1. Restore focus to captured window BEFORE any input simulation (INJC-10)
+    // 1. Verify target window still exists, then restore focus (INJC-10)
     if let Some(fw) = fw_info {
+        if !is_window_open(fw.handle) {
+            return Err(InjectionErrorPayload {
+                code: InjectionErrorCode::AllMethodsFailed,
+                message: "Target window was closed before injection could complete.".to_string(),
+                typed_chars: None,
+                total_chars: None,
+            });
+        }
         let _ = window.restore_focus(fw);
     }
 

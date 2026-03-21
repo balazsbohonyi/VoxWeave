@@ -11,7 +11,7 @@ const icon = computed(() => {
   if (props.state === "recording") return "REC";
   if (props.state === "processing") return "...";
   if (props.state === "injecting") return "INJ";
-  if (props.state === "success") return "OK";
+  if (props.state === "success") return "DONE";
   return "IDLE";
 });
 
@@ -32,10 +32,3 @@ const methodHint = computed(() => {
   </div>
 </template>
 
-<style scoped>
-.indicator-badge--success {
-  background-color: #22c55e;
-  border-radius: 4px;
-  padding: 0 4px;
-}
-</style>
