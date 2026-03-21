@@ -57,17 +57,17 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### Injection
 
-- [ ] **INJC-01**: FlashPaste is the default injection method: save clipboard → write text → simulate paste → wait 500ms → restore clipboard
-- [ ] **INJC-02**: FlashPaste detects terminal windows (ConsoleWindowClass, CASCADIA_HOSTING_WINDOW_CLASS, mintty, VirtualConsoleClass) and uses Ctrl+Shift+V or Shift+Insert instead of Ctrl+V
-- [ ] **INJC-03**: Simulated keystroke injection is available as an alternative — character-by-character via SendInput with KEYEVENTF_UNICODE
+- [x] **INJC-01**: FlashPaste is the default injection method: save clipboard → write text → simulate paste → wait 500ms → restore clipboard
+- [x] **INJC-02**: FlashPaste detects terminal windows (ConsoleWindowClass, CASCADIA_HOSTING_WINDOW_CLASS, mintty, VirtualConsoleClass) and uses Ctrl+Shift+V or Shift+Insert instead of Ctrl+V
+- [x] **INJC-03**: Simulated keystroke injection is available as an alternative — character-by-character via SendInput with KEYEVENTF_UNICODE
 - [x] **INJC-04**: Keystroke injection speed is configurable: slow (10ms/char), normal (5ms/char), fast (2ms/char)
-- [ ] **INJC-05**: Newline characters are injected as VK_RETURN keystrokes in keystroke mode
-- [ ] **INJC-06**: Manual clipboard mode copies transcription to clipboard without auto-pasting
-- [ ] **INJC-07**: Before injection, app checks if the target process runs at higher integrity level; if so, shows dialog with "Relaunch as Admin" and "Copy to clipboard" options
+- [x] **INJC-05**: Newline characters are injected as VK_RETURN keystrokes in keystroke mode
+- [x] **INJC-06**: Manual clipboard mode copies transcription to clipboard without auto-pasting
+- [x] **INJC-07**: Before injection, app checks if the target process runs at higher integrity level; if so, shows dialog with "Relaunch as Admin" and "Copy to clipboard" options
 - [ ] **INJC-08**: Pressing Escape or the hotkey during keystroke injection cancels immediately; toast shows "X of Y characters typed"
 - [x] **INJC-09**: Automatic fallback chain when selected method fails: Keystrokes → FlashPaste → Clipboard; FlashPaste → Clipboard (configurable toggle)
-- [ ] **INJC-10**: Focus is restored to the target window before injection if VoxFlow's window gained focus
-- [ ] **INJC-11**: Unicode text (accented characters, symbols) is handled correctly in all injection modes
+- [x] **INJC-10**: Focus is restored to the target window before injection if VoxFlow's window gained focus
+- [x] **INJC-11**: Unicode text (accented characters, symbols) is handled correctly in all injection modes
 
 ### System Tray
 
@@ -175,17 +175,17 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 | LOCL-05 | Phase 10 | Pending |
 | LOCL-06 | Phase 10 | Pending |
 | LOCL-07 | Phase 10 | Pending |
-| INJC-01 | Phase 6 | Pending |
-| INJC-02 | Phase 6 | Pending |
-| INJC-03 | Phase 6 | Pending |
+| INJC-01 | Phase 6 | Complete |
+| INJC-02 | Phase 6 | Complete |
+| INJC-03 | Phase 6 | Complete |
 | INJC-04 | Phase 6 | Complete |
-| INJC-05 | Phase 6 | Pending |
-| INJC-06 | Phase 6 | Pending |
-| INJC-07 | Phase 6 | Pending |
+| INJC-05 | Phase 6 | Complete |
+| INJC-06 | Phase 6 | Complete |
+| INJC-07 | Phase 6 | Complete |
 | INJC-08 | Phase 6 | Pending |
 | INJC-09 | Phase 6 | Complete |
-| INJC-10 | Phase 6 | Pending |
-| INJC-11 | Phase 6 | Pending |
+| INJC-10 | Phase 6 | Complete |
+| INJC-11 | Phase 6 | Complete |
 | TRAY-01 | Phase 1 | Complete |
 | TRAY-02 | Phase 1 | Complete |
 | TRAY-03 | Phase 1 | Complete |
