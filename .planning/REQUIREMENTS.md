@@ -64,7 +64,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 - [x] **INJC-05**: Newline characters are injected as VK_RETURN keystrokes in keystroke mode
 - [x] **INJC-06**: Manual clipboard mode copies transcription to clipboard without auto-pasting
 - [x] **INJC-07**: Before injection, app checks if the target process runs at higher integrity level; if so, shows dialog with "Relaunch as Admin" and "Copy to clipboard" options
-- [ ] **INJC-08**: Pressing Escape or the hotkey during keystroke injection cancels immediately; toast shows "X of Y characters typed"
+- [x] **INJC-08**: Pressing Escape or the hotkey during keystroke injection cancels immediately; toast shows "X of Y characters typed"
 - [x] **INJC-09**: Automatic fallback chain when selected method fails: Keystrokes → FlashPaste → Clipboard; FlashPaste → Clipboard (configurable toggle)
 - [x] **INJC-10**: Focus is restored to the target window before injection if VoxFlow's window gained focus
 - [x] **INJC-11**: Unicode text (accented characters, symbols) is handled correctly in all injection modes
@@ -182,7 +182,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 | INJC-05 | Phase 6 | Complete |
 | INJC-06 | Phase 6 | Complete |
 | INJC-07 | Phase 6 | Complete |
-| INJC-08 | Phase 6 | Pending |
+| INJC-08 | Phase 6 | Complete |
 | INJC-09 | Phase 6 | Complete |
 | INJC-10 | Phase 6 | Complete |
 | INJC-11 | Phase 6 | Complete |
