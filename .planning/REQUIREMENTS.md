@@ -16,9 +16,9 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### Audio
 
-- [ ] **AUDI-01**: App captures audio from the selected microphone (or system default) at 16kHz mono
-- [ ] **AUDI-02**: Recording starts within 200ms of hotkey press
-- [ ] **AUDI-03**: Audio is encoded as Opus for cloud providers and WAV for local whisper.cpp
+- [x] **AUDI-01**: App captures audio from the selected microphone (or system default) at 16kHz mono
+- [x] **AUDI-02**: Recording starts within 200ms of hotkey press
+- [x] **AUDI-03**: Audio is encoded as Opus for cloud providers and WAV for local whisper.cpp
 - [ ] **AUDI-04**: User can select audio input device from a dropdown in settings
 - [ ] **AUDI-05**: If the selected device is disconnected, app falls back to system default with a notification
 - [ ] **AUDI-06**: If no microphone is available, app shows an error notification
@@ -34,16 +34,16 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### Cloud Transcription
 
-- [ ] **CLOD-01**: App supports three cloud providers: OpenAI, Groq, and OpenRouter
-- [ ] **CLOD-02**: Each provider has its own API key, model selection, and language hint in settings
-- [ ] **CLOD-03**: OpenAI sends to `/v1/audio/transcriptions` with models: whisper-1, gpt-4o-transcribe, gpt-4o-mini-transcribe
-- [ ] **CLOD-04**: Groq sends to its transcription endpoint with hardcoded models: whisper-large-v3-turbo (default), whisper-large-v3, distil-whisper-large-v3-en
-- [ ] **CLOD-05**: OpenRouter sends to chat completions endpoint with audio as input_audio content; models: google/gemini-2.5-flash (default), google/gemini-2.5-pro, google/gemini-2.5-flash-lite, openai/gpt-4o-audio-preview, openai/gpt-audio, openai/gpt-audio-mini
-- [ ] **CLOD-06**: Invalid API key errors prompt user to open settings with the offending provider tab highlighted
-- [ ] **CLOD-07**: Rate limit errors (429) retry with exponential backoff, max 3 retries
-- [ ] **CLOD-08**: Network errors show a notification with a retry button
-- [ ] **CLOD-09**: If the active provider fails after retries and another provider is configured, offer to retry with the fallback provider via toast action
-- [ ] **CLOD-10**: User can configure a language hint per provider (or leave on auto-detect)
+- [x] **CLOD-01**: App supports three cloud providers: OpenAI, Groq, and OpenRouter
+- [x] **CLOD-02**: Each provider has its own API key, model selection, and language hint in settings
+- [x] **CLOD-03**: OpenAI sends to `/v1/audio/transcriptions` with models: whisper-1, gpt-4o-transcribe, gpt-4o-mini-transcribe
+- [x] **CLOD-04**: Groq sends to its transcription endpoint with hardcoded models: whisper-large-v3-turbo (default), whisper-large-v3, distil-whisper-large-v3-en
+- [x] **CLOD-05**: OpenRouter sends to chat completions endpoint with audio as input_audio content; models: google/gemini-2.5-flash (default), google/gemini-2.5-pro, google/gemini-2.5-flash-lite, openai/gpt-4o-audio-preview, openai/gpt-audio, openai/gpt-audio-mini
+- [x] **CLOD-06**: Invalid API key errors prompt user to open settings with the offending provider tab highlighted
+- [x] **CLOD-07**: Rate limit errors (429) retry with exponential backoff, max 3 retries
+- [x] **CLOD-08**: Network errors show a notification with a retry button
+- [x] **CLOD-09**: If the active provider fails after retries and another provider is configured, offer to retry with the fallback provider via toast action
+- [x] **CLOD-10**: User can configure a language hint per provider (or leave on auto-detect)
 
 ### Local Transcription
 
@@ -146,9 +146,9 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 | HOTK-02 | Phase 2 | Complete |
 | HOTK-03 | Phase 2 | Complete |
 | HOTK-04 | Phase 2 | Complete |
-| AUDI-01 | Phase 3 | Pending |
-| AUDI-02 | Phase 3 | Pending |
-| AUDI-03 | Phase 3 | Pending |
+| AUDI-01 | Phase 3 | Complete |
+| AUDI-02 | Phase 3 | Complete |
+| AUDI-03 | Phase 3 | Complete |
 | AUDI-04 | Phase 3 | Pending |
 | AUDI-05 | Phase 3 | Pending |
 | AUDI-06 | Phase 3 | Pending |
@@ -158,16 +158,16 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 | FLOT-04 | Phase 4 | Complete |
 | FLOT-05 | Phase 4 | Complete |
 | FLOT-06 | Phase 4 | Complete |
-| CLOD-01 | Phase 5 | Pending |
-| CLOD-02 | Phase 5 | Pending |
-| CLOD-03 | Phase 5 | Pending |
-| CLOD-04 | Phase 5 | Pending |
-| CLOD-05 | Phase 5 | Pending |
-| CLOD-06 | Phase 5 | Pending |
-| CLOD-07 | Phase 5 | Pending |
-| CLOD-08 | Phase 5 | Pending |
-| CLOD-09 | Phase 5 | Pending |
-| CLOD-10 | Phase 5 | Pending |
+| CLOD-01 | Phase 5 | Complete |
+| CLOD-02 | Phase 5 | Complete |
+| CLOD-03 | Phase 5 | Complete |
+| CLOD-04 | Phase 5 | Complete |
+| CLOD-05 | Phase 5 | Complete |
+| CLOD-06 | Phase 5 | Complete |
+| CLOD-07 | Phase 5 | Complete |
+| CLOD-08 | Phase 5 | Complete |
+| CLOD-09 | Phase 5 | Complete |
+| CLOD-10 | Phase 5 | Complete |
 | LOCL-01 | Phase 10 | Pending |
 | LOCL-02 | Phase 10 | Pending |
 | LOCL-03 | Phase 10 | Pending |

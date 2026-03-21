@@ -6,14 +6,32 @@ current_phase: 5
 current_phase_name: Cloud Transcription
 current_plan: 2
 status: executing
-stopped_at: Completed 04-floating-indicator-04-06-PLAN.md
-last_updated: "2026-03-15T22:20:47.784Z"
-last_activity: 2026-03-15
+stopped_at: Completed 05.1-implement-real-pcm-accumulation-and-opus-encoder 05.1-05-PLAN.md
+last_updated: "2026-03-20T20:49:41.050Z"
+last_activity: 2026-03-20
+progress:
+  total_phases: 11
+  completed_phases: 6
+  total_plans: 28
+  completed_plans: 28
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+current_phase: 5
+current_phase_name: Cloud Transcription
+current_plan: 2
+status: executing
+stopped_at: Completed 05-cloud-transcription 05-07-PLAN.md
+last_updated: "2026-03-17T23:56:00.291Z"
+last_activity: 2026-03-17
 progress:
   total_phases: 10
-  completed_phases: 4
-  total_plans: 16
-  completed_plans: 16
+  completed_phases: 5
+  total_plans: 23
+  completed_plans: 23
 ---
 
 ---
@@ -50,7 +68,7 @@ Current Phase Name: Cloud Transcription
 Current Plan: 2
 Total Plans in Phase: 2
 status: ready_to_execute
-Last Activity: 2026-03-15
+Last Activity: 2026-03-20
 
 Progress: [███░░░░░░░] 33%
 
@@ -81,6 +99,18 @@ Progress: [███░░░░░░░] 33%
 | Phase 04-floating-indicator P04-04 | 9m | 2 tasks | 4 files |
 | Phase 04-floating-indicator P04-05 | 3m | 3 tasks | 3 files |
 | Phase 04-floating-indicator P04-06 | 14m | 2 tasks | 4 files |
+| Phase 05-cloud-transcription P05-01 | 1289 | 3 tasks | 8 files |
+| Phase 05-cloud-transcription P02 | 540 | 3 tasks | 2 files |
+| Phase 05-cloud-transcription P03 | 15 | 3 tasks | 10 files |
+| Phase 05-cloud-transcription P04 | 4 | 2 tasks | 4 files |
+| Phase 05-cloud-transcription P06 | 3 | 2 tasks | 2 files |
+| Phase 05-cloud-transcription P05-05 | 15 | 2 tasks | 4 files |
+| Phase 05-cloud-transcription P07 | 3 | 1 tasks | 1 files |
+| Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder P01 | 10 | 2 tasks | 4 files |
+| Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder P02 | 8 | 1 tasks | 2 files |
+| Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder P03 | 2 | 1 tasks | 2 files |
+| Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder P04 | 8 | 2 tasks | 3 files |
+| Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder P05 | 2 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -113,10 +143,38 @@ Recent decisions affecting current work:
 - [Phase 04-floating-indicator]: Treat off-screen saved coordinates as invalid and fallback to deterministic bottom-right placement.
 - [Phase 04-floating-indicator]: Keep cpal::Stream ownership inside dedicated capture thread; AppState stores stop/join controls only.
 - [Phase 04-floating-indicator]: Recording waveform now requires fresh backend audio-level events and drops to baseline on stale data.
+- [Phase 05-cloud-transcription]: async-trait crate used for object-safe async TranscriptionProviderTrait
+- [Phase 05-cloud-transcription]: Testable helper functions extracted (form_field_names, build_body, status_to_error) to avoid HTTP mocking
+- [Phase 05-cloud-transcription]: OpenRouter format='ogg' (identifier, not MIME type audio/ogg)
+- [Phase 05-cloud-transcription]: Pure helper run_with_retry_inner extracted so retry logic is unit-testable without AppHandle mocking
+- [Phase 05-cloud-transcription]: Explicit MutexGuard intermediate used to satisfy borrow checker without holding across await points
+- [Phase 05-cloud-transcription]: tauri::async_runtime::spawn used (not tokio::spawn) to avoid reactor panics in Tauri v2 for transcription task
+- [Phase 05-cloud-transcription]: transcribe_with_provider clones TranscriptionConfig and overrides provider field — no AppState mutation for single fallback call
+- [Phase 05-cloud-transcription]: last_encoded_audio stored before async spawn in AppState so retry commands can re-send without new recording
+- [Phase 05-cloud-transcription]: Indicator stays in show_idle after transcription error so JS event loop delivers toast before indicator hides
+- [Phase 05-cloud-transcription]: hide_indicator is frontend-invoked after toast clears — keeps error UX in frontend control
+- [Phase 05-cloud-transcription]: invalid_key shows toast with Open Settings action button (not auto-opens Settings)
+- [Phase 05-cloud-transcription]: Toast CSS appended to styles.css matching existing indicator colour palette
+- [Phase 05-cloud-transcription]: OpenAI Whisper requires WAV not Opus -- format_for_provider routes Openai to EncodedFormat::Wav
+- [Phase 05-cloud-transcription]: Network error arms in service.rs emit friendly string, not raw reqwest error URL
+- [Phase 05-cloud-transcription]: Toast container uses inset:0 relative to .indicator-root (position:relative) so it stays within OS window rectangle and is never clipped by compositor
+- [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: Integer decimation for rates cleanly divisible by 16kHz (48k); rubato FftFixedInOut for fractional ratios; nearest-neighbour fallback
+- [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: pcm_emitter_stop shares the same AtomicBool as level_emitter_stop — one flag stops both capture paths
+- [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: audiopus error types mapped with format\!('{e:?}') since they do not implement Display
+- [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: Empty PCM produces headers-only Ogg output (no audio packets) - valid per RFC 7845
+- [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: Log plugin must be first in the plugin chain to capture early-phase log calls before .setup() runs
+- [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: TranscriptionErrorCode::TooShort added as new variant — short-recording toasts use TooShort code to let frontend distinguish from network/key errors
+- [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: AudioErrorCode::EncodeFailed reused for too-short audio-error telemetry — no TooShort variant in AudioErrorCode, consistent with existing pattern
+- [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: attachConsole() return value (UnlistenFn) deliberately ignored — app-lifetime listener needs no cleanup
+- [Phase 05.1-implement-real-pcm-accumulation-and-opus-encoder]: top-level await valid in window entry points since package.json has type:module and Vite handles it
+
+### Roadmap Evolution
+
+- Phase 05.1 inserted after Phase 5: implement real PCM accumulation and Opus encoder (URGENT)
 
 ### Pending Todos
 
-None yet.
+- `2026-03-18-implement-real-pcm-accumulation-and-opus-encoder.md` — Implement real PCM accumulation and Opus encoder (Phase 3 gap: synthetic_capture_pcm stub + fake Opus encoder + no log backend)
 
 ### Blockers/Concerns
 
@@ -127,7 +185,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T22:20:47.667Z
-Stopped at: Completed 04-floating-indicator-04-06-PLAN.md
+Last session: 2026-03-20T20:43:36.618Z
+Stopped at: Completed 05.1-implement-real-pcm-accumulation-and-opus-encoder 05.1-05-PLAN.md
 Resume file: None
 

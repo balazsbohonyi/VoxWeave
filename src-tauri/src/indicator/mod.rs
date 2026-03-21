@@ -9,6 +9,7 @@ use events::{
 use tauri::{AppHandle, Emitter, Manager, Runtime};
 
 const INDICATOR_LABEL: &str = "indicator";
+const TOAST_LABEL: &str = "toast";
 
 fn get_window<R: Runtime>(app: &AppHandle<R>) -> Result<tauri::WebviewWindow<R>, String> {
     app.get_webview_window(INDICATOR_LABEL)
@@ -85,6 +86,78 @@ pub fn hide<R: Runtime>(app: &AppHandle<R>) {
         let _ = window.set_ignore_cursor_events(true);
     }
     let _ = app.emit(INDICATOR_HIDDEN_EVENT, ());
+}
+
+/// Shows the toast window adjacent to the indicator, delivers the payload via eval,
+/// and hides the indicator. Uses eval (not Tauri events) because WebView2 may not
+/// deliver events to hidden windows before they are made visible.
+pub fn show_toast_window<R: Runtime, S: serde::Serialize>(
+    app: &AppHandle<R>,
+    payload: &S,
+) -> Result<(), String> {
+    let toast_win = app
+        .get_webview_window(TOAST_LABEL)
+        .ok_or_else(|| "Toast window not available".to_string())?;
+
+    let json = serde_json::to_string(payload).map_err(|e| e.to_string())?;
+    let eval_script = format!(
+        "window.__voxflowShowToast && window.__voxflowShowToast({})",
+        json
+    );
+
+    // Already visible — deliver payload directly without repositioning.
+    if toast_win.is_visible().map_err(|e| e.to_string())? {
+        let _ = toast_win.eval(&eval_script);
+        return Ok(());
+    }
+
+    let state = app.state::<AppState>();
+    let (position_x, position_y) = {
+        let config = state.config.lock().map_err(|e| e.to_string())?;
+        (config.indicator.position_x, config.indicator.position_y)
+    };
+
+    let Some(monitor) = app.primary_monitor().map_err(|e| e.to_string())? else {
+        // No monitor info — show at fallback position without repositioning.
+        window::apply_window_policy(&toast_win)?;
+        toast_win.show().map_err(|e| e.to_string())?;
+        let _ = toast_win.eval(&eval_script);
+        hide_indicator_window(app);
+        return Ok(());
+    };
+
+    let rect = window::monitor_rect(&monitor);
+    let (indicator_x, indicator_y) = window::resolve_position(rect, position_x, position_y);
+    let direction = window::compute_toast_direction(indicator_y, rect);
+    let toast_y = if direction == "above" {
+        indicator_y - window::TOAST_GAP - window::TOAST_HEIGHT
+    } else {
+        indicator_y + window::INDICATOR_HEIGHT + window::TOAST_GAP
+    };
+
+    window::apply_window_policy(&toast_win)?;
+    window::place_window(&toast_win, indicator_x, toast_y)?;
+    toast_win.show().map_err(|e| e.to_string())?;
+    let _ = toast_win.eval(&eval_script);
+    hide_indicator_window(app);
+
+    Ok(())
+}
+
+/// Hides the toast window and shows the indicator in idle state.
+pub fn hide_toast_window<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
+    if let Some(toast_win) = app.get_webview_window(TOAST_LABEL) {
+        let _ = toast_win.hide();
+        let _ = toast_win.set_ignore_cursor_events(true);
+    }
+    show_idle(app)
+}
+
+fn hide_indicator_window<R: Runtime>(app: &AppHandle<R>) {
+    if let Some(ind) = app.get_webview_window(INDICATOR_LABEL) {
+        let _ = ind.hide();
+        let _ = ind.set_ignore_cursor_events(true);
+    }
 }
 
 pub fn begin_drag<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {

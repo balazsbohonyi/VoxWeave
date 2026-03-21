@@ -5,14 +5,32 @@ mod hotkey;
 mod indicator;
 mod platform;
 mod state;
+mod transcription;
 mod tray;
 
 use state::AppState;
 use tauri::{Manager, WindowEvent};
+use tauri_plugin_log::{Builder as LogBuilder, Target, TargetKind};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let log_level = if cfg!(debug_assertions) {
+        log::LevelFilter::Debug
+    } else {
+        log::LevelFilter::Info
+    };
+
     tauri::Builder::default()
+        .plugin(
+            LogBuilder::new()
+                .level(log_level)
+                .targets([
+                    Target::new(TargetKind::Stdout),
+                    Target::new(TargetKind::LogDir { file_name: None }),
+                    Target::new(TargetKind::Webview),
+                ])
+                .build(),
+        )
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             // Managed state — single source of truth across commands and tray
@@ -49,7 +67,9 @@ pub fn run() {
             }
 
             // Indicator window is pre-defined in tauri.conf and starts hidden.
-            // Enforce non-focus/click-through defaults at runtime to avoid input theft.
+            // Enforce non-focus/click-through defaults. Toast is now a separate window
+            // so there is no expanded height to reset — never call resize_window here
+            // (set_resizable(true) triggers WS_THICKFRAME minimum size enforcement on Windows).
             if let Some(indicator_win) = app.get_webview_window("indicator") {
                 let _ = indicator::window::apply_window_policy(&indicator_win);
             }
@@ -77,6 +97,11 @@ pub fn run() {
             commands::indicator::get_indicator_state,
             commands::indicator::get_recording_state,
             commands::indicator::toggle_recording_from_indicator,
+            commands::indicator::hide_indicator,
+            commands::transcription::retry_transcription,
+            commands::transcription::retry_transcription_with_fallback,
+            commands::transcription::open_settings_on_transcription_tab,
+            commands::indicator::hide_toast_window,
         ])
         .run(tauri::generate_context!())
         .expect("error while running VoxFlow");

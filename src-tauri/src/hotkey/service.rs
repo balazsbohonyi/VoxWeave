@@ -1,5 +1,7 @@
 use crate::audio;
 use crate::config::{persistence, AppConfig};
+use crate::transcription;
+use crate::transcription::service::{TranscriptionErrorCode, TranscriptionErrorPayload};
 use crate::hotkey::normalize::normalize_hotkey;
 use crate::indicator;
 use crate::state::{AppState, HotkeyAvailability, HotkeyWarning, RecordingState};
@@ -93,7 +95,7 @@ pub(crate) fn register_startup_hotkey_with<R: Runtime, F>(
             };
             *state.hotkey_availability.lock().unwrap() = HotkeyAvailability::Unavailable;
             *state.hotkey_warning.lock().unwrap() = Some(warning.clone());
-            emit_hotkey_warning(app, &warning, HotkeyWarningSource::Startup, true);
+            emit_hotkey_warning(app, &warning, HotkeyWarningSource::Startup, false);
             log::warn!("Failed to register global hotkey: {err}");
         }
     }
@@ -194,7 +196,7 @@ where
                 .lock()
                 .map_err(|e| e.to_string())? = Some(warning.clone());
 
-            emit_hotkey_warning(app, &warning, HotkeyWarningSource::Save, true);
+            emit_hotkey_warning(app, &warning, HotkeyWarningSource::Save, false);
 
             Ok(current_config)
         }
@@ -246,22 +248,66 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
     }
 
     if previous_state == RecordingState::Recording {
-        indicator::show_processing(app);
-        if let Err(err) = audio::stop_recording_and_encode(app) {
-            log::warn!("Failed to finalize recording: {err}");
-            indicator::hide(app);
+        match audio::stop_recording_and_encode(app) {
+            Err(err) => {
+                log::warn!("Failed to finalize recording: {err}");
+                let state = app.state::<AppState>();
+                *state.recording_state.lock().unwrap() = RecordingState::Idle;
+                tray::update_recording_menu(app, RecordingState::Idle);
+                // Show the error as a toast in the indicator overlay.
+                // show_toast_window positions, shows, and hides the indicator itself.
+                // Use TranscriptionErrorPayload because that is what the toast JS expects.
+                let payload = TranscriptionErrorPayload {
+                    code: TranscriptionErrorCode::TooShort,
+                    message: err.clone(),
+                    provider: None,
+                    fallback_provider: None,
+                    retryable: false,
+                };
+                if let Err(toast_err) = indicator::show_toast_window(app, &payload) {
+                    log::warn!("Failed to show error toast: {toast_err}");
+                    // Fallback: hide the indicator so it is not left dangling.
+                    indicator::hide(app);
+                }
+            }
+            Ok(encoded) => {
+                // Store audio for retry commands before spawning
+                {
+                    let state = app.state::<AppState>();
+                    *state.last_encoded_audio.lock().unwrap() = Some(encoded.clone());
+                }
+                // Show processing state on indicator while transcription runs
+                indicator::show_processing(app);
+                let app_clone = app.clone();
+                tauri::async_runtime::spawn(async move {
+                    match transcription::transcribe_with_retry(&app_clone, &encoded).await {
+                        Ok(_text) => {
+                            // Phase 6 will handle injection here.
+                            // For now: show injecting state briefly then hide.
+                            indicator::show_injecting(&app_clone);
+                        }
+                        Err(()) => {
+                            // show_toast_window already showed the toast and hid the indicator.
+                            // Only restore idle indicator if the toast is not currently visible
+                            // (e.g. cancelled errors skip the toast entirely).
+                            let toast_visible = app_clone
+                                .get_webview_window("toast")
+                                .and_then(|w| w.is_visible().ok())
+                                .unwrap_or(false);
+                            if !toast_visible {
+                                let _ = indicator::show_idle(&app_clone);
+                            }
+                        }
+                    }
+                    // Always reset state after transcription attempt completes
+                    if let Some(state) = app_clone.try_state::<AppState>() {
+                        *state.recording_state.lock().unwrap() = RecordingState::Idle;
+                    }
+                    tray::update_recording_menu(&app_clone, RecordingState::Idle);
+                });
+            }
         }
-        complete_transcription_placeholder(app);
     }
-}
-
-fn complete_transcription_placeholder<R: Runtime>(app: &AppHandle<R>) {
-    indicator::show_injecting(app);
-    if let Some(state) = app.try_state::<AppState>() {
-        *state.recording_state.lock().unwrap() = RecordingState::Idle;
-    }
-    tray::update_recording_menu(app, RecordingState::Idle);
-    indicator::hide(app);
 }
 
 fn emit_hotkey_warning<R: Runtime>(

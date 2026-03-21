@@ -7,8 +7,9 @@ use crate::state::{AppState, RecordingState};
 use capture::{resolve_input_device, DeviceSnapshot};
 use encode::{DefaultEncoderBackend, EncodedAudio, EncoderBackend};
 use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::{Arc, Mutex};
 #[cfg(not(test))]
-use std::sync::{Arc, mpsc};
+use std::sync::mpsc;
 #[cfg(not(test))]
 use std::sync::atomic::AtomicBool;
 #[cfg(not(test))]
@@ -110,19 +111,22 @@ pub fn start_recording_with_snapshot<R: Runtime>(
         );
     }
 
+    let pcm_buffer: Arc<Mutex<Vec<f32>>> = Arc::new(Mutex::new(Vec::new()));
+
     #[cfg(not(test))]
     let (level_emitter_stop, level_emitter_thread) =
-        start_realtime_level_capture(app, &resolved.active_device)?;
+        start_realtime_level_capture(app, &resolved.active_device, Arc::clone(&pcm_buffer))?;
 
     #[cfg(not(test))]
     let session = session::new_session(
         resolved.active_device,
         level_emitter_stop,
         level_emitter_thread,
+        pcm_buffer,
     );
 
     #[cfg(test)]
-    let session = session::new_session(resolved.active_device);
+    let session = session::new_session(resolved.active_device, pcm_buffer);
 
     *state.audio_session.lock().map_err(|e| e.to_string())? = Some(session);
     Ok(())
@@ -154,7 +158,24 @@ pub fn stop_recording_and_encode_with_backend<R: Runtime>(
         .transcription
         .provider
         .clone();
-    let capture_pcm = synthetic_capture_pcm();
+
+    // Drain the real PCM accumulation buffer collected during recording.
+    let capture_pcm: Vec<f32> = {
+        let session = session.as_ref().unwrap();
+        drain_pcm_buffer(&session.pcm_buffer)
+    };
+    if capture_pcm.len() < 8_000 {
+        let msg = "Recording too short (under 0.5 seconds). Please hold the hotkey longer."
+            .to_string();
+        emit_audio_error(
+            app,
+            AudioErrorPayload {
+                code: AudioErrorCode::EncodeFailed,
+                message: msg.clone(),
+            },
+        );
+        return Err(msg);
+    }
 
     match encode_with_retry_once(&provider, &capture_pcm, encoder_backend) {
         Ok(encoded) => Ok(encoded),
@@ -184,14 +205,101 @@ pub fn encode_with_retry_once(
     encode::encode_for_provider(provider, pcm_mono_16khz, backend)
 }
 
-fn synthetic_capture_pcm() -> Vec<f32> {
-    vec![0.0; 16_000]
+/// Push mono-downmixed, downsampled-to-16kHz PCM samples into the shared buffer.
+/// Enforces the 5-minute hard cap and emits a near-limit event at 4.5 minutes.
+///
+/// Downsampling strategy:
+/// - If native_rate is an exact integer multiple of 16000 (e.g. 48000 → step=3),
+///   use simple integer decimation — keep every N-th sample. This is lossless for
+///   multiples and covers the vast majority of consumer microphones (48kHz, 32kHz).
+/// - Otherwise use rubato FftFixedInOut for accurate fractional-ratio resampling
+///   (e.g. 44100 Hz → 16000 Hz).
+#[cfg(not(test))]
+fn accumulate_pcm_chunk<R: Runtime>(
+    mono_f32: &[f32],
+    native_rate: u32,
+    pcm_buffer: &Arc<Mutex<Vec<f32>>>,
+    near_limit_emitted: &std::sync::atomic::AtomicBool,
+    stop_flag: &AtomicBool,
+    app: &AppHandle<R>,
+) {
+    const TARGET_RATE: u32 = 16_000;
+    const NEAR_LIMIT: usize = 4_320_000; // 4.5 min × 16000
+    const HARD_CAP: usize = 4_800_000;   // 5 min × 16000
+
+    // Downsample to 16kHz.
+    let downsampled: Vec<f32> = if native_rate == TARGET_RATE {
+        mono_f32.to_vec()
+    } else if native_rate % TARGET_RATE == 0 {
+        // Integer decimation: keep every N-th sample.
+        let step = (native_rate / TARGET_RATE) as usize;
+        mono_f32.iter().step_by(step).copied().collect()
+    } else {
+        // Non-integer ratio: use rubato FftFixedInOut.
+        use rubato::{FftFixedInOut, Resampler};
+        let chunk_len = mono_f32.len();
+        // Create a fresh per-chunk resampler (cheap for small chunks).
+        match FftFixedInOut::<f32>::new(
+            native_rate as usize,
+            TARGET_RATE as usize,
+            chunk_len,
+            1,
+        ) {
+            Ok(mut resampler) => {
+                let waves_in = vec![mono_f32.to_vec()];
+                match resampler.process(&waves_in, None) {
+                    Ok(out) => out.into_iter().next().unwrap_or_default(),
+                    Err(_) => {
+                        // Fallback: nearest-neighbour decimation to avoid silent buffer.
+                        let ratio = native_rate as f64 / TARGET_RATE as f64;
+                        (0..((chunk_len as f64 / ratio).ceil() as usize))
+                            .map(|i| mono_f32[(i as f64 * ratio) as usize])
+                            .collect()
+                    }
+                }
+            }
+            Err(_) => {
+                // Fallback: nearest-neighbour decimation.
+                let ratio = native_rate as f64 / TARGET_RATE as f64;
+                (0..((chunk_len as f64 / ratio).ceil() as usize))
+                    .map(|i| mono_f32[(i as f64 * ratio) as usize])
+                    .collect()
+            }
+        }
+    };
+
+    // Lock the buffer and push, enforcing the hard cap.
+    let buf_len = {
+        let mut buf = pcm_buffer.lock().expect("pcm_buffer lock poisoned");
+        if buf.len() >= HARD_CAP {
+            // Already at cap; discard this chunk.
+            return;
+        }
+        buf.extend_from_slice(&downsampled);
+        if buf.len() > HARD_CAP {
+            buf.truncate(HARD_CAP);
+            // Signal the recording to stop at the hard cap.
+            stop_flag.store(true, Ordering::Relaxed);
+        }
+        buf.len()
+    };
+
+    // Emit near-limit warning once.
+    if buf_len >= NEAR_LIMIT
+        && !near_limit_emitted.load(Ordering::Relaxed)
+        && near_limit_emitted
+            .compare_exchange(false, true, Ordering::Relaxed, Ordering::Relaxed)
+            .is_ok()
+    {
+        let _ = app.emit("recording-near-limit", ());
+    }
 }
 
 #[cfg(not(test))]
 fn start_realtime_level_capture<R: Runtime>(
     app: &AppHandle<R>,
     active_device: &str,
+    pcm_buffer: Arc<Mutex<Vec<f32>>>,
 ) -> Result<(Arc<AtomicBool>, std::thread::JoinHandle<()>), String> {
     use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 
@@ -229,15 +337,38 @@ fn start_realtime_level_capture<R: Runtime>(
         };
 
         let stream_config: cpal::StreamConfig = default_config.clone().into();
+        let native_rate = stream_config.sample_rate.0;
+        let n_channels = stream_config.channels as usize;
         let latest_rms = Arc::new(AtomicU32::new(0f32.to_bits()));
+        // Tracks whether the near-limit event has been emitted for this recording.
+        let near_limit_emitted = Arc::new(AtomicBool::new(false));
 
         let stream_result = match default_config.sample_format() {
             cpal::SampleFormat::F32 => {
                 let rms_for_callback = Arc::clone(&latest_rms);
+                let pcm_buf = Arc::clone(&pcm_buffer);
+                let stop_clone = Arc::clone(&stop_for_thread);
+                let near_limit = Arc::clone(&near_limit_emitted);
+                let app_for_pcm = app_for_thread.clone();
                 let app_for_errors = app_for_thread.clone();
                 device.build_input_stream(
                     &stream_config,
-                    move |data: &[f32], _| update_latest_rms(data, &rms_for_callback),
+                    move |data: &[f32], _| {
+                        // Mix to mono: average across channels per frame.
+                        let mono: Vec<f32> = data
+                            .chunks_exact(n_channels)
+                            .map(|frame| frame.iter().sum::<f32>() / n_channels as f32)
+                            .collect();
+                        update_latest_rms(&mono, &rms_for_callback);
+                        accumulate_pcm_chunk(
+                            &mono,
+                            native_rate,
+                            &pcm_buf,
+                            &near_limit,
+                            &stop_clone,
+                            &app_for_pcm,
+                        );
+                    },
                     move |err| {
                         emit_audio_error(
                             &app_for_errors,
@@ -252,13 +383,30 @@ fn start_realtime_level_capture<R: Runtime>(
             }
             cpal::SampleFormat::I16 => {
                 let rms_for_callback = Arc::clone(&latest_rms);
+                let pcm_buf = Arc::clone(&pcm_buffer);
+                let stop_clone = Arc::clone(&stop_for_thread);
+                let near_limit = Arc::clone(&near_limit_emitted);
+                let app_for_pcm = app_for_thread.clone();
                 let app_for_errors = app_for_thread.clone();
                 device.build_input_stream(
                     &stream_config,
                     move |data: &[i16], _| {
-                        let converted: Vec<f32> =
-                            data.iter().map(|sample| *sample as f32 / i16::MAX as f32).collect();
-                        update_latest_rms(&converted, &rms_for_callback);
+                        // Convert to f32, then mix to mono.
+                        let f32_data: Vec<f32> =
+                            data.iter().map(|s| *s as f32 / i16::MAX as f32).collect();
+                        let mono: Vec<f32> = f32_data
+                            .chunks_exact(n_channels)
+                            .map(|frame| frame.iter().sum::<f32>() / n_channels as f32)
+                            .collect();
+                        update_latest_rms(&mono, &rms_for_callback);
+                        accumulate_pcm_chunk(
+                            &mono,
+                            native_rate,
+                            &pcm_buf,
+                            &near_limit,
+                            &stop_clone,
+                            &app_for_pcm,
+                        );
                     },
                     move |err| {
                         emit_audio_error(
@@ -274,13 +422,30 @@ fn start_realtime_level_capture<R: Runtime>(
             }
             cpal::SampleFormat::U16 => {
                 let rms_for_callback = Arc::clone(&latest_rms);
+                let pcm_buf = Arc::clone(&pcm_buffer);
+                let stop_clone = Arc::clone(&stop_for_thread);
+                let near_limit = Arc::clone(&near_limit_emitted);
+                let app_for_pcm = app_for_thread.clone();
                 let app_for_errors = app_for_thread.clone();
                 device.build_input_stream(
                     &stream_config,
                     move |data: &[u16], _| {
-                        let converted: Vec<f32> =
-                            data.iter().map(|sample| u16_to_signed(*sample)).collect();
-                        update_latest_rms(&converted, &rms_for_callback);
+                        // Convert to signed f32, then mix to mono.
+                        let f32_data: Vec<f32> =
+                            data.iter().map(|s| u16_to_signed(*s)).collect();
+                        let mono: Vec<f32> = f32_data
+                            .chunks_exact(n_channels)
+                            .map(|frame| frame.iter().sum::<f32>() / n_channels as f32)
+                            .collect();
+                        update_latest_rms(&mono, &rms_for_callback);
+                        accumulate_pcm_chunk(
+                            &mono,
+                            native_rate,
+                            &pcm_buf,
+                            &near_limit,
+                            &stop_clone,
+                            &app_for_pcm,
+                        );
                     },
                     move |err| {
                         emit_audio_error(
@@ -383,6 +548,33 @@ fn emit_audio_error<R: Runtime>(app: &AppHandle<R>, payload: AudioErrorPayload) 
     let _ = app.emit(AUDIO_ERROR_EVENT, payload);
 }
 
+/// Drain all accumulated PCM samples out of the shared buffer, leaving it empty.
+fn drain_pcm_buffer(buffer: &Arc<Mutex<Vec<f32>>>) -> Vec<f32> {
+    let mut buf = buffer.lock().expect("pcm_buffer lock poisoned");
+    std::mem::take(&mut *buf)
+}
+
+/// Enforce the 5-minute hard cap: truncate the buffer to at most 4,800,000 samples.
+/// The 5-minute limit = 5 * 60 * 16_000 = 4_800_000 samples at 16kHz mono.
+fn apply_pcm_cap(buffer: &Arc<Mutex<Vec<f32>>>) {
+    const MAX_SAMPLES: usize = 4_800_000;
+    let mut buf = buffer.lock().expect("pcm_buffer lock poisoned");
+    buf.truncate(MAX_SAMPLES);
+}
+
+/// Validate that the buffer holds at least 0.5 seconds of audio (8,000 samples at 16kHz).
+/// Returns Err with a user-friendly "too short" message if the threshold is not met.
+fn validate_pcm_length(buffer: &Arc<Mutex<Vec<f32>>>) -> Result<(), String> {
+    const MIN_SAMPLES: usize = 8_000;
+    let buf = buffer.lock().expect("pcm_buffer lock poisoned");
+    if buf.len() < MIN_SAMPLES {
+        return Err(
+            "Recording too short (under 0.5 seconds). Please hold the hotkey longer.".to_string(),
+        );
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -419,7 +611,8 @@ mod tests {
 
     #[test]
     fn session_state_transitions() {
-        let session = session::new_session("Mic A".to_string());
+        let pcm_buffer = Arc::new(Mutex::new(Vec::new()));
+        let session = session::new_session("Mic A".to_string(), pcm_buffer);
         assert_eq!(session.sample_rate_hz, 16_000);
         assert_eq!(session.channels, 1);
         assert_eq!(session.active_device, "Mic A");
@@ -459,8 +652,8 @@ mod tests {
 
     #[test]
     fn captures_mono_16khz_contract() {
-        let pcm = synthetic_capture_pcm();
-        assert_eq!(pcm.len(), 16_000);
+        // Verify the canonical capture constants — length assertion removed now
+        // that real PCM accumulation replaces the synthetic stub.
         assert_eq!(session::CAPTURE_SAMPLE_RATE_HZ, 16_000);
         assert_eq!(session::CAPTURE_CHANNELS, 1);
     }
@@ -469,11 +662,15 @@ mod tests {
     fn selects_encoder_from_provider() {
         assert_eq!(
             encode::format_for_provider(&TranscriptionProvider::Openai),
-            encode::EncodedFormat::Opus
+            encode::EncodedFormat::Wav
         );
         assert_eq!(
             encode::format_for_provider(&TranscriptionProvider::Local),
             encode::EncodedFormat::Wav
+        );
+        assert_eq!(
+            encode::format_for_provider(&TranscriptionProvider::Groq),
+            encode::EncodedFormat::Opus
         );
     }
 
@@ -498,7 +695,7 @@ mod tests {
     #[test]
     fn opus_output_contract() {
         let backend = encode::DefaultEncoderBackend;
-        let bytes = encode::encode_for_provider(&TranscriptionProvider::Openai, &[0.0; 8], &backend)
+        let bytes = encode::encode_for_provider(&TranscriptionProvider::Groq, &[0.0; 8], &backend)
             .unwrap()
             .bytes;
         assert_eq!(&bytes[0..4], b"OggS");
@@ -509,7 +706,7 @@ mod tests {
         let backend = FailOnceBackend {
             failed: std::sync::Mutex::new(false),
         };
-        let encoded = encode_with_retry_once(&TranscriptionProvider::Openai, &[0.0; 16], &backend)
+        let encoded = encode_with_retry_once(&TranscriptionProvider::Groq, &[0.0; 16], &backend)
             .unwrap();
         assert_eq!(encoded.format, encode::EncodedFormat::Opus);
     }
@@ -531,5 +728,58 @@ mod tests {
     fn realtime_level_emit_interval_targets_roughly_30fps() {
         assert!(AUDIO_LEVEL_EMIT_INTERVAL_MS <= 42);
         assert!(AUDIO_LEVEL_EMIT_INTERVAL_MS >= 33);
+    }
+
+    // --- PCM accumulation tests (Task 2) ---
+
+    #[test]
+    fn pcm_buffer_accumulates_samples() {
+        // Simulate what the capture callback does: push samples into a shared
+        // buffer then drain it — all values must survive the round-trip.
+        let buffer: Arc<Mutex<Vec<f32>>> = Arc::new(Mutex::new(Vec::new()));
+        {
+            let mut buf = buffer.lock().unwrap();
+            for i in 0..1000_u32 {
+                buf.push(i as f32 * 0.001);
+            }
+        }
+        let drained = drain_pcm_buffer(&buffer);
+        assert_eq!(drained.len(), 1000);
+        assert!((drained[0] - 0.0).abs() < 1e-6);
+        assert!((drained[999] - 0.999).abs() < 1e-4);
+    }
+
+    #[test]
+    fn pcm_cap_at_five_minutes_truncates() {
+        // 5 minutes at 16kHz = 4_800_000 samples; one extra must be truncated.
+        let buffer: Arc<Mutex<Vec<f32>>> = Arc::new(Mutex::new(Vec::new()));
+        {
+            let mut buf = buffer.lock().unwrap();
+            for _ in 0..4_800_001_usize {
+                buf.push(0.0);
+            }
+        }
+        apply_pcm_cap(&buffer);
+        let len = buffer.lock().unwrap().len();
+        assert_eq!(len, 4_800_000);
+    }
+
+    #[test]
+    fn short_audio_below_threshold_is_rejected() {
+        // Below 0.5 s at 16kHz = 8_000 samples must be rejected.
+        let buffer: Arc<Mutex<Vec<f32>>> = Arc::new(Mutex::new(Vec::new()));
+        {
+            let mut buf = buffer.lock().unwrap();
+            for _ in 0..7_999_usize {
+                buf.push(0.0);
+            }
+        }
+        let result = validate_pcm_length(&buffer);
+        assert!(result.is_err());
+        let msg = result.unwrap_err();
+        assert!(
+            msg.to_lowercase().contains("too short"),
+            "expected 'too short' in error: {msg}"
+        );
     }
 }

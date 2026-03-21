@@ -29,13 +29,24 @@ impl Default for InjectionMode {
 pub enum TranscriptionProvider {
     Openai,
     Groq,
-    Openrouter,
     Local,
 }
 
 impl Default for TranscriptionProvider {
     fn default() -> Self {
         Self::Openai
+    }
+}
+
+impl std::str::FromStr for TranscriptionProvider {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, ()> {
+        match s {
+            "openai" => Ok(Self::Openai),
+            "groq" => Ok(Self::Groq),
+            "local" => Ok(Self::Local),
+            _ => Err(()),
+        }
     }
 }
 
@@ -82,17 +93,12 @@ pub struct TranscriptionConfig {
     pub openai_api_key: String,
     #[serde(default)]
     pub groq_api_key: String,
-    #[serde(default)]
-    pub openrouter_api_key: String,
 
     // --- Model selections (hardcoded lists in UI, stored as string) ---
     #[serde(default = "default_openai_model")]
     pub openai_model: String,
     #[serde(default = "default_groq_model")]
     pub groq_model: String,
-    /// OpenRouter model identifier (e.g. "openai/whisper-large-v3").
-    #[serde(default)]
-    pub openrouter_model: String,
 
     /// BCP-47 language hint sent to the transcription API (e.g. "en", "hu").
     /// Empty string means auto-detect.
@@ -102,6 +108,11 @@ pub struct TranscriptionConfig {
     /// Path to local whisper.cpp model file. Used only when provider = Local.
     #[serde(default)]
     pub local_model_path: Option<String>,
+
+    /// Ordered list of providers to try when the primary provider fails.
+    /// Deserialized from old configs that lack this field using the default.
+    #[serde(default = "default_fallback_order")]
+    pub fallback_order: Vec<TranscriptionProvider>,
 }
 
 impl Default for TranscriptionConfig {
@@ -110,12 +121,11 @@ impl Default for TranscriptionConfig {
             provider: TranscriptionProvider::default(),
             openai_api_key: String::new(),
             groq_api_key: String::new(),
-            openrouter_api_key: String::new(),
             openai_model: default_openai_model(),
             groq_model: default_groq_model(),
-            openrouter_model: String::new(),
             language: String::new(),
             local_model_path: None,
+            fallback_order: default_fallback_order(),
         }
     }
 }
@@ -240,4 +250,10 @@ fn default_vad_threshold() -> f32 {
 }
 fn default_vad_silence_ms() -> u32 {
     1500
+}
+fn default_fallback_order() -> Vec<TranscriptionProvider> {
+    vec![
+        TranscriptionProvider::Openai,
+        TranscriptionProvider::Groq,
+    ]
 }

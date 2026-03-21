@@ -1,6 +1,7 @@
 // AppState — Tauri managed state. Single source of truth for all mutable
 // application data accessed across commands, tray, and window lifecycle.
 
+use crate::audio::encode::EncodedAudio;
 use crate::config::{persistence, AppConfig};
 use crate::indicator::events::IndicatorVisualState;
 use std::sync::{Arc, Mutex};
@@ -53,6 +54,13 @@ pub struct AudioSessionState {
     pub started_at: SystemTime,
     pub level_emitter_stop: Option<Arc<std::sync::atomic::AtomicBool>>,
     pub level_emitter_thread: Option<std::thread::JoinHandle<()>>,
+    /// Shared PCM accumulation buffer. The capture thread pushes 16kHz mono f32
+    /// samples into this buffer; the stop path drains it for encoding.
+    pub pcm_buffer: Arc<Mutex<Vec<f32>>>,
+    /// Stop flag shared with the PCM capture path. Mirrors level_emitter_stop
+    /// — the same AtomicBool signals both the level emitter loop and the
+    /// PCM accumulation path to stop.
+    pub pcm_emitter_stop: Option<Arc<std::sync::atomic::AtomicBool>>,
 }
 
 /// Top-level managed state stored in `tauri::Manager`.
@@ -94,6 +102,11 @@ pub struct AppState {
     /// The close-to-hide handler checks this to allow window destruction
     /// instead of hiding, so WebView2 tears down cleanly before exit.
     pub quitting: Arc<Mutex<bool>>,
+
+    /// Last successfully encoded audio blob. Stored before spawning transcription
+    /// so the retry and fallback commands can re-send the same audio without
+    /// requiring the user to record again.
+    pub last_encoded_audio: Arc<Mutex<Option<EncodedAudio>>>,
 }
 
 impl AppState {
@@ -116,6 +129,7 @@ impl AppState {
                     indicator_drag_active: Arc::new(Mutex::new(false)),
                     indicator_visual_state: Arc::new(Mutex::new(IndicatorVisualState::Hidden)),
                     quitting: Arc::new(Mutex::new(false)),
+                    last_encoded_audio: Arc::new(Mutex::new(None)),
                 }
             }
             Err(e) => {
@@ -137,6 +151,7 @@ impl AppState {
                     indicator_drag_active: Arc::new(Mutex::new(false)),
                     indicator_visual_state: Arc::new(Mutex::new(IndicatorVisualState::Hidden)),
                     quitting: Arc::new(Mutex::new(false)),
+                    last_encoded_audio: Arc::new(Mutex::new(None)),
                 }
             }
         }
