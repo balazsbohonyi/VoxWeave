@@ -37,6 +37,16 @@ audiopus = "0.2"
 ogg = "0.9"
 rubato = "0.15"
 tauri-plugin-log = "2"
+arboard = "3"
+windows = { version = "0.58", features = [
+  "Win32_Foundation",
+  "Win32_UI_WindowsAndMessaging",
+  "Win32_UI_Input_KeyboardAndMouse",
+  "Win32_UI_Shell",
+  "Win32_System_Threading",
+  "Win32_Security",
+  "Win32_System_Diagnostics_Debug",
+] }
 
 [dev-dependencies]
 tempfile = "3"

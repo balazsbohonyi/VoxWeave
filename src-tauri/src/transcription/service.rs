@@ -202,6 +202,7 @@ pub async fn transcribe_with_retry<R: tauri::Runtime>(
 
         match provider_impl.transcribe(audio, &config).await {
             Ok(text) => {
+                let text = text.trim_end().to_string();
                 log::info!("[transcription] success: {:?}", text);
                 let _ = app.emit(TRANSCRIPTION_DONE_EVENT, text.clone());
                 return Ok(text);
@@ -301,6 +302,7 @@ pub async fn transcribe_with_provider<R: tauri::Runtime>(
     let provider_impl = make_provider(&call_config.provider);
     match provider_impl.transcribe(audio, &call_config).await {
         Ok(text) => {
+            let text = text.trim_end().to_string();
             log::info!("[transcription] success (fallback): {:?}", text);
             let _ = app.emit(TRANSCRIPTION_DONE_EVENT, text.clone());
             Ok(text)

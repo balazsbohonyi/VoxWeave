@@ -26,6 +26,30 @@ impl Default for InjectionMode {
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
+pub enum KeystrokeSpeed {
+    Slow,    // 10ms/char
+    Normal,  // 5ms/char
+    Fast,    // 2ms/char
+}
+
+impl Default for KeystrokeSpeed {
+    fn default() -> Self {
+        Self::Normal
+    }
+}
+
+impl KeystrokeSpeed {
+    pub fn delay_ms(&self) -> u64 {
+        match self {
+            Self::Slow   => 10,
+            Self::Normal => 5,
+            Self::Fast   => 2,
+        }
+    }
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq)]
+#[serde(rename_all = "snake_case")]
 pub enum TranscriptionProvider {
     Openai,
     Groq,
@@ -135,12 +159,24 @@ impl Default for TranscriptionConfig {
 pub struct InjectionConfig {
     #[serde(default)]
     pub mode: InjectionMode,
+
+    #[serde(default)]
+    pub keystroke_speed: KeystrokeSpeed,
+
+    #[serde(default = "default_true")]
+    pub auto_fallback: bool,
+
+    #[serde(default = "default_paste_delay_ms")]
+    pub paste_delay_ms: u64,
 }
 
 impl Default for InjectionConfig {
     fn default() -> Self {
         Self {
             mode: InjectionMode::default(),
+            keystroke_speed: KeystrokeSpeed::default(),
+            auto_fallback: true,
+            paste_delay_ms: default_paste_delay_ms(),
         }
     }
 }
@@ -251,9 +287,47 @@ fn default_vad_threshold() -> f32 {
 fn default_vad_silence_ms() -> u32 {
     1500
 }
+fn default_paste_delay_ms() -> u64 {
+    500
+}
 fn default_fallback_order() -> Vec<TranscriptionProvider> {
     vec![
         TranscriptionProvider::Openai,
         TranscriptionProvider::Groq,
     ]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn keystroke_speed_delay_ms() {
+        assert_eq!(KeystrokeSpeed::Slow.delay_ms(), 10);
+        assert_eq!(KeystrokeSpeed::Normal.delay_ms(), 5);
+        assert_eq!(KeystrokeSpeed::Fast.delay_ms(), 2);
+    }
+
+    #[test]
+    fn injection_config_defaults() {
+        let cfg = InjectionConfig::default();
+        assert_eq!(cfg.keystroke_speed, KeystrokeSpeed::Normal);
+        assert_eq!(cfg.auto_fallback, true);
+        assert_eq!(cfg.paste_delay_ms, 500);
+    }
+
+    #[test]
+    fn injection_config_serde_round_trip() {
+        let cfg = InjectionConfig {
+            mode: InjectionMode::Keystroke,
+            keystroke_speed: KeystrokeSpeed::Fast,
+            auto_fallback: false,
+            paste_delay_ms: 250,
+        };
+        let json = serde_json::to_string(&cfg).unwrap();
+        let back: InjectionConfig = serde_json::from_str(&json).unwrap();
+        assert_eq!(back.keystroke_speed, KeystrokeSpeed::Fast);
+        assert_eq!(back.auto_fallback, false);
+        assert_eq!(back.paste_delay_ms, 250);
+    }
 }

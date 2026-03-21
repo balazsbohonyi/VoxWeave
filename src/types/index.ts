@@ -7,6 +7,8 @@
 
 export type InjectionMode = "flash_paste" | "keystroke" | "clipboard";
 
+export type KeystrokeSpeed = "slow" | "normal" | "fast";
+
 export type TranscriptionProvider = "openai" | "groq" | "openrouter" | "local";
 
 // ---------------------------------------------------------------------------
@@ -34,6 +36,9 @@ export interface TranscriptionConfig {
 
 export interface InjectionConfig {
   mode: InjectionMode;
+  keystroke_speed: KeystrokeSpeed;
+  auto_fallback: boolean;
+  paste_delay_ms: number;
 }
 
 export interface IndicatorConfig {
@@ -92,6 +97,7 @@ export type IndicatorVisualState =
   | "recording"
   | "processing"
   | "injecting"
+  | "success"
   | "hidden";
 
 export interface IndicatorStatePayload {
@@ -105,4 +111,20 @@ export interface InjectionDonePayload {
 
 export interface StateChangedPayload {
   state: RecordingState;
+}
+
+// ---------------------------------------------------------------------------
+// Injection result payloads (Rust -> Frontend)
+// ---------------------------------------------------------------------------
+
+export type InjectionErrorCode =
+  | "cancelled"
+  | "all_methods_failed"
+  | "elevation_required";
+
+export interface InjectionErrorPayload {
+  code: InjectionErrorCode;
+  message: string;
+  typed_chars: number | null;
+  total_chars: number | null;
 }
