@@ -7,6 +7,8 @@
 
 export type InjectionMode = "flash_paste" | "keystroke" | "clipboard";
 
+export type KeystrokeSpeed = "slow" | "normal" | "fast";
+
 export type TranscriptionProvider = "openai" | "groq" | "openrouter" | "local";
 
 // ---------------------------------------------------------------------------
@@ -34,6 +36,9 @@ export interface TranscriptionConfig {
 
 export interface InjectionConfig {
   mode: InjectionMode;
+  keystroke_speed: KeystrokeSpeed;
+  auto_fallback: boolean;
+  paste_delay_ms: number;
 }
 
 export interface IndicatorConfig {
