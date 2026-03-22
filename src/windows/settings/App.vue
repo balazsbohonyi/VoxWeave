@@ -3,6 +3,7 @@ import { onMounted, onUnmounted } from "vue";
 import { useConfig } from "../../composables/useConfig";
 import GeneralSection from "./components/GeneralSection.vue";
 import AudioSection from "./components/AudioSection.vue";
+import TranscriptionSection from "./components/TranscriptionSection.vue";
 
 const {
   config,
@@ -39,8 +40,7 @@ onUnmounted(() => {
       <template v-else-if="config">
         <GeneralSection />
         <AudioSection />
-        <!-- Transcription section — implemented in Plan 04 -->
-        <div id="transcription-stub"></div>
+        <TranscriptionSection />
         <!-- Injection section — implemented in Plan 05 -->
         <div id="injection-stub"></div>
       </template>
