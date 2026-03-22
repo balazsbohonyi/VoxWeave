@@ -10,6 +10,7 @@ pub mod persistence;
 // Enumerations
 // ---------------------------------------------------------------------------
 
+
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum InjectionMode {
@@ -300,6 +301,25 @@ fn default_fallback_order() -> Vec<TranscriptionProvider> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // --- TranscriptionConfig nested providers tests ---
+
+    #[test]
+    fn test_transcription_config_default_provider_models() {
+        let config = TranscriptionConfig::default();
+        assert_eq!(config.providers.openai.model, "whisper-1");
+        assert_eq!(config.providers.groq.model, "whisper-large-v3");
+        assert!(config.providers.openai.api_key.is_empty());
+        assert!(config.providers.groq.api_key.is_empty());
+    }
+
+    #[test]
+    fn test_transcription_config_nested_json_round_trips() {
+        let json = r#"{"provider":"openai","providers":{"openai":{"api_key":"sk-abc","model":"gpt-4o-transcribe"},"groq":{"api_key":"","model":"whisper-large-v3"}},"language":"","local_model_path":null,"fallback_order":["openai","groq"]}"#;
+        let config: TranscriptionConfig = serde_json::from_str(json).unwrap();
+        assert_eq!(config.providers.openai.api_key, "sk-abc");
+        assert_eq!(config.providers.openai.model, "gpt-4o-transcribe");
+    }
 
     #[test]
     fn keystroke_speed_delay_ms() {
