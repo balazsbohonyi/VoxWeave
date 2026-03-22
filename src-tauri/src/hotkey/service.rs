@@ -363,46 +363,119 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
 
                                 match result {
                                     Ok(crate::injection::InjectionResult::Ok) => {
-                                        // Green success flash for ~1 second then hide (INJC-08)
+                                        // Green success flash for ~1 second, transition to idle,
+                                        // then show toast without hiding indicator (INJC-08, NOTF-01).
                                         indicator::show_success(&app_for_inject);
                                         tokio::time::sleep(
                                             std::time::Duration::from_millis(1000),
                                         )
                                         .await;
-                                        indicator::hide(&app_for_inject);
+                                        let _ = indicator::show_idle(&app_for_inject);
+                                        let label = injection_success_label(&injection_config.mode);
+                                        let payload = serde_json::json!({
+                                            "type": "success",
+                                            "message": label
+                                        });
+                                        if let Err(e) = indicator::show_toast_window_keep_indicator(
+                                            &app_for_inject,
+                                            &payload,
+                                        ) {
+                                            log::warn!("Failed to show success toast: {e}");
+                                        }
+                                        tokio::time::sleep(
+                                            std::time::Duration::from_millis(10000),
+                                        )
+                                        .await;
+                                        // Only hide if a new recording has not started.
+                                        let is_idle = app_for_inject
+                                            .try_state::<AppState>()
+                                            .map(|s| {
+                                                *s.recording_state.lock().unwrap()
+                                                    == RecordingState::Idle
+                                            })
+                                            .unwrap_or(true);
+                                        if is_idle {
+                                            indicator::hide(&app_for_inject);
+                                        }
+                                        if let Some(tw) =
+                                            app_for_inject.get_webview_window("toast")
+                                        {
+                                            let _ = tw.hide();
+                                        }
                                     }
                                     Ok(crate::injection::InjectionResult::CopiedToClipboard) => {
                                         // Elevation dialog: user chose "Copy to clipboard".
-                                        // Show info toast, NOT the green success flash.
-                                        indicator::hide(&app_for_inject);
-                                        let plain_toast = serde_json::json!({
-                                            "type": "info",
-                                            "message": "Copied to clipboard \u{2014} paste manually"
+                                        // Show success toast without hiding indicator (NOTF-02).
+                                        indicator::show_success(&app_for_inject);
+                                        tokio::time::sleep(
+                                            std::time::Duration::from_millis(1000),
+                                        )
+                                        .await;
+                                        let _ = indicator::show_idle(&app_for_inject);
+                                        let payload = serde_json::json!({
+                                            "type": "success",
+                                            "message": "Copied to clipboard"
                                         });
-                                        if let Err(e) =
-                                            indicator::show_toast_window(&app_for_inject, &plain_toast)
-                                        {
+                                        if let Err(e) = indicator::show_toast_window_keep_indicator(
+                                            &app_for_inject,
+                                            &payload,
+                                        ) {
                                             log::warn!("Failed to show clipboard toast: {e}");
+                                        }
+                                        tokio::time::sleep(
+                                            std::time::Duration::from_millis(10000),
+                                        )
+                                        .await;
+                                        let is_idle = app_for_inject
+                                            .try_state::<AppState>()
+                                            .map(|s| {
+                                                *s.recording_state.lock().unwrap()
+                                                    == RecordingState::Idle
+                                            })
+                                            .unwrap_or(true);
+                                        if is_idle {
+                                            indicator::hide(&app_for_inject);
+                                        }
+                                        if let Some(tw) =
+                                            app_for_inject.get_webview_window("toast")
+                                        {
+                                            let _ = tw.hide();
                                         }
                                     }
                                     Ok(crate::injection::InjectionResult::Cancelled {
                                         typed,
                                         total,
                                     }) => {
-                                        // Show cancelled info toast with char counts
-                                        let payload = crate::injection::InjectionErrorPayload {
-                                            code: crate::injection::InjectionErrorCode::Cancelled,
-                                            message: format!(
-                                                "Cancelled \u{2014} {typed} of {total} chars typed"
-                                            ),
-                                            typed_chars: Some(typed),
-                                            total_chars: Some(total),
-                                        };
-                                        indicator::hide(&app_for_inject);
-                                        if let Err(e) =
-                                            indicator::show_toast_window(&app_for_inject, &payload)
-                                        {
+                                        // Keep indicator visible — show info toast (NOTF-03).
+                                        let message = injection_cancel_message(typed, total);
+                                        let payload = serde_json::json!({
+                                            "type": "info",
+                                            "message": message
+                                        });
+                                        if let Err(e) = indicator::show_toast_window_keep_indicator(
+                                            &app_for_inject,
+                                            &payload,
+                                        ) {
                                             log::warn!("Failed to show cancel toast: {e}");
+                                        }
+                                        tokio::time::sleep(
+                                            std::time::Duration::from_millis(10000),
+                                        )
+                                        .await;
+                                        let is_idle = app_for_inject
+                                            .try_state::<AppState>()
+                                            .map(|s| {
+                                                *s.recording_state.lock().unwrap()
+                                                    == RecordingState::Idle
+                                            })
+                                            .unwrap_or(true);
+                                        if is_idle {
+                                            indicator::hide(&app_for_inject);
+                                        }
+                                        if let Some(tw) =
+                                            app_for_inject.get_webview_window("toast")
+                                        {
+                                            let _ = tw.hide();
                                         }
                                     }
                                     Ok(crate::injection::InjectionResult::Err(msg)) => {
@@ -455,6 +528,24 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
     }
 }
 
+/// Maps injection mode to user-facing success toast label.
+pub(crate) fn injection_success_label(mode: &crate::config::InjectionMode) -> &'static str {
+    match mode {
+        crate::config::InjectionMode::FlashPaste => "Text pasted",
+        crate::config::InjectionMode::Keystroke => "Text typed",
+        crate::config::InjectionMode::Clipboard => "Copied to clipboard",
+    }
+}
+
+/// Formats the cancel toast message based on how many chars were typed.
+pub(crate) fn injection_cancel_message(typed: usize, total: usize) -> String {
+    if total == 0 {
+        "Paste cancelled".to_string()
+    } else {
+        format!("Cancelled \u{2014} {typed} of {total} chars typed")
+    }
+}
+
 fn emit_hotkey_warning<R: Runtime>(
     app: &AppHandle<R>,
     warning: &HotkeyWarning,
@@ -479,4 +570,33 @@ fn persist_config(state: &AppState, config: AppConfig) -> Result<(), String> {
     let mut current = state.config.lock().map_err(|e| e.to_string())?;
     *current = config;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::InjectionMode;
+
+    #[test]
+    fn success_toast_label() {
+        assert_eq!(injection_success_label(&InjectionMode::FlashPaste), "Text pasted");
+        assert_eq!(injection_success_label(&InjectionMode::Keystroke), "Text typed");
+        assert_eq!(injection_success_label(&InjectionMode::Clipboard), "Copied to clipboard");
+    }
+
+    #[test]
+    fn cancel_toast_message() {
+        // total == 0 → generic message
+        assert_eq!(injection_cancel_message(0, 0), "Paste cancelled");
+        // total > 0 → detailed message with em-dash
+        assert_eq!(
+            injection_cancel_message(5, 20),
+            "Cancelled \u{2014} 5 of 20 chars typed"
+        );
+        // typed == 0 but total > 0 → still shows counts
+        assert_eq!(
+            injection_cancel_message(0, 10),
+            "Cancelled \u{2014} 0 of 10 chars typed"
+        );
+    }
 }
