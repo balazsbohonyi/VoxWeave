@@ -78,9 +78,9 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### Settings
 
-- [ ] **SETT-01**: Settings window has sections: General, Audio, Transcription, Injection
-- [ ] **SETT-02**: General: hotkey capture input, "Launch on Windows startup" toggle (default OFF), minimize-to-tray toggle
-- [ ] **SETT-03**: Audio: microphone device dropdown listing all available devices, plus `Auto-stop on silence` toggle and configurable silence-duration input
+- [x] **SETT-01**: Settings window has sections: General, Audio, Transcription, Injection
+- [x] **SETT-02**: General: hotkey capture input, "Launch on Windows startup" toggle (default OFF), minimize-to-tray toggle
+- [x] **SETT-03**: Audio: microphone device dropdown listing all available devices, plus `Auto-stop on silence` toggle and configurable silence-duration input
 - [ ] **SETT-04**: Transcription: Cloud/Local engine toggle; Cloud has tabbed interface (OpenAI, Groq) each with API key (masked), model dropdown (list sourced from Rust constants via `get_provider_models` command), language hint input, "Test connection", "Set as active"; active provider visually highlighted
 - [ ] **SETT-05**: Transcription: Local sub-section with model variants, sizes, download/delete buttons, progress bar
 - [ ] **SETT-06**: Injection: method selector (FlashPaste/Keystrokes/Clipboard), speed selector (shown only for Keystrokes), auto-fallback checkbox
@@ -190,9 +190,9 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 | TRAY-02 | Phase 1 | Complete |
 | TRAY-03 | Phase 1 | Complete |
 | TRAY-04 | Phase 1 | Complete |
-| SETT-01 | Phase 8 | Pending |
-| SETT-02 | Phase 8 | Pending |
-| SETT-03 | Phase 8 | Pending |
+| SETT-01 | Phase 8 | Complete |
+| SETT-02 | Phase 8 | Complete |
+| SETT-03 | Phase 8 | Complete |
 | SETT-04 | Phase 8 | Pending |
 | SETT-05 | Phase 8 | Pending |
 | SETT-06 | Phase 8 | Pending |

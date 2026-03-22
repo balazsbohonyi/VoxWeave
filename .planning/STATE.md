@@ -6,14 +6,14 @@ current_phase: 5
 current_phase_name: Cloud Transcription
 current_plan: 2
 status: verifying
-stopped_at: Completed 08-settings-ui 08-01-PLAN.md
-last_updated: "2026-03-22T19:38:50.991Z"
+stopped_at: Completed 08-settings-ui 08-03-PLAN.md
+last_updated: "2026-03-22T19:43:27.521Z"
 last_activity: 2026-03-22
 progress:
   total_phases: 11
   completed_phases: 7
   total_plans: 42
-  completed_plans: 39
+  completed_plans: 40
 ---
 
 ---
@@ -156,6 +156,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 07-pipeline-integration P03 | 15 | 2 tasks | 1 files |
 | Phase 07-pipeline-integration P04 | 4 | 2 tasks | 1 files |
 | Phase 08-settings-ui P01 | 5 | 3 tasks | 6 files |
+| Phase 08-settings-ui P03 | 3 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -234,6 +235,8 @@ Recent decisions affecting current work:
 - [Pre-Phase-08]: transcription.providers nested structure adopted — per-provider api_key and model stored under providers.<id>; available model lists are Rust constants (not stored in config), exposed to frontend via get_provider_models command; language hint stays global; OpenRouter fields removed from config entirely
 - [Phase 08-settings-ui]: migrate_transcription_fields runs at load time on raw JSON Value — no disk rewrite needed, old flat keys coexist safely
 - [Phase 08-settings-ui]: TranscriptionConfig field access: config.providers.openai.api_key / config.providers.groq.model replaces 4 flat fields
+- [Phase 08-settings-ui]: App.vue delegates state to section components via independent useConfig() calls — avoids prop-drilling
+- [Phase 08-settings-ui]: minimize_to_tray rendered as always-on disabled checkbox (SETT-02) without adding new Rust config field
 
 ### Roadmap Evolution
 
@@ -252,7 +255,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-22T19:38:50.986Z
-Stopped at: Completed 08-settings-ui 08-01-PLAN.md
+Last session: 2026-03-22T19:43:22.148Z
+Stopped at: Completed 08-settings-ui 08-03-PLAN.md
 Resume file: None
 
