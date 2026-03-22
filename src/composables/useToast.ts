@@ -11,12 +11,14 @@ export interface Toast {
   message: string;
   type: "success" | "error" | "info" | "warning";
   action?: ToastAction;
+  autoDismissMs?: number;
 }
 
 export interface ShowToastOptions {
   message: string;
   type?: Toast["type"];
   action?: ToastAction;
+  autoDismissMs?: number;
 }
 
 let nextId = 0;
@@ -24,7 +26,7 @@ let nextId = 0;
 export function useToast() {
   const toasts = ref<Toast[]>([]);
 
-  function showToast(messageOrOptions: string | ShowToastOptions, type: Toast["type"] = "info") {
+  function showToast(messageOrOptions: string | ShowToastOptions, type: Toast["type"] = "info"): number {
     const id = nextId++;
     if (typeof messageOrOptions === "string") {
       toasts.value.push({ id, message: messageOrOptions, type });
@@ -34,8 +36,10 @@ export function useToast() {
         message: messageOrOptions.message,
         type: messageOrOptions.type ?? "info",
         action: messageOrOptions.action,
+        autoDismissMs: messageOrOptions.autoDismissMs,
       });
     }
+    return id;
   }
 
   function dismissToast(id: number) {
