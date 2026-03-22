@@ -4,6 +4,7 @@ import { useConfig } from "../../composables/useConfig";
 import GeneralSection from "./components/GeneralSection.vue";
 import AudioSection from "./components/AudioSection.vue";
 import TranscriptionSection from "./components/TranscriptionSection.vue";
+import InjectionSection from "./components/InjectionSection.vue";
 
 const {
   config,
@@ -41,8 +42,7 @@ onUnmounted(() => {
         <GeneralSection />
         <AudioSection />
         <TranscriptionSection />
-        <!-- Injection section — implemented in Plan 05 -->
-        <div id="injection-stub"></div>
+        <InjectionSection />
       </template>
     </div>
   </div>
