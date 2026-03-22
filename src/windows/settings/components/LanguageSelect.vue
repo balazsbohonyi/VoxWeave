@@ -122,6 +122,7 @@ const inputRef = ref<HTMLInputElement | null>(null);
 const listRef = ref<HTMLUListElement | null>(null);
 const query = ref("");
 const open = ref(false);
+const dropUp = ref(false);
 const activeIndex = ref(-1); // -1 = Auto-detect row
 
 function nameForCode(code: string): string {
@@ -148,6 +149,10 @@ const filtered = computed((): Language[] => {
 
 function openDropdown() {
   if (props.disabled) return;
+  if (inputRef.value) {
+    const rect = inputRef.value.getBoundingClientRect();
+    dropUp.value = window.innerHeight - rect.bottom < 200;
+  }
   query.value = "";
   open.value = true;
   activeIndex.value = -1;
@@ -230,7 +235,8 @@ function onBlur() {
     <ul
       v-if="open"
       ref="listRef"
-      class="absolute right-0 z-50 mt-1 max-h-48 w-48 overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900"
+      class="absolute right-0 z-50 max-h-48 w-48 overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900"
+      :class="dropUp ? 'bottom-full mb-1' : 'top-full mt-1'"
     >
       <li
         :data-active="activeIndex === -1"
