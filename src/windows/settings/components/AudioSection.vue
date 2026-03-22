@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useConfig } from "../../../composables/useConfig";
-import SectionDivider from "./SectionDivider.vue";
 import WarningCard from "./WarningCard.vue";
 
 const {
@@ -88,8 +87,6 @@ onUnmounted(() => {
 
 <template>
   <section v-if="config">
-    <SectionDivider title="Audio" />
-
     <!-- Audio warning -->
     <WarningCard
       v-if="audioWarning"

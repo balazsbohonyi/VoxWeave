@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
 import { useConfig } from "../../../composables/useConfig";
-import SectionDivider from "./SectionDivider.vue";
 import HotkeyCapture from "./HotkeyCapture.vue";
 
 const { config, hotkeyWarning, saveConfig } = useConfig();
@@ -24,8 +23,6 @@ async function onLaunchAtLoginChange(e: Event): Promise<void> {
 
 <template>
   <section v-if="config">
-    <SectionDivider title="General" />
-
     <!-- Hotkey -->
     <div class="mb-4">
       <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useConfig } from "../../../composables/useConfig";
-import SectionDivider from "./SectionDivider.vue";
 import type { InjectionMode, KeystrokeSpeed } from "../../../types/index";
 
 const { config, saveConfig } = useConfig();
@@ -24,8 +23,6 @@ function onFallbackChange(e: Event): void {
 
 <template>
   <section v-if="config">
-    <SectionDivider title="Injection" />
-
     <!-- Injection method -->
     <div class="mb-4">
       <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">

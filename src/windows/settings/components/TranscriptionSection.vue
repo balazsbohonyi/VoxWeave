@@ -217,8 +217,6 @@ async function saveLanguage(lang: string) {
 
 <template>
   <section>
-    <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-4">Transcription</h2>
-
     <template v-if="config">
       <!-- Cloud / Local toggle -->
       <div class="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden w-fit mb-5">
