@@ -49,7 +49,7 @@ completed: 2026-03-22
 - **Duration:** ~1 min
 - **Started:** 2026-03-22T19:50:12Z
 - **Completed:** 2026-03-22T19:51:08Z
-- **Tasks:** 1 of 2 complete (2nd = human-verify checkpoint, awaiting user)
+- **Tasks:** 2 of 2 complete (human-verify checkpoint approved)
 - **Files modified:** 2
 
 ## Accomplishments
@@ -62,6 +62,7 @@ completed: 2026-03-22
 ## Task Commits
 
 1. **Task 1: InjectionSection.vue + wire into App.vue** - `dcfca7a` (feat)
+2. **Task 2: Checkpoint — human verification approved** - (no code commit; full settings window verified visually and functionally)
 
 ## Files Created/Modified
 
@@ -88,8 +89,9 @@ None - no external service configuration required.
 ## Next Phase Readiness
 
 - Full settings window is assembled — all four sections render
-- Awaiting human-verify checkpoint: user confirms layout, conditional speed selector, and persistence across restart
-- After approval, plan 05 is complete and phase 08 is done
+- Human-verify checkpoint approved: layout, conditional speed selector, and persistence across restart all confirmed
+- Phase 08 (Settings UI) is complete — SETT-01 through SETT-07 satisfied
+- Ready for Phase 09 (First-launch Wizard)
 
 ---
 *Phase: 08-settings-ui*
