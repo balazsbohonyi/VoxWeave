@@ -239,10 +239,10 @@ mod tests {
                 "provider": "openai",
                 "providers": {
                     "openai": {"api_key": "", "model": "whisper-1"},
-                    "groq": {"api_key": "", "model": "whisper-large-v3"}
+                    "groq": {"api_key": "", "model": "whisper-large-v3"},
+                    "local": {"model_path": null}
                 },
                 "language": "",
-                "local_model_path": null,
                 "fallback_order": ["openai", "groq"],
                 "future_transcription_field": 42
             },

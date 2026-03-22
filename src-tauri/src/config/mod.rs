@@ -111,13 +111,23 @@ fn default_groq_provider() -> CloudProviderConfig {
     }
 }
 
-/// Nested map of all cloud provider configs.
+/// Local Whisper provider config.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, Default)]
+pub struct LocalProviderConfig {
+    /// Path to a local whisper.cpp model file (.bin). None = not yet downloaded.
+    #[serde(default)]
+    pub model_path: Option<String>,
+}
+
+/// Nested map of all provider configs.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct TranscriptionProviders {
     #[serde(default = "default_openai_provider")]
     pub openai: CloudProviderConfig,
     #[serde(default = "default_groq_provider")]
     pub groq: CloudProviderConfig,
+    #[serde(default)]
+    pub local: LocalProviderConfig,
 }
 
 impl Default for TranscriptionProviders {
@@ -125,6 +135,7 @@ impl Default for TranscriptionProviders {
         Self {
             openai: default_openai_provider(),
             groq: default_groq_provider(),
+            local: LocalProviderConfig::default(),
         }
     }
 }
@@ -172,10 +183,6 @@ pub struct TranscriptionConfig {
     #[serde(default)]
     pub language: String,
 
-    /// Path to local whisper.cpp model file. Used only when provider = Local.
-    #[serde(default)]
-    pub local_model_path: Option<String>,
-
     /// Ordered list of providers to try when the primary provider fails.
     /// Deserialized from old configs that lack this field using the default.
     #[serde(default = "default_fallback_order")]
@@ -188,7 +195,6 @@ impl Default for TranscriptionConfig {
             provider: TranscriptionProvider::default(),
             providers: TranscriptionProviders::default(),
             language: String::new(),
-            local_model_path: None,
             fallback_order: default_fallback_order(),
         }
     }
@@ -348,7 +354,7 @@ mod tests {
 
     #[test]
     fn test_transcription_config_nested_json_round_trips() {
-        let json = r#"{"provider":"openai","providers":{"openai":{"api_key":"sk-abc","model":"gpt-4o-transcribe"},"groq":{"api_key":"","model":"whisper-large-v3"}},"language":"","local_model_path":null,"fallback_order":["openai","groq"]}"#;
+        let json = r#"{"provider":"openai","providers":{"openai":{"api_key":"sk-abc","model":"gpt-4o-transcribe"},"groq":{"api_key":"","model":"whisper-large-v3"},"local":{"model_path":null}},"language":"","fallback_order":["openai","groq"]}"#;
         let config: TranscriptionConfig = serde_json::from_str(json).unwrap();
         assert_eq!(config.providers.openai.api_key, "sk-abc");
         assert_eq!(config.providers.openai.model, "gpt-4o-transcribe");

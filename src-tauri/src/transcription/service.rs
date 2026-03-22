@@ -367,7 +367,7 @@ mod tests {
     // -----------------------------------------------------------------------
 
     fn make_config_with_keys(openai_key: &str, groq_key: &str) -> TranscriptionConfig {
-        use crate::config::{CloudProviderConfig, TranscriptionProviders};
+        use crate::config::{CloudProviderConfig, LocalProviderConfig, TranscriptionProviders};
         TranscriptionConfig {
             fallback_order: vec![TranscriptionProvider::Openai, TranscriptionProvider::Groq],
             providers: TranscriptionProviders {
@@ -379,6 +379,7 @@ mod tests {
                     api_key: groq_key.to_string(),
                     model: "whisper-large-v3".to_string(),
                 },
+                local: LocalProviderConfig::default(),
             },
             ..TranscriptionConfig::default()
         }

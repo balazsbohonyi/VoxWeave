@@ -26,9 +26,14 @@ export interface CloudProviderConfig {
   model: string;
 }
 
+export interface LocalProviderConfig {
+  model_path: string | null;
+}
+
 export interface TranscriptionProviders {
   openai: CloudProviderConfig;
   groq: CloudProviderConfig;
+  local: LocalProviderConfig;
 }
 
 export interface TranscriptionConfig {
@@ -36,7 +41,6 @@ export interface TranscriptionConfig {
   providers: TranscriptionProviders;
   /** BCP-47 language hint (e.g. "en"). Empty string = auto-detect. */
   language: string;
-  local_model_path: string | null;
   fallback_order: TranscriptionProvider[];
 }
 
