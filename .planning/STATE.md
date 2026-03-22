@@ -6,14 +6,14 @@ current_phase: 5
 current_phase_name: Cloud Transcription
 current_plan: 2
 status: executing
-stopped_at: Completed 07-pipeline-integration 07-02-PLAN.md
-last_updated: "2026-03-22T13:50:06.430Z"
+stopped_at: Completed 07-pipeline-integration 07-01-PLAN.md
+last_updated: "2026-03-22T13:52:35.416Z"
 last_activity: 2026-03-22
 progress:
   total_phases: 11
   completed_phases: 6
   total_plans: 36
-  completed_plans: 35
+  completed_plans: 36
 ---
 
 ---
@@ -116,6 +116,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 06-text-injection P03 | 366 | 2 tasks | 4 files |
 | Phase 06-text-injection P04 | 3 | 2 tasks | 8 files |
 | Phase 07-pipeline-integration P02 | 1 | 1 tasks | 1 files |
+| Phase 07-pipeline-integration P01 | 214 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -183,6 +184,9 @@ Recent decisions affecting current work:
 - [Phase 06-text-injection]: WindowsProvider implements all four platform traits directly — pass &*platform to inject_text() (no .inner() method)
 - [Phase 06-text-injection]: Injection cancelled detection: check typed_chars field presence to avoid collision with transcription cancelled
 - [Phase 07-pipeline-integration]: No behavioral change for existing callers — autoDismissMs is optional and showToast return value was previously void (ignorable)
+- [Phase 07-pipeline-integration]: show_toast_window_keep_indicator is a thin variant of show_toast_window with no hide_indicator_window() calls — success/cancel paths keep indicator visible during toast
+- [Phase 07-pipeline-integration]: RecordingState::Idle guard before deferred 10s hide prevents toast cleanup from interrupting a new recording
+- [Phase 07-pipeline-integration]: injection_success_label and injection_cancel_message extracted as free functions for unit testability without AppHandle
 
 ### Roadmap Evolution
 
@@ -201,7 +205,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-22T13:50:06.427Z
-Stopped at: Completed 07-pipeline-integration 07-02-PLAN.md
+Last session: 2026-03-22T13:52:35.414Z
+Stopped at: Completed 07-pipeline-integration 07-01-PLAN.md
 Resume file: None
 

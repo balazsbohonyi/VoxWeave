@@ -97,9 +97,9 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### Notifications
 
-- [ ] **NOTF-01**: Success toasts confirm injection method and show text preview ("Text pasted", "Text typed", "Copied to clipboard")
-- [ ] **NOTF-02**: Error toasts show actionable messages (open settings, retry, fallback notification)
-- [ ] **NOTF-03**: Cancellation toasts show "X of Y characters typed" or "Paste cancelled"
+- [x] **NOTF-01**: Success toasts confirm injection method and show text preview ("Text pasted", "Text typed", "Copied to clipboard")
+- [x] **NOTF-02**: Error toasts show actionable messages (open settings, retry, fallback notification)
+- [x] **NOTF-03**: Cancellation toasts show "X of Y characters typed" or "Paste cancelled"
 - [x] **NOTF-04**: Toasts auto-dismiss after 4 seconds and can be manually dismissed
 
 ### Config
@@ -203,9 +203,9 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 | WIZR-04 | Phase 9 | Pending |
 | WIZR-05 | Phase 9 | Pending |
 | WIZR-06 | Phase 9 | Pending |
-| NOTF-01 | Phase 7 | Pending |
-| NOTF-02 | Phase 7 | Pending |
-| NOTF-03 | Phase 7 | Pending |
+| NOTF-01 | Phase 7 | Complete |
+| NOTF-02 | Phase 7 | Complete |
+| NOTF-03 | Phase 7 | Complete |
 | NOTF-04 | Phase 7 | Complete |
 | CONF-01 | Phase 1 | Complete |
 | CONF-02 | Phase 1 | Complete |
