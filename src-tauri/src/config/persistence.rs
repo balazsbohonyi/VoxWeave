@@ -45,29 +45,37 @@ pub fn config_path() -> Result<PathBuf, String> {
 ///   groq_api_key    → providers.groq.api_key
 ///   groq_model      → providers.groq.model
 pub fn migrate_transcription_fields(t: &mut serde_json::Value) {
-    // If new nested key already present, skip migration.
-    if t.get("providers").is_some() {
-        return;
+    // Promote old flat keys into nested providers — only when providers is absent.
+    if t.get("providers").is_none() {
+        let mut providers = serde_json::json!({});
+
+        if let Some(k) = t.get("openai_api_key").and_then(|v| v.as_str()) {
+            providers["openai"]["api_key"] = serde_json::Value::String(k.to_string());
+        }
+        if let Some(k) = t.get("openai_model").and_then(|v| v.as_str()) {
+            providers["openai"]["model"] = serde_json::Value::String(k.to_string());
+        }
+        if let Some(k) = t.get("groq_api_key").and_then(|v| v.as_str()) {
+            providers["groq"]["api_key"] = serde_json::Value::String(k.to_string());
+        }
+        if let Some(k) = t.get("groq_model").and_then(|v| v.as_str()) {
+            providers["groq"]["model"] = serde_json::Value::String(k.to_string());
+        }
+
+        if !providers.as_object().map(|o| o.is_empty()).unwrap_or(true) {
+            t["providers"] = providers;
+        }
     }
 
-    let mut providers = serde_json::json!({});
-
-    if let Some(k) = t.get("openai_api_key").and_then(|v| v.as_str()) {
-        providers["openai"]["api_key"] = serde_json::Value::String(k.to_string());
-    }
-    if let Some(k) = t.get("openai_model").and_then(|v| v.as_str()) {
-        providers["openai"]["model"] = serde_json::Value::String(k.to_string());
-    }
-    if let Some(k) = t.get("groq_api_key").and_then(|v| v.as_str()) {
-        providers["groq"]["api_key"] = serde_json::Value::String(k.to_string());
-    }
-    if let Some(k) = t.get("groq_model").and_then(|v| v.as_str()) {
-        providers["groq"]["model"] = serde_json::Value::String(k.to_string());
-    }
-
-    // Only set providers if we found at least one old key to promote.
-    if !providers.as_object().map(|o| o.is_empty()).unwrap_or(true) {
-        t["providers"] = providers;
+    // Always strip legacy flat keys — covers both first migration and configs
+    // that somehow still carry them from a previous partial migration.
+    if let Some(obj) = t.as_object_mut() {
+        obj.remove("openai_api_key");
+        obj.remove("openai_model");
+        obj.remove("groq_api_key");
+        obj.remove("groq_model");
+        obj.remove("openrouter_api_key");
+        obj.remove("openrouter_model");
     }
 }
 
@@ -225,8 +233,30 @@ mod tests {
             "openai_api_key": "should-not-overwrite"
         });
         migrate_transcription_fields(&mut t);
-        // providers already exists — should remain unchanged
+        // providers already exists — nested value must be unchanged
         assert_eq!(t["providers"]["openai"]["api_key"], "existing");
+        // flat key must be stripped even when providers was already present
+        assert!(t.get("openai_api_key").is_none());
+    }
+
+    #[test]
+    fn test_migrate_strips_flat_keys_after_promotion() {
+        let mut t = serde_json::json!({
+            "openai_api_key": "sk-abc",
+            "openai_model": "whisper-1",
+            "groq_api_key": "gsk-xyz",
+            "groq_model": "whisper-large-v3",
+            "openrouter_api_key": "sk-or-abc",
+            "openrouter_model": "some/model"
+        });
+        migrate_transcription_fields(&mut t);
+        // All legacy flat keys must be gone
+        assert!(t.get("openai_api_key").is_none());
+        assert!(t.get("openai_model").is_none());
+        assert!(t.get("groq_api_key").is_none());
+        assert!(t.get("groq_model").is_none());
+        assert!(t.get("openrouter_api_key").is_none());
+        assert!(t.get("openrouter_model").is_none());
     }
 
     #[test]
