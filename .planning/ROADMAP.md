@@ -145,11 +145,12 @@ Plans:
   3. Error toasts show actionable messages (open settings, retry, use fallback) rather than raw error strings
   4. Cancellation toasts show the number of characters typed or "Paste cancelled"
   5. Success and cancellation toasts auto-dismiss after 10 seconds; error toasts require manual dismiss
-**Plans**: 3 plans
+**Plans**: 4 plans
 Plans:
 - [x] 07-01-PLAN.md — Rust: show_toast_window_keep_indicator + revised InjectionResult match arms (NOTF-01, NOTF-02, NOTF-03)
 - [x] 07-02-PLAN.md — TS: autoDismissMs field in useToast + showToast returns id (NOTF-04)
 - [x] 07-03-PLAN.md — TS: auto-dismiss timer wiring in App.vue + human-verify checkpoint (NOTF-04)
+- [ ] 07-04-PLAN.md — gap closure: fix cancel message guard + reset state/flag before toast sleeps (NOTF-03, NOTF-04)
 
 ### Phase 8: Settings UI
 **Goal**: A full settings window lets the user configure every aspect of VoxFlow, with changes taking effect immediately and persisting across restarts
@@ -205,7 +206,7 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | 5. Cloud Transcription | 7/7 | Complete   | 2026-03-20 |
 | 5.1. PCM + Opus | 5/5 | Complete   | 2026-03-20 |
 | 6. Text Injection | 4/4 | Complete   | 2026-03-21 |
-| 7. Pipeline Integration | 3/3 | Complete   | 2026-03-22 |
+| 7. Pipeline Integration | 3/4 | In progress | - |
 | 8. Settings UI | 0/TBD | Not started | - |
 | 9. Setup Wizard | 0/TBD | Not started | - |
 | 10. Local Transcription | 0/TBD | Not started | - |
