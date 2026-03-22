@@ -20,17 +20,32 @@ interface InjectionErrorPayload {
 }
 
 interface PlainToastPayload {
-  type: "info" | "warning" | "error";
+  type: "info" | "warning" | "error" | "success";
   message: string;
 }
 
 const { toasts, showToast, dismissToast } = useToast();
 
+const dismissTimers = new Map<number, ReturnType<typeof setTimeout>>();
+
 async function handleDismissToast(id: number): Promise<void> {
+  const timer = dismissTimers.get(id);
+  if (timer !== undefined) {
+    clearTimeout(timer);
+    dismissTimers.delete(id);
+  }
   dismissToast(id);
   if (toasts.value.length === 0) {
     await invoke("hide_toast_window");
   }
+}
+
+function scheduleAutoDismiss(id: number, ms: number): void {
+  const timer = setTimeout(() => {
+    dismissTimers.delete(id);
+    void handleDismissToast(id);
+  }, ms);
+  dismissTimers.set(id, timer);
 }
 
 function showTranscriptionErrorToast(opts: ShowToastOptions): void {
@@ -67,7 +82,12 @@ onMounted(() => {
   ) => {
     // Handle plain {type, message} toasts (e.g. "Copied to clipboard — paste manually")
     if (isPlainToast(payload)) {
-      showToast({ message: payload.message, type: payload.type });
+      if (payload.type === "success") {
+        const toastId = showToast({ message: payload.message, type: payload.type, autoDismissMs: 10000 });
+        scheduleAutoDismiss(toastId, 10000);
+      } else {
+        showToast({ message: payload.message, type: payload.type });
+      }
       return;
     }
 
@@ -75,7 +95,8 @@ onMounted(() => {
     if (isInjectionPayload(payload)) {
       if (payload.code === "cancelled") {
         // message is already formatted as "Cancelled — N of M chars typed" by Rust
-        showToast({ message: payload.message, type: "info" });
+        const toastId = showToast({ message: payload.message, type: "info", autoDismissMs: 10000 });
+        scheduleAutoDismiss(toastId, 10000);
       } else if (payload.code === "all_methods_failed") {
         showToast({ message: payload.message, type: "error" });
       } else if (payload.code === "elevation_required") {
