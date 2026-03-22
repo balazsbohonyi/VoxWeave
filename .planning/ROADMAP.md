@@ -150,7 +150,7 @@ Plans:
 - [x] 07-01-PLAN.md — Rust: show_toast_window_keep_indicator + revised InjectionResult match arms (NOTF-01, NOTF-02, NOTF-03)
 - [x] 07-02-PLAN.md — TS: autoDismissMs field in useToast + showToast returns id (NOTF-04)
 - [x] 07-03-PLAN.md — TS: auto-dismiss timer wiring in App.vue + human-verify checkpoint (NOTF-04)
-- [ ] 07-04-PLAN.md — gap closure: fix cancel message guard + reset state/flag before toast sleeps (NOTF-03, NOTF-04)
+- [x] 07-04-PLAN.md — gap closure: fix cancel message guard + reset state/flag before toast sleeps (NOTF-03, NOTF-04)
 
 ### Phase 8: Settings UI
 **Goal**: A full settings window lets the user configure every aspect of VoxFlow, with changes taking effect immediately and persisting across restarts
