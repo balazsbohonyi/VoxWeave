@@ -245,6 +245,9 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
     tray::update_recording_menu(app, next_state.clone());
 
     if previous_state == RecordingState::Idle {
+        // Reset cancel flag so a stale true from a previous cancel does not
+        // abort the new transcription before it starts.
+        *state.cancel_flag.lock().unwrap() = false;
         // Capture foreground window BEFORE indicator shows so we record the
         // correct target window (INJC-10). The indicator show must not steal focus.
         {
@@ -360,6 +363,13 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                     typed_chars: None,
                                     total_chars: None,
                                 }));
+
+                                // Reset to Idle immediately after injection so the hotkey handler
+                                // accepts a new recording during the toast window.
+                                if let Some(st) = app_for_inject.try_state::<AppState>() {
+                                    *st.recording_state.lock().unwrap() = RecordingState::Idle;
+                                }
+                                tray::update_recording_menu(&app_for_inject, RecordingState::Idle);
 
                                 match result {
                                     Ok(crate::injection::InjectionResult::Ok) => {
@@ -494,13 +504,6 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                     }
                                 }
 
-                                // Injection complete — reset recording state here so the
-                                // Transcribing state stays live during injection and the hotkey
-                                // cancel path (which checks for Transcribing) works correctly.
-                                if let Some(st) = app_for_inject.try_state::<AppState>() {
-                                    *st.recording_state.lock().unwrap() = RecordingState::Idle;
-                                }
-                                tray::update_recording_menu(&app_for_inject, RecordingState::Idle);
                             });
                             // Return early so the outer spawn's unconditional reset below is
                             // skipped — the inner spawn owns the reset for the injection path.
