@@ -165,7 +165,13 @@ Plans:
   4. Local transcription sub-section lists model variants with sizes, download/delete buttons, and a progress bar
   5. Injection section provides method selector (FlashPaste/Keystrokes/Clipboard), speed selector (shown only for Keystrokes), auto-fallback checkbox
   6. All setting changes persist immediately with no save button and are correctly restored on app restart
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 08-01-PLAN.md — TranscriptionConfig migration: nested providers struct + on-disk field promotion + TS types
+- [ ] 08-02-PLAN.md — New Rust commands: get_provider_models, test_connection, set_launch_at_login + autostart plugin
+- [ ] 08-03-PLAN.md — App.vue shell (480px) + SectionDivider + GeneralSection + AudioSection + HotkeyCapture
+- [ ] 08-04-PLAN.md — TranscriptionSection: cloud tabs, API key, model, test-connection, local stubs
+- [ ] 08-05-PLAN.md — InjectionSection + final App.vue wiring + human-verify checkpoint
 
 ### Phase 9: Setup Wizard
 **Goal**: A new user completes first-time configuration through a guided 3-step wizard before the app begins minimizing to tray on launch
@@ -208,6 +214,6 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | 5.1. PCM + Opus | 5/5 | Complete   | 2026-03-20 |
 | 6. Text Injection | 4/4 | Complete   | 2026-03-21 |
 | 7. Pipeline Integration | 4/4 | Complete   | 2026-03-22 |
-| 8. Settings UI | 0/TBD | Not started | - |
+| 8. Settings UI | 0/5 | Not started | - |
 | 9. Setup Wizard | 0/TBD | Not started | - |
 | 10. Local Transcription | 0/TBD | Not started | - |
