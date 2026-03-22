@@ -37,6 +37,7 @@ audiopus = "0.2"
 ogg = "0.9"
 rubato = "0.15"
 tauri-plugin-log = "2"
+tauri-plugin-autostart = "2"
 arboard = "3"
 windows = { version = "0.58", features = [
   "Win32_Foundation",

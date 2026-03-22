@@ -34,6 +34,10 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            None,
+        ))
         .setup(|app| {
             // Managed state — single source of truth across commands and tray
             let app_state = AppState::load();
@@ -93,6 +97,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::config::get_config,
             commands::config::save_config,
+            commands::config::get_provider_models,
+            commands::config::test_connection,
+            commands::config::set_launch_at_login,
             commands::audio::list_audio_input_devices,
             commands::indicator::begin_indicator_drag,
             commands::indicator::end_indicator_drag,
