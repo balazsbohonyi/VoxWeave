@@ -56,22 +56,6 @@ async function onLaunchAtLoginChange(e: Event): Promise<void> {
       >
     </div>
 
-    <!-- Minimize to tray (hardcoded always-on) -->
-    <div class="mb-4 flex items-center justify-between">
-      <div>
-        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Minimize to tray on close
-        </p>
-        <p class="text-xs text-gray-400 dark:text-gray-500">
-          Window minimizes to tray on close (always enabled)
-        </p>
-      </div>
-      <input
-        type="checkbox"
-        :checked="true"
-        :disabled="true"
-        class="h-4 w-4 rounded accent-blue-500 opacity-60 cursor-not-allowed"
-      >
-    </div>
+
   </section>
 </template>
