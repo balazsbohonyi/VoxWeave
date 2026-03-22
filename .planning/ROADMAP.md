@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Floating Indicator** - Always-on-top recording status window with waveform (completed 2026-03-15)
 - [x] **Phase 5: Cloud Transcription** - OpenAI, Groq, and OpenRouter providers with error handling (completed 2026-03-17)
 - [x] **Phase 6: Text Injection** - FlashPaste, keystroke, and clipboard injection with fallback chain (completed 2026-03-21)
-- [ ] **Phase 7: Pipeline Integration** - End-to-end hotkey-to-text pipeline with toast notifications
+- [x] **Phase 7: Pipeline Integration** - End-to-end hotkey-to-text pipeline with toast notifications (completed 2026-03-22)
 - [ ] **Phase 8: Settings UI** - Full settings window for all configurable parameters
 - [ ] **Phase 9: Setup Wizard** - First-launch onboarding flow
 - [ ] **Phase 10: Local Transcription** - whisper.cpp integration with on-demand model download
@@ -141,11 +141,16 @@ Plans:
 **Requirements**: NOTF-01, NOTF-02, NOTF-03, NOTF-04
 **Success Criteria** (what must be TRUE):
   1. A single hotkey press starts recording; a second press produces transcribed text injected into the active window without any manual steps
-  2. A success toast confirms the injection method and shows a text preview ("Text pasted", "Text typed", "Copied to clipboard")
+  2. A success toast confirms the injection method ("Text pasted", "Text typed", "Copied to clipboard")
   3. Error toasts show actionable messages (open settings, retry, use fallback) rather than raw error strings
   4. Cancellation toasts show the number of characters typed or "Paste cancelled"
-  5. All toasts auto-dismiss after 4 seconds and can be manually dismissed earlier
-**Plans**: TBD
+  5. Success and cancellation toasts auto-dismiss after 10 seconds; error toasts require manual dismiss
+**Plans**: 4 plans
+Plans:
+- [x] 07-01-PLAN.md — Rust: show_toast_window_keep_indicator + revised InjectionResult match arms (NOTF-01, NOTF-02, NOTF-03)
+- [x] 07-02-PLAN.md — TS: autoDismissMs field in useToast + showToast returns id (NOTF-04)
+- [x] 07-03-PLAN.md — TS: auto-dismiss timer wiring in App.vue + human-verify checkpoint (NOTF-04)
+- [x] 07-04-PLAN.md — gap closure: fix cancel message guard + reset state/flag before toast sleeps (NOTF-03, NOTF-04)
 
 ### Phase 8: Settings UI
 **Goal**: A full settings window lets the user configure every aspect of VoxFlow, with changes taking effect immediately and persisting across restarts
@@ -201,7 +206,7 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | 5. Cloud Transcription | 7/7 | Complete   | 2026-03-20 |
 | 5.1. PCM + Opus | 5/5 | Complete   | 2026-03-20 |
 | 6. Text Injection | 4/4 | Complete   | 2026-03-21 |
-| 7. Pipeline Integration | 0/TBD | Not started | - |
+| 7. Pipeline Integration | 4/4 | Complete   | 2026-03-22 |
 | 8. Settings UI | 0/TBD | Not started | - |
 | 9. Setup Wizard | 0/TBD | Not started | - |
 | 10. Local Transcription | 0/TBD | Not started | - |
