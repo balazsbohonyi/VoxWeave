@@ -541,7 +541,7 @@ pub(crate) fn injection_success_label(mode: &crate::config::InjectionMode) -> &'
 
 /// Formats the cancel toast message based on how many chars were typed.
 pub(crate) fn injection_cancel_message(typed: usize, total: usize) -> String {
-    if total == 0 {
+    if typed == 0 {
         "Paste cancelled".to_string()
     } else {
         format!("Cancelled \u{2014} {typed} of {total} chars typed")
@@ -588,17 +588,17 @@ mod tests {
 
     #[test]
     fn cancel_toast_message() {
-        // total == 0 → generic message
+        // typed == 0, total == 0 → generic message
         assert_eq!(injection_cancel_message(0, 0), "Paste cancelled");
-        // total > 0 → detailed message with em-dash
+        // typed > 0 → detailed message with em-dash
         assert_eq!(
             injection_cancel_message(5, 20),
             "Cancelled \u{2014} 5 of 20 chars typed"
         );
-        // typed == 0 but total > 0 → still shows counts
+        // typed == 0 but total > 0 → "Paste cancelled" (guard is typed == 0, not total == 0)
         assert_eq!(
             injection_cancel_message(0, 10),
-            "Cancelled \u{2014} 0 of 10 chars typed"
+            "Paste cancelled"
         );
     }
 }
