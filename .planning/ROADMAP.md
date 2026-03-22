@@ -129,11 +129,11 @@ Plans:
   7. Unicode characters (accented letters, symbols) are injected correctly in all three modes
 **Plans**: 4 plans
 Plans:
-- [ ] 06-01-PLAN.md — Cargo.toml deps (arboard + windows crate) + InjectionConfig extension + AppState.foreground_window
-- [ ] 06-02-PLAN.md — Windows platform trait implementations (all stubs replaced with real Win32 + arboard)
-- [ ] 06-03-PLAN.md — injection/service.rs: flashpaste, keystroke, clipboard, fallback chain, elevation check, cancel loop + tests
-- [ ] 06-04-PLAN.md — hotkey wiring: foreground capture at start, inject_text() call, Success indicator state, toast handling
-- [ ] 06-05-PLAN.md — gap closure: wire hotkey-press-during-injection to cancel_flag (INJC-08 hotkey path)
+- [x] 06-01-PLAN.md — Cargo.toml deps (arboard + windows crate) + InjectionConfig extension + AppState.foreground_window
+- [x] 06-02-PLAN.md — Windows platform trait implementations (all stubs replaced with real Win32 + arboard)
+- [x] 06-03-PLAN.md — injection/service.rs: flashpaste, keystroke, clipboard, fallback chain, elevation check, cancel loop + tests
+- [x] 06-04-PLAN.md — hotkey wiring: foreground capture at start, inject_text() call, Success indicator state, toast handling
+- [x] 06-05-PLAN.md — gap closure: wire hotkey-press-during-injection to cancel_flag (INJC-08 hotkey path)
 
 ### Phase 7: Pipeline Integration
 **Goal**: The complete hotkey-to-text pipeline works end-to-end as a seamless user experience, with toast notifications confirming every outcome
