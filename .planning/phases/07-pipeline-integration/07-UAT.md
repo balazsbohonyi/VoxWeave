@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: resolved
 phase: 07-pipeline-integration
 source: 07-01-SUMMARY.md, 07-02-SUMMARY.md, 07-03-SUMMARY.md
 started: 2026-03-22T15:00:00Z
-updated: 2026-03-22T15:00:00Z
+updated: 2026-03-22T18:00:00Z
 ---
 
 ## Current Test
@@ -58,7 +58,7 @@ skipped: 0
 ## Gaps
 
 - truth: "When cancel fires before any chars are typed, toast shows 'Paste cancelled'"
-  status: failed
+  status: resolved
   reason: "User reported: I only see the 'Canceled - x of y characters...' cancel toast"
   severity: major
   test: 3
@@ -73,7 +73,7 @@ skipped: 0
     - "Update unit test to expect 'Paste cancelled' for (typed=0, total=10)"
 
 - truth: "Pressing hotkey during the 10s post-injection toast window starts a new recording normally"
-  status: failed
+  status: resolved
   reason: "User reported: cannot start a new recording, the indicator still shows IDLE after pressing the hotkey while the success toast from the previous indicator is still visible"
   severity: major
   root_cause: "RecordingState is not reset to Idle until after both sleeps (1s + 10s) complete. During the 10s toast window, state is still Transcribing. The hotkey handler treats hotkey presses in Transcribing state as cancel requests (sets cancel_flag=true, returns). The stale cancel_flag=true then aborts the next real recording attempt too."
