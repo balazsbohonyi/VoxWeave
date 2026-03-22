@@ -9,7 +9,7 @@ export type InjectionMode = "flash_paste" | "keystroke" | "clipboard";
 
 export type KeystrokeSpeed = "slow" | "normal" | "fast";
 
-export type TranscriptionProvider = "openai" | "groq" | "openrouter" | "local";
+export type TranscriptionProvider = "openai" | "groq" | "local";
 
 // ---------------------------------------------------------------------------
 // Nested config sections
@@ -21,17 +21,23 @@ export interface AudioConfig {
   vad_silence_ms: number;
 }
 
+export interface CloudProviderConfig {
+  api_key: string;
+  model: string;
+}
+
+export interface TranscriptionProviders {
+  openai: CloudProviderConfig;
+  groq: CloudProviderConfig;
+}
+
 export interface TranscriptionConfig {
   provider: TranscriptionProvider;
-  openai_api_key: string;
-  groq_api_key: string;
-  openrouter_api_key: string;
-  openai_model: string;
-  groq_model: string;
-  openrouter_model: string;
+  providers: TranscriptionProviders;
   /** BCP-47 language hint (e.g. "en"). Empty string = auto-detect. */
   language: string;
   local_model_path: string | null;
+  fallback_order: TranscriptionProvider[];
 }
 
 export interface InjectionConfig {
