@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 07-pipeline-integration
 source: 07-01-SUMMARY.md, 07-02-SUMMARY.md, 07-03-SUMMARY.md
 started: 2026-03-22T15:00:00Z
@@ -62,13 +62,29 @@ skipped: 0
   reason: "User reported: I only see the 'Canceled - x of y characters...' cancel toast"
   severity: major
   test: 3
-  artifacts: []
-  missing: []
+  root_cause: "injection_cancel_message() checks `total == 0` but total is always > 0 (it's the full text length). Should check `typed == 0` instead. The 'Paste cancelled' branch is unreachable in practice."
+  artifacts:
+    - path: "src-tauri/src/hotkey/service.rs"
+      issue: "Line ~544: condition `total == 0` should be `typed == 0` in injection_cancel_message()"
+    - path: "src-tauri/src/hotkey/service.rs"
+      issue: "Lines ~598-602: unit test asserts buggy behavior (0, 10) → count format; needs updating"
+  missing:
+    - "Change `if total == 0` to `if typed == 0` in injection_cancel_message()"
+    - "Update unit test to expect 'Paste cancelled' for (typed=0, total=10)"
 
 - truth: "Pressing hotkey during the 10s post-injection toast window starts a new recording normally"
   status: failed
   reason: "User reported: cannot start a new recording, the indicator still shows IDLE after pressing the hotkey while the success toast from the previous indicator is still visible"
   severity: major
-  test: 7
-  artifacts: []
-  missing: []
+  root_cause: "RecordingState is not reset to Idle until after both sleeps (1s + 10s) complete. During the 10s toast window, state is still Transcribing. The hotkey handler treats hotkey presses in Transcribing state as cancel requests (sets cancel_flag=true, returns). The stale cancel_flag=true then aborts the next real recording attempt too."
+  artifacts:
+    - path: "src-tauri/src/hotkey/service.rs"
+      issue: "Lines ~226-231: Transcribing guard intercepts hotkey as cancel instead of new recording"
+    - path: "src-tauri/src/hotkey/service.rs"
+      issue: "Lines ~500-501: RecordingState reset to Idle placed after 10s sleep, should be before toast sequence"
+    - path: "src-tauri/src/hotkey/service.rs"
+      issue: "cancel_flag is not reset at start of new Idle→Recording transition, stale true aborts next transcription"
+  missing:
+    - "Reset RecordingState to Idle immediately after injection completes, before the 1s+10s toast sleeps"
+    - "Reset cancel_flag to false at the start of each new Idle→Recording transition"
+    - "Remove or guard the post-sleep state reset so it doesn't overwrite a Recording state already set by a new session"
