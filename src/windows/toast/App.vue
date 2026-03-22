@@ -82,7 +82,7 @@ onMounted(() => {
   ) => {
     // Handle plain {type, message} toasts (e.g. "Copied to clipboard — paste manually")
     if (isPlainToast(payload)) {
-      if (payload.type === "success") {
+      if (payload.type === "success" || payload.type === "info") {
         const toastId = showToast({ message: payload.message, type: payload.type, autoDismissMs: 10000 });
         scheduleAutoDismiss(toastId, 10000);
       } else {

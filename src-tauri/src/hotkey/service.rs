@@ -458,6 +458,8 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                         ) {
                                             log::warn!("Failed to show cancel toast: {e}");
                                         }
+                                        // Return indicator to neutral state — clears the Injecting visual.
+                                        indicator::show_idle_visual(&app_for_inject);
                                         tokio::time::sleep(
                                             std::time::Duration::from_millis(10000),
                                         )

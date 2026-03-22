@@ -68,6 +68,12 @@ pub fn show_success<R: Runtime>(app: &AppHandle<R>) {
     emit_state(app, IndicatorVisualState::Success);
 }
 
+/// Emit the idle/neutral visual state without touching window visibility.
+/// Use after keeping the indicator visible (e.g. cancel toast) to clear the Injecting state.
+pub fn show_idle_visual<R: Runtime>(app: &AppHandle<R>) {
+    emit_state(app, IndicatorVisualState::Hidden);
+}
+
 pub fn hide<R: Runtime>(app: &AppHandle<R>) {
     let keep_visible = {
         let app_state = app.state::<AppState>();
