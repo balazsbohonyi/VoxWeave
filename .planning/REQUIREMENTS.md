@@ -84,7 +84,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 - [ ] **SETT-04**: Transcription: Cloud/Local engine toggle; Cloud has tabbed interface (OpenAI, Groq) each with API key (masked), model dropdown (list sourced from Rust constants via `get_provider_models` command), language hint input, "Test connection", "Set as active"; active provider visually highlighted
 - [ ] **SETT-05**: Transcription: Local sub-section with model variants, sizes, download/delete buttons, progress bar
 - [ ] **SETT-06**: Injection: method selector (FlashPaste/Keystrokes/Clipboard), speed selector (shown only for Keystrokes), auto-fallback checkbox
-- [ ] **SETT-07**: All settings persist immediately (no save button) and are restored on restart
+- [x] **SETT-07**: All settings persist immediately (no save button) and are restored on restart
 
 ### Setup Wizard
 
@@ -196,7 +196,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 | SETT-04 | Phase 8 | Pending |
 | SETT-05 | Phase 8 | Pending |
 | SETT-06 | Phase 8 | Pending |
-| SETT-07 | Phase 8 | Pending |
+| SETT-07 | Phase 8 | Complete |
 | WIZR-01 | Phase 9 | Pending |
 | WIZR-02 | Phase 9 | Pending |
 | WIZR-03 | Phase 9 | Pending |

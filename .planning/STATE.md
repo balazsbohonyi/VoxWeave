@@ -6,14 +6,14 @@ current_phase: 5
 current_phase_name: Cloud Transcription
 current_plan: 2
 status: verifying
-stopped_at: Phase 8 context gathered
-last_updated: "2026-03-22T19:07:23.587Z"
+stopped_at: Completed 08-settings-ui 08-01-PLAN.md
+last_updated: "2026-03-22T19:38:50.991Z"
 last_activity: 2026-03-22
 progress:
   total_phases: 11
   completed_phases: 7
-  total_plans: 37
-  completed_plans: 38
+  total_plans: 42
+  completed_plans: 39
 ---
 
 ---
@@ -155,6 +155,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 07-pipeline-integration P01 | 214 | 2 tasks | 2 files |
 | Phase 07-pipeline-integration P03 | 15 | 2 tasks | 1 files |
 | Phase 07-pipeline-integration P04 | 4 | 2 tasks | 1 files |
+| Phase 08-settings-ui P01 | 5 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -231,6 +232,8 @@ Recent decisions affecting current work:
 - [Phase 07-pipeline-integration]: RecordingState reset to Idle moved before match result block: new hotkey during 10s toast window starts fresh recording
 - [Phase 07-pipeline-integration]: cancel_flag reset to false at Idle->Recording entry: stale cancel from prior session cannot abort new transcription
 - [Pre-Phase-08]: transcription.providers nested structure adopted — per-provider api_key and model stored under providers.<id>; available model lists are Rust constants (not stored in config), exposed to frontend via get_provider_models command; language hint stays global; OpenRouter fields removed from config entirely
+- [Phase 08-settings-ui]: migrate_transcription_fields runs at load time on raw JSON Value — no disk rewrite needed, old flat keys coexist safely
+- [Phase 08-settings-ui]: TranscriptionConfig field access: config.providers.openai.api_key / config.providers.groq.model replaces 4 flat fields
 
 ### Roadmap Evolution
 
@@ -249,7 +252,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-22T19:07:23.582Z
-Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-settings-ui/08-CONTEXT.md
+Last session: 2026-03-22T19:38:50.986Z
+Stopped at: Completed 08-settings-ui 08-01-PLAN.md
+Resume file: None
 
