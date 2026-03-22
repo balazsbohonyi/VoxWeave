@@ -61,7 +61,7 @@ impl TranscriptionProviderTrait for OpenAiProvider {
 
         let mut form = reqwest::multipart::Form::new()
             .part("file", file_part)
-            .text("model", config.openai_model.clone())
+            .text("model", config.providers.openai.model.clone())
             .text("response_format", "text");
 
         if !config.language.is_empty() {
@@ -71,7 +71,7 @@ impl TranscriptionProviderTrait for OpenAiProvider {
         let response = self
             .client
             .post(OPENAI_ENDPOINT)
-            .bearer_auth(&config.openai_api_key)
+            .bearer_auth(&config.providers.openai.api_key)
             .multipart(form)
             .send()
             .await

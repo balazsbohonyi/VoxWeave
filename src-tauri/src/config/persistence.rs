@@ -32,6 +32,46 @@ pub fn config_path() -> Result<PathBuf, String> {
 }
 
 // ---------------------------------------------------------------------------
+// Migration helpers
+// ---------------------------------------------------------------------------
+
+/// One-time migration: promote old flat transcription fields into the new
+/// nested `providers` structure. Safe to call on any JSON value; skips
+/// gracefully when `providers` is already present.
+///
+/// Old flat keys promoted:
+///   openai_api_key  → providers.openai.api_key
+///   openai_model    → providers.openai.model
+///   groq_api_key    → providers.groq.api_key
+///   groq_model      → providers.groq.model
+pub fn migrate_transcription_fields(t: &mut serde_json::Value) {
+    // If new nested key already present, skip migration.
+    if t.get("providers").is_some() {
+        return;
+    }
+
+    let mut providers = serde_json::json!({});
+
+    if let Some(k) = t.get("openai_api_key").and_then(|v| v.as_str()) {
+        providers["openai"]["api_key"] = serde_json::Value::String(k.to_string());
+    }
+    if let Some(k) = t.get("openai_model").and_then(|v| v.as_str()) {
+        providers["openai"]["model"] = serde_json::Value::String(k.to_string());
+    }
+    if let Some(k) = t.get("groq_api_key").and_then(|v| v.as_str()) {
+        providers["groq"]["api_key"] = serde_json::Value::String(k.to_string());
+    }
+    if let Some(k) = t.get("groq_model").and_then(|v| v.as_str()) {
+        providers["groq"]["model"] = serde_json::Value::String(k.to_string());
+    }
+
+    // Only set providers if we found at least one old key to promote.
+    if !providers.as_object().map(|o| o.is_empty()).unwrap_or(true) {
+        t["providers"] = providers;
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Load
 // ---------------------------------------------------------------------------
 
@@ -66,7 +106,11 @@ pub fn load() -> Result<LoadedConfig, String> {
     let raw_result: Result<serde_json::Value, _> = serde_json::from_slice(&bytes);
 
     match raw_result {
-        Ok(raw_value) => {
+        Ok(mut raw_value) => {
+            // One-time field migration: promote old flat transcription keys.
+            if let Some(t) = raw_value.get_mut("transcription") {
+                migrate_transcription_fields(t);
+            }
             // Deserialize typed config; missing fields get serde defaults.
             let config: AppConfig =
                 serde_json::from_value(raw_value.clone()).unwrap_or_default();
@@ -157,6 +201,57 @@ mod tests {
     use super::*;
     use crate::config::TranscriptionProvider;
 
+    // ----- migrate_transcription_fields -----
+
+    #[test]
+    fn test_migrate_old_flat_transcription_fields() {
+        let mut t = serde_json::json!({
+            "openai_api_key": "sk-abc",
+            "openai_model": "whisper-1",
+            "groq_api_key": "gsk-xyz",
+            "groq_model": "whisper-large-v3"
+        });
+        migrate_transcription_fields(&mut t);
+        assert_eq!(t["providers"]["openai"]["api_key"], "sk-abc");
+        assert_eq!(t["providers"]["openai"]["model"], "whisper-1");
+        assert_eq!(t["providers"]["groq"]["api_key"], "gsk-xyz");
+        assert_eq!(t["providers"]["groq"]["model"], "whisper-large-v3");
+    }
+
+    #[test]
+    fn test_migrate_skips_when_providers_present() {
+        let mut t = serde_json::json!({
+            "providers": {"openai": {"api_key": "existing", "model": "whisper-1"}},
+            "openai_api_key": "should-not-overwrite"
+        });
+        migrate_transcription_fields(&mut t);
+        // providers already exists — should remain unchanged
+        assert_eq!(t["providers"]["openai"]["api_key"], "existing");
+    }
+
+    #[test]
+    fn test_migrate_full_config_old_format() {
+        // Simulate loading a full old-style config.json from disk
+        let old_json = r#"{
+            "transcription": {
+                "provider": "openai",
+                "openai_api_key": "sk-real-key",
+                "openai_model": "whisper-1",
+                "groq_api_key": "gsk-real-key",
+                "groq_model": "whisper-large-v3",
+                "language": "",
+                "local_model_path": null
+            }
+        }"#;
+        let mut raw: serde_json::Value = serde_json::from_str(old_json).unwrap();
+        if let Some(t) = raw.get_mut("transcription") {
+            migrate_transcription_fields(t);
+        }
+        let config: AppConfig = serde_json::from_value(raw).unwrap_or_default();
+        assert_eq!(config.transcription.providers.openai.api_key, "sk-real-key");
+        assert_eq!(config.transcription.providers.groq.api_key, "gsk-real-key");
+    }
+
     // ----- merge_into -----
 
     #[test]
@@ -201,8 +296,8 @@ mod tests {
             config.transcription.provider,
             TranscriptionProvider::Openai
         ));
-        assert_eq!(config.transcription.openai_model, "whisper-1");
-        assert_eq!(config.transcription.groq_model, "whisper-large-v3");
+        assert_eq!(config.transcription.providers.openai.model, "whisper-1");
+        assert_eq!(config.transcription.providers.groq.model, "whisper-large-v3");
         assert!(config.indicator.show);
         assert!(!config.launch_at_login);
         assert!(config.first_launch);
@@ -219,7 +314,7 @@ mod tests {
         let config: AppConfig = serde_json::from_value(raw).unwrap_or_default();
         assert_eq!(config.hotkey, "Ctrl+F9");
         // Nested sections should be at defaults.
-        assert_eq!(config.transcription.openai_model, "whisper-1");
+        assert_eq!(config.transcription.providers.openai.model, "whisper-1");
         assert!(config.indicator.show);
     }
 
@@ -237,14 +332,13 @@ mod tests {
             "future_top_level_field": "v2_value",
             "transcription": {
                 "provider": "openai",
-                "openai_api_key": "",
-                "groq_api_key": "",
-                "openrouter_api_key": "",
-                "openai_model": "whisper-1",
-                "groq_model": "whisper-large-v3",
-                "openrouter_model": "",
+                "providers": {
+                    "openai": {"api_key": "", "model": "whisper-1"},
+                    "groq": {"api_key": "", "model": "whisper-large-v3"}
+                },
                 "language": "",
                 "local_model_path": null,
+                "fallback_order": ["openai", "groq"],
                 "future_transcription_field": 42
             },
             "injection": {"mode": "flash_paste"},

@@ -79,6 +79,56 @@ impl std::str::FromStr for TranscriptionProvider {
 // Nested config sections
 // ---------------------------------------------------------------------------
 
+/// Per-provider cloud transcription config (API key + model selection).
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct CloudProviderConfig {
+    #[serde(default)]
+    pub api_key: String,
+    #[serde(default)]
+    pub model: String,
+}
+
+impl Default for CloudProviderConfig {
+    fn default() -> Self {
+        Self {
+            api_key: String::new(),
+            model: String::new(),
+        }
+    }
+}
+
+fn default_openai_provider() -> CloudProviderConfig {
+    CloudProviderConfig {
+        api_key: String::new(),
+        model: "whisper-1".to_string(),
+    }
+}
+
+fn default_groq_provider() -> CloudProviderConfig {
+    CloudProviderConfig {
+        api_key: String::new(),
+        model: "whisper-large-v3".to_string(),
+    }
+}
+
+/// Nested map of all cloud provider configs.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct TranscriptionProviders {
+    #[serde(default = "default_openai_provider")]
+    pub openai: CloudProviderConfig,
+    #[serde(default = "default_groq_provider")]
+    pub groq: CloudProviderConfig,
+}
+
+impl Default for TranscriptionProviders {
+    fn default() -> Self {
+        Self {
+            openai: default_openai_provider(),
+            groq: default_groq_provider(),
+        }
+    }
+}
+
 /// Audio capture settings.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct AudioConfig {
@@ -113,17 +163,9 @@ pub struct TranscriptionConfig {
     #[serde(default)]
     pub provider: TranscriptionProvider,
 
-    // --- API keys ---
+    /// Per-provider API key and model selections.
     #[serde(default)]
-    pub openai_api_key: String,
-    #[serde(default)]
-    pub groq_api_key: String,
-
-    // --- Model selections (hardcoded lists in UI, stored as string) ---
-    #[serde(default = "default_openai_model")]
-    pub openai_model: String,
-    #[serde(default = "default_groq_model")]
-    pub groq_model: String,
+    pub providers: TranscriptionProviders,
 
     /// BCP-47 language hint sent to the transcription API (e.g. "en", "hu").
     /// Empty string means auto-detect.
@@ -144,10 +186,7 @@ impl Default for TranscriptionConfig {
     fn default() -> Self {
         Self {
             provider: TranscriptionProvider::default(),
-            openai_api_key: String::new(),
-            groq_api_key: String::new(),
-            openai_model: default_openai_model(),
-            groq_model: default_groq_model(),
+            providers: TranscriptionProviders::default(),
             language: String::new(),
             local_model_path: None,
             fallback_order: default_fallback_order(),
@@ -272,12 +311,6 @@ impl Default for AppConfig {
 
 fn default_hotkey() -> String {
     "Ctrl+Shift+Space".to_string()
-}
-fn default_openai_model() -> String {
-    "whisper-1".to_string()
-}
-fn default_groq_model() -> String {
-    "whisper-large-v3".to_string()
 }
 fn default_true() -> bool {
     true

@@ -80,8 +80,8 @@ pub fn find_fallback_provider(
 
         // Skip providers that have no configured API key.
         let has_key = match candidate {
-            TranscriptionProvider::Openai => !config.openai_api_key.is_empty(),
-            TranscriptionProvider::Groq => !config.groq_api_key.is_empty(),
+            TranscriptionProvider::Openai => !config.providers.openai.api_key.is_empty(),
+            TranscriptionProvider::Groq => !config.providers.groq.api_key.is_empty(),
             TranscriptionProvider::Local => false,
         };
 
@@ -366,42 +366,43 @@ mod tests {
     // find_fallback_provider tests
     // -----------------------------------------------------------------------
 
+    fn make_config_with_keys(openai_key: &str, groq_key: &str) -> TranscriptionConfig {
+        use crate::config::{CloudProviderConfig, TranscriptionProviders};
+        TranscriptionConfig {
+            fallback_order: vec![TranscriptionProvider::Openai, TranscriptionProvider::Groq],
+            providers: TranscriptionProviders {
+                openai: CloudProviderConfig {
+                    api_key: openai_key.to_string(),
+                    model: "whisper-1".to_string(),
+                },
+                groq: CloudProviderConfig {
+                    api_key: groq_key.to_string(),
+                    model: "whisper-large-v3".to_string(),
+                },
+            },
+            ..TranscriptionConfig::default()
+        }
+    }
+
     #[test]
     fn test_find_fallback_skips_current() {
-        let config = TranscriptionConfig {
-            fallback_order: vec![TranscriptionProvider::Openai, TranscriptionProvider::Groq],
-            groq_api_key: "sk-groq-key".to_string(),
-            ..TranscriptionConfig::default()
-        };
+        let config = make_config_with_keys("", "sk-groq-key");
         let result = find_fallback_provider(&TranscriptionProvider::Openai, &config);
         assert_eq!(result, Some("groq".to_string()));
     }
 
     #[test]
     fn test_find_fallback_skips_empty_key() {
-        let config = TranscriptionConfig {
-            fallback_order: vec![
-                TranscriptionProvider::Openai,
-                TranscriptionProvider::Groq,
-            ],
-            // Groq key is empty — should be skipped, leaving no eligible fallback.
-            openai_api_key: "sk-key".to_string(),
-            groq_api_key: "".to_string(),
-            ..TranscriptionConfig::default()
-        };
+        // Groq key is empty — should be skipped, leaving no eligible fallback.
+        let config = make_config_with_keys("sk-key", "");
         let result = find_fallback_provider(&TranscriptionProvider::Openai, &config);
         assert_eq!(result, None);
     }
 
     #[test]
     fn test_find_fallback_none_available() {
-        let config = TranscriptionConfig {
-            fallback_order: vec![TranscriptionProvider::Openai, TranscriptionProvider::Groq],
-            // All keys empty.
-            openai_api_key: "".to_string(),
-            groq_api_key: "".to_string(),
-            ..TranscriptionConfig::default()
-        };
+        // All keys empty.
+        let config = make_config_with_keys("", "");
         let result = find_fallback_provider(&TranscriptionProvider::Openai, &config);
         assert_eq!(result, None);
     }
