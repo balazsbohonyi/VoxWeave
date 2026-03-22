@@ -34,11 +34,11 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### Cloud Transcription
 
-- [x] **CLOD-01**: App supports three cloud providers: OpenAI, Groq, and OpenRouter
-- [x] **CLOD-02**: Each provider has its own API key, model selection, and language hint in settings
+- [x] **CLOD-01**: App supports two cloud providers: OpenAI and Groq
+- [x] **CLOD-02**: Each cloud provider has its own API key and model selection stored under `transcription.providers.<id>`; language hint is a single global field
 - [x] **CLOD-03**: OpenAI sends to `/v1/audio/transcriptions` with models: whisper-1, gpt-4o-transcribe, gpt-4o-mini-transcribe
 - [x] **CLOD-04**: Groq sends to its transcription endpoint with hardcoded models: whisper-large-v3-turbo (default), whisper-large-v3, distil-whisper-large-v3-en
-- [x] **CLOD-05**: OpenRouter sends to chat completions endpoint with audio as input_audio content; models: google/gemini-2.5-flash (default), google/gemini-2.5-pro, google/gemini-2.5-flash-lite, openai/gpt-4o-audio-preview, openai/gpt-audio, openai/gpt-audio-mini
+- ~~**CLOD-05**~~: *(dropped — OpenRouter removed; see Key Decisions in PROJECT.md)*
 - [x] **CLOD-06**: Invalid API key errors prompt user to open settings with the offending provider tab highlighted
 - [x] **CLOD-07**: Rate limit errors (429) retry with exponential backoff, max 3 retries
 - [x] **CLOD-08**: Network errors show a notification with a retry button
@@ -81,7 +81,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 - [ ] **SETT-01**: Settings window has sections: General, Audio, Transcription, Injection
 - [ ] **SETT-02**: General: hotkey capture input, "Launch on Windows startup" toggle (default OFF), minimize-to-tray toggle
 - [ ] **SETT-03**: Audio: microphone device dropdown listing all available devices, plus `Auto-stop on silence` toggle and configurable silence-duration input
-- [ ] **SETT-04**: Transcription: Cloud/Local engine toggle; Cloud has tabbed interface (OpenAI, Groq, OpenRouter) each with API key (masked), model dropdown, "Test connection", "Set as active"; active provider visually highlighted
+- [ ] **SETT-04**: Transcription: Cloud/Local engine toggle; Cloud has tabbed interface (OpenAI, Groq) each with API key (masked), model dropdown (list sourced from Rust constants via `get_provider_models` command), language hint input, "Test connection", "Set as active"; active provider visually highlighted
 - [ ] **SETT-05**: Transcription: Local sub-section with model variants, sizes, download/delete buttons, progress bar
 - [ ] **SETT-06**: Injection: method selector (FlashPaste/Keystrokes/Clipboard), speed selector (shown only for Keystrokes), auto-fallback checkbox
 - [ ] **SETT-07**: All settings persist immediately (no save button) and are restored on restart
@@ -105,7 +105,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 ### Config
 
 - [x] **CONF-01**: All settings persist in JSON at `%APPDATA%/VoxFlow/config.json`
-- [x] **CONF-02**: Config includes: engine, active provider, API keys, models, language hints, hotkey, mic device, local model, injection method/speed, auto-fallback, autostart, indicator position, first-launch flag
+- [x] **CONF-02**: Config includes: engine, active provider, per-provider API key and model under `transcription.providers`, global language hint, hotkey, mic device, local model path, injection method/speed, auto-fallback, autostart, indicator position, first-launch flag
 - [x] **CONF-03**: Missing fields use defaults; unknown fields are ignored (forward/backward compatible)
 
 ## v2 Requirements

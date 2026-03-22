@@ -212,6 +212,7 @@ Recent decisions affecting current work:
 - [Phase 07-pipeline-integration]: injection_cancel_message uses typed==0 guard: cancel before any chars typed shows 'Paste cancelled' regardless of total length
 - [Phase 07-pipeline-integration]: RecordingState reset to Idle moved before match result block: new hotkey during 10s toast window starts fresh recording
 - [Phase 07-pipeline-integration]: cancel_flag reset to false at Idle->Recording entry: stale cancel from prior session cannot abort new transcription
+- [Pre-Phase-08]: transcription.providers nested structure adopted — per-provider api_key and model stored under providers.<id>; available model lists are Rust constants (not stored in config), exposed to frontend via get_provider_models command; language hint stays global; OpenRouter fields removed from config entirely
 
 ### Roadmap Evolution
 

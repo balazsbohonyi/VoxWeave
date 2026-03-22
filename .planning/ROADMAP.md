@@ -157,10 +157,11 @@ Plans:
 **Depends on**: Phase 7
 **Requirements**: SETT-01, SETT-02, SETT-03, SETT-04, SETT-05, SETT-06, SETT-07
 **Note from Phase 3 context**: Audio settings must expose an `Auto-stop on silence` toggle and silence-duration control; defaults remain backend-managed until this phase.
+**Note (config refactor)**: Before building the Settings UI, migrate `TranscriptionConfig` from its current flat shape (`openai_api_key`, `groq_api_key`, `openai_model`, `groq_model`) to a nested `providers` map keyed by provider id, with a single global `language` field. Update all consumers: `src-tauri/src/config/mod.rs`, `src/types/index.ts`, provider impls in `src-tauri/src/transcription/`, and `service.rs`. Remove all OpenRouter fields. Expose available model lists as Rust constants via a `get_provider_models` command. This must land in the first plan of Phase 8 before any UI work.
 **Success Criteria** (what must be TRUE):
   1. The settings window has four sections: General, Audio, Transcription, and Injection, each exposing all relevant controls
   2. General section includes the hotkey capture input, a "Launch on Windows startup" toggle (default OFF), and a minimize-to-tray toggle
-  3. Transcription section has a Cloud/Local engine toggle; Cloud shows a tabbed interface (OpenAI, Groq, OpenRouter) with API key (masked), model dropdown, "Test connection", and "Set as active" per tab
+  3. Transcription section has a Cloud/Local engine toggle; Cloud shows a tabbed interface (OpenAI, Groq) with API key (masked), model dropdown, language hint input, "Test connection", and "Set as active" per tab
   4. Local transcription sub-section lists model variants with sizes, download/delete buttons, and a progress bar
   5. Injection section provides method selector (FlashPaste/Keystrokes/Clipboard), speed selector (shown only for Keystrokes), auto-fallback checkbox
   6. All setting changes persist immediately with no save button and are correctly restored on app restart
