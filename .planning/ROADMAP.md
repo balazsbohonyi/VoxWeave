@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Floating Indicator** - Always-on-top recording status window with waveform (completed 2026-03-15)
 - [x] **Phase 5: Cloud Transcription** - OpenAI, Groq, and OpenRouter providers with error handling (completed 2026-03-17)
 - [x] **Phase 6: Text Injection** - FlashPaste, keystroke, and clipboard injection with fallback chain (completed 2026-03-21)
-- [ ] **Phase 7: Pipeline Integration** - End-to-end hotkey-to-text pipeline with toast notifications
+- [x] **Phase 7: Pipeline Integration** - End-to-end hotkey-to-text pipeline with toast notifications (completed 2026-03-22)
 - [ ] **Phase 8: Settings UI** - Full settings window for all configurable parameters
 - [ ] **Phase 9: Setup Wizard** - First-launch onboarding flow
 - [ ] **Phase 10: Local Transcription** - whisper.cpp integration with on-demand model download
@@ -205,7 +205,7 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | 5. Cloud Transcription | 7/7 | Complete   | 2026-03-20 |
 | 5.1. PCM + Opus | 5/5 | Complete   | 2026-03-20 |
 | 6. Text Injection | 4/4 | Complete   | 2026-03-21 |
-| 7. Pipeline Integration | 2/3 | In Progress|  |
+| 7. Pipeline Integration | 3/3 | Complete   | 2026-03-22 |
 | 8. Settings UI | 0/TBD | Not started | - |
 | 9. Setup Wizard | 0/TBD | Not started | - |
 | 10. Local Transcription | 0/TBD | Not started | - |
