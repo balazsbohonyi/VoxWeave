@@ -2,10 +2,28 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
+current_phase: 5
+current_phase_name: Cloud Transcription
+current_plan: 2
+status: verifying
+stopped_at: Completed 07-pipeline-integration 07-04-PLAN.md
+last_updated: "2026-03-22T15:58:55.241Z"
+last_activity: 2026-03-22
+progress:
+  total_phases: 11
+  completed_phases: 7
+  total_plans: 37
+  completed_plans: 38
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
 current_phase: 8
 current_phase_name: Settings UI
 current_plan: 1
-status: ready_to_plan
+status: Phase complete — ready for verification
 stopped_at: Completed phase 07-pipeline-integration (human-verified 2026-03-22)
 last_updated: "2026-03-22T00:00:00.000Z"
 last_activity: 2026-03-22
@@ -118,6 +136,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 07-pipeline-integration P02 | 1 | 1 tasks | 1 files |
 | Phase 07-pipeline-integration P01 | 214 | 2 tasks | 2 files |
 | Phase 07-pipeline-integration P03 | 15 | 2 tasks | 1 files |
+| Phase 07-pipeline-integration P04 | 4 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -190,6 +209,9 @@ Recent decisions affecting current work:
 - [Phase 07-pipeline-integration]: injection_success_label and injection_cancel_message extracted as free functions for unit testability without AppHandle
 - [Phase 07-pipeline-integration]: Auto-dismiss timers keyed by toast id (not array index) for stable lookup across list mutations
 - [Phase 07-pipeline-integration]: handleDismissToast declared before scheduleAutoDismiss — closure captures by name at call time, no hoisting needed
+- [Phase 07-pipeline-integration]: injection_cancel_message uses typed==0 guard: cancel before any chars typed shows 'Paste cancelled' regardless of total length
+- [Phase 07-pipeline-integration]: RecordingState reset to Idle moved before match result block: new hotkey during 10s toast window starts fresh recording
+- [Phase 07-pipeline-integration]: cancel_flag reset to false at Idle->Recording entry: stale cancel from prior session cannot abort new transcription
 
 ### Roadmap Evolution
 
@@ -208,7 +230,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-22T14:35:48.968Z
-Stopped at: Completed 07-pipeline-integration 07-03-PLAN.md
+Last session: 2026-03-22T15:58:55.239Z
+Stopped at: Completed 07-pipeline-integration 07-04-PLAN.md
 Resume file: None
 
