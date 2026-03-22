@@ -328,45 +328,40 @@ async function saveLanguage(lang: string) {
             </select>
           </div>
 
-          <!-- Test connection -->
-          <div class="space-y-2">
-            <button
-              type="button"
-              :disabled="testConnectionState.openai === 'pending'"
-              class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              @click="testConnection('openai')"
-            >
-              <!-- Spinner -->
-              <svg v-if="testConnectionState.openai === 'pending'" class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-              </svg>
-              <!-- Success checkmark -->
-              <svg v-else-if="testConnectionState.openai === 'success'" class="h-3.5 w-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              <!-- Error x -->
-              <svg v-else-if="testConnectionState.openai === 'error'" class="h-3.5 w-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              Test connection
-            </button>
-            <p v-if="testConnectionState.openai !== 'idle'" class="text-xs"
+          <!-- Test connection + Set as active -->
+          <div>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                :disabled="testConnectionState.openai === 'pending'"
+                class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                @click="testConnection('openai')"
+              >
+                <svg v-if="testConnectionState.openai === 'pending'" class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                </svg>
+                <svg v-else-if="testConnectionState.openai === 'success'" class="h-3.5 w-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <svg v-else-if="testConnectionState.openai === 'error'" class="h-3.5 w-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Test connection
+              </button>
+              <button
+                type="button"
+                :disabled="isActiveProvider('openai')"
+                class="px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                @click="setAsActive('openai')"
+              >
+                Set as active
+              </button>
+            </div>
+            <p v-if="testConnectionState.openai !== 'idle'" class="mt-1.5 text-xs"
                :class="testConnectionState.openai === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
               {{ testConnectionMessage.openai }}
             </p>
-          </div>
-
-          <!-- Set as active -->
-          <div>
-            <button
-              type="button"
-              :disabled="isActiveProvider('openai')"
-              class="px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              @click="setAsActive('openai')"
-            >
-              Set as active
-            </button>
           </div>
         </div>
 
@@ -433,45 +428,40 @@ async function saveLanguage(lang: string) {
             </select>
           </div>
 
-          <!-- Test connection -->
-          <div class="space-y-2">
-            <button
-              type="button"
-              :disabled="testConnectionState.groq === 'pending'"
-              class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              @click="testConnection('groq')"
-            >
-              <!-- Spinner -->
-              <svg v-if="testConnectionState.groq === 'pending'" class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-              </svg>
-              <!-- Success checkmark -->
-              <svg v-else-if="testConnectionState.groq === 'success'" class="h-3.5 w-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              <!-- Error x -->
-              <svg v-else-if="testConnectionState.groq === 'error'" class="h-3.5 w-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              Test connection
-            </button>
-            <p v-if="testConnectionState.groq !== 'idle'" class="text-xs"
+          <!-- Test connection + Set as active -->
+          <div>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                :disabled="testConnectionState.groq === 'pending'"
+                class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                @click="testConnection('groq')"
+              >
+                <svg v-if="testConnectionState.groq === 'pending'" class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                </svg>
+                <svg v-else-if="testConnectionState.groq === 'success'" class="h-3.5 w-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <svg v-else-if="testConnectionState.groq === 'error'" class="h-3.5 w-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Test connection
+              </button>
+              <button
+                type="button"
+                :disabled="isActiveProvider('groq')"
+                class="px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                @click="setAsActive('groq')"
+              >
+                Set as active
+              </button>
+            </div>
+            <p v-if="testConnectionState.groq !== 'idle'" class="mt-1.5 text-xs"
                :class="testConnectionState.groq === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
               {{ testConnectionMessage.groq }}
             </p>
-          </div>
-
-          <!-- Set as active -->
-          <div>
-            <button
-              type="button"
-              :disabled="isActiveProvider('groq')"
-              class="px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              @click="setAsActive('groq')"
-            >
-              Set as active
-            </button>
           </div>
         </div>
 
@@ -480,7 +470,7 @@ async function saveLanguage(lang: string) {
           <div class="flex items-center justify-between">
             <div>
               <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Language</label>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">BCP-47 hint passed to the transcription API. Leave blank for auto-detect.</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Leave blank for auto-detect.</p>
             </div>
             <LanguageSelect
               :model-value="config.transcription.language"
@@ -523,7 +513,7 @@ async function saveLanguage(lang: string) {
           <div class="flex items-center justify-between">
             <div>
               <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Language</label>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">BCP-47 hint for local Whisper inference.</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Leave blank for auto-detect.</p>
             </div>
             <LanguageSelect
               :model-value="config.transcription.language"

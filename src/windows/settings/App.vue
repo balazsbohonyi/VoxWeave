@@ -32,9 +32,9 @@ onMounted(() => {
       <button
         v-for="tab in tabs"
         :key="tab.id"
-        class="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors rounded-none"
+        class="w-full text-left px-4 py-2.5 text-sm font-bold transition-colors"
         :class="activeTab === tab.id
-          ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 border-r-2 border-blue-500'
+          ? 'bg-blue-600 text-white'
           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'"
         @click="activeTab = tab.id"
       >
