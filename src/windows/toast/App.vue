@@ -48,6 +48,18 @@ function scheduleAutoDismiss(id: number, ms: number): void {
   dismissTimers.set(id, timer);
 }
 
+function dismissTransientToasts(): void {
+  const transient = toasts.value.filter((t) => t.type === "success" || t.type === "info");
+  for (const t of transient) {
+    const timer = dismissTimers.get(t.id);
+    if (timer !== undefined) {
+      clearTimeout(timer);
+      dismissTimers.delete(t.id);
+    }
+    dismissToast(t.id);
+  }
+}
+
 function showTranscriptionErrorToast(opts: ShowToastOptions): void {
   showToast(opts);
 }
@@ -83,6 +95,7 @@ onMounted(() => {
     // Handle plain {type, message} toasts (e.g. "Copied to clipboard — paste manually")
     if (isPlainToast(payload)) {
       if (payload.type === "success" || payload.type === "info") {
+        dismissTransientToasts();
         const toastId = showToast({ message: payload.message, type: payload.type, autoDismissMs: 10000 });
         scheduleAutoDismiss(toastId, 10000);
       } else {
@@ -95,6 +108,7 @@ onMounted(() => {
     if (isInjectionPayload(payload)) {
       if (payload.code === "cancelled") {
         // message is already formatted as "Cancelled — N of M chars typed" by Rust
+        dismissTransientToasts();
         const toastId = showToast({ message: payload.message, type: "info", autoDismissMs: 10000 });
         scheduleAutoDismiss(toastId, 10000);
       } else if (payload.code === "all_methods_failed") {
