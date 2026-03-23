@@ -62,7 +62,7 @@ src-tauri/src/
 ├── main.rs                  # Tauri setup, plugin registration, window creation
 ├── commands/                # Thin Tauri command handlers only — no business logic here
 ├── audio/                   # cpal capture, RMS computation, Opus/WAV encoding
-├── transcription/           # TranscriptionProvider trait + OpenAI/Groq/OpenRouter/Local impls
+├── transcription/           # TranscriptionProvider trait + OpenAI/Groq/Local impls
 ├── injection/               # FlashPaste, keystroke, clipboard modes + fallback pipeline
 ├── platform/                # Platform abstraction traits + Windows implementations
 │   └── windows/             # GetForegroundWindow, SendInput, integrity checks, ShellExecuteW
@@ -125,10 +125,12 @@ Terminal window classes for FlashPaste paste shortcut switching: `ConsoleWindowC
 | `windows` crate (not `winapi` or `windows-sys`) | Microsoft-maintained, safe wrappers, actively developed |
 | No `pinia` | Tauri managed state + Vue reactivity is sufficient; Pinia is overkill |
 | No heavy UI libraries (Vuetify, PrimeVue) | Custom Tailwind UI keeps the floating indicator lightweight |
-| Hardcoded model lists (not dynamic API calls) | Avoids API calls just to populate dropdowns |
+| Hardcoded model lists (not dynamic API calls) | Avoids API calls just to populate dropdowns; exposed via `get_provider_models` Rust command |
 | OpenRouter support dropped (never add back without re-evaluation) | OpenRouter has no Whisper-style STT endpoint; chat completions with base64 audio is a poor fit for dictation — inconsistent results, not purpose-built for STT. Confirmed by user testing. |
 | Feature-gate `whisper-rs` behind cargo feature | Avoids MSVC + CMake build requirement during cloud-only phases |
-| `transcription.provider` in config controls the active provider; `fallback_order` is the failover chain | These are separate concerns — changing fallback order does not change the active provider. The full Settings UI (Phase 8) must make this distinction clear to users. |
+| `transcription.provider` in config controls the active provider; `fallback_order` is the failover chain | These are separate concerns — changing fallback order does not change the active provider. |
+| `TranscriptionConfig` uses nested `providers` map (not flat fields) | Per-provider api_key/model stored under `providers.<id>`; language hint is global; migrated at load time via `migrate_transcription_fields` on raw JSON — no disk rewrite needed |
+| `TranscriptionConfig` migration runs at load time on raw JSON Value | Old flat keys (`openai_api_key` etc.) are promoted to nested structure transparently; unknown fields preserved |
 
 ## Config
 
