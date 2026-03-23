@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { useConfig } from "../../composables/useConfig";
 import GeneralSection from "./components/GeneralSection.vue";
 import AudioSection from "./components/AudioSection.vue";
@@ -18,6 +18,17 @@ const tabs: { id: Tab; label: string }[] = [
   { id: "transcription", label: "Transcription" },
   { id: "injection",     label: "Injection" },
 ];
+
+const activeProviderLabel = computed<{ provider: string; detail: string } | null>(() => {
+  if (!config.value) return null;
+  const t = config.value.transcription;
+  if (t.provider === "openai") return { provider: "OpenAI", detail: t.providers.openai.model || "—" };
+  if (t.provider === "groq")   return { provider: "Groq",   detail: t.providers.groq.model   || "—" };
+  // Local — derive size label from model_path
+  const path = t.providers.local.model_path ?? "";
+  const size = ["medium", "small", "base", "tiny"].find(s => path.toLowerCase().includes(s));
+  return { provider: "Local", detail: size ? size.charAt(0).toUpperCase() + size.slice(1) : "No model" };
+});
 
 onMounted(() => {
   loadConfig();
@@ -40,6 +51,14 @@ onMounted(() => {
       >
         {{ tab.label }}
       </button>
+
+      <!-- Active provider status -->
+      <div v-if="activeProviderLabel" class="mt-auto px-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+        <p class="text-xs text-gray-400 dark:text-gray-500">
+          Provider · <span class="font-semibold text-gray-600 dark:text-gray-300">{{ activeProviderLabel.provider }}</span>
+        </p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ activeProviderLabel.detail }}</p>
+      </div>
     </nav>
 
     <!-- Content area -->

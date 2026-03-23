@@ -24,9 +24,9 @@ function onFallbackChange(e: Event): void {
 <template>
   <section v-if="config">
     <!-- Injection method + Typing speed side by side -->
-    <div class="mb-4 flex gap-8">
-      <!-- Left: method -->
-      <div class="flex-1">
+    <div class="mb-4 flex gap-6">
+      <!-- Left: method (wider to fit "Simulated keystrokes" on one line) -->
+      <div class="flex-[3] min-w-0">
         <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
           Injection method
         </label>
@@ -40,7 +40,7 @@ function onFallbackChange(e: Event): void {
               class="accent-blue-500"
               @change="onModeChange('flash_paste')"
             >
-            <span class="text-sm text-gray-800 dark:text-gray-200">FlashPaste (recommended)</span>
+            <span class="text-sm text-gray-800 dark:text-gray-200">FlashPaste</span>
           </label>
           <label class="flex items-center gap-2 py-1 cursor-pointer">
             <input
@@ -51,7 +51,7 @@ function onFallbackChange(e: Event): void {
               class="accent-blue-500"
               @change="onModeChange('keystroke')"
             >
-            <span class="text-sm text-gray-800 dark:text-gray-200">Simulated keystrokes</span>
+            <span class="text-sm text-gray-800 dark:text-gray-200 whitespace-nowrap">Simulated keystrokes</span>
           </label>
           <label class="flex items-center gap-2 py-1 cursor-pointer">
             <input
@@ -67,8 +67,8 @@ function onFallbackChange(e: Event): void {
         </div>
       </div>
 
-      <!-- Right: typing speed (only when keystroke mode selected) -->
-      <div v-if="config.injection.mode === 'keystroke'" class="flex-1">
+      <!-- Right: typing speed (only when keystroke mode selected, narrower) -->
+      <div v-if="config.injection.mode === 'keystroke'" class="flex-[2] min-w-0">
         <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
           Typing speed
         </label>
@@ -82,7 +82,7 @@ function onFallbackChange(e: Event): void {
               class="accent-blue-500"
               @change="onSpeedChange('slow')"
             >
-            <span class="text-sm text-gray-800 dark:text-gray-200">Slow (10ms/char)</span>
+            <span class="text-sm text-gray-800 dark:text-gray-200">Slow</span>
           </label>
           <label class="flex items-center gap-2 py-1 cursor-pointer">
             <input
@@ -93,7 +93,7 @@ function onFallbackChange(e: Event): void {
               class="accent-blue-500"
               @change="onSpeedChange('normal')"
             >
-            <span class="text-sm text-gray-800 dark:text-gray-200">Normal (5ms/char)</span>
+            <span class="text-sm text-gray-800 dark:text-gray-200">Normal</span>
           </label>
           <label class="flex items-center gap-2 py-1 cursor-pointer">
             <input
@@ -104,7 +104,7 @@ function onFallbackChange(e: Event): void {
               class="accent-blue-500"
               @change="onSpeedChange('fast')"
             >
-            <span class="text-sm text-gray-800 dark:text-gray-200">Fast (2ms/char)</span>
+            <span class="text-sm text-gray-800 dark:text-gray-200">Fast</span>
           </label>
         </div>
       </div>
@@ -126,6 +126,22 @@ function onFallbackChange(e: Event): void {
         class="h-4 w-4 rounded accent-blue-500"
         @change="onFallbackChange"
       >
+    </div>
+
+    <!-- Method descriptions -->
+    <div class="mt-5 pt-4 border-t border-gray-100 dark:border-gray-800 space-y-2.5">
+      <p class="text-xs text-gray-500 dark:text-gray-400">
+        <span class="font-semibold text-gray-600 dark:text-gray-300">FlashPaste</span>
+        — pastes via clipboard (Ctrl+V / Ctrl+Shift+V in terminals). Instant and reliable for most apps.
+      </p>
+      <p class="text-xs text-gray-500 dark:text-gray-400">
+        <span class="font-semibold text-gray-600 dark:text-gray-300">Simulated keystrokes</span>
+        — types each character using keyboard events. Works in apps that block paste.
+      </p>
+      <p class="text-xs text-gray-500 dark:text-gray-400">
+        <span class="font-semibold text-gray-600 dark:text-gray-300">Clipboard only</span>
+        — copies transcribed text to clipboard without injecting. Paste manually with Ctrl+V.
+      </p>
     </div>
   </section>
 </template>

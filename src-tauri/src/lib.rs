@@ -56,19 +56,38 @@ pub fn run() {
             hotkey::service::register_startup_hotkey(&app.handle());
 
             // Settings window is defined in tauri.conf.json with `visible: false`.
-            // Register the close-to-hide handler so titlebar close hides rather than destroys.
+            // - CloseRequested: hide instead of destroy (unless quitting).
+            // - Destroyed: when quitting, drive cleanup_before_exit + exit here so
+            //   WebView2 has fully torn down before the process exits — avoids the
+            //   "Failed to unregister class Chrome_WidgetWin_0" error on Windows.
+            // - Moved: persist position in AppState for session-only position memory.
             if let Some(settings_win) = app.get_webview_window("settings") {
                 let win_clone = settings_win.clone();
+                let app_handle = app.handle().clone();
                 let quitting = app.state::<AppState>().quitting.clone();
+                let settings_position = app.state::<AppState>().settings_position.clone();
                 settings_win.on_window_event(move |event| {
-                    if let WindowEvent::CloseRequested { api, .. } = event {
-                        if *quitting.lock().unwrap() {
-                            // App is quitting — allow WebView2 to destroy cleanly.
-                            return;
+                    match event {
+                        WindowEvent::CloseRequested { api, .. } => {
+                            if *quitting.lock().unwrap() {
+                                return;
+                            }
+                            api.prevent_close();
+                            let _ = win_clone.hide();
                         }
-                        // Normal close: hide instead of destroy so the window is reusable.
-                        api.prevent_close();
-                        let _ = win_clone.hide();
+                        WindowEvent::Destroyed => {
+                            if *quitting.lock().unwrap() {
+                                let handle = app_handle.clone();
+                                std::thread::spawn(move || {
+                                    handle.cleanup_before_exit();
+                                    handle.exit(0);
+                                });
+                            }
+                        }
+                        WindowEvent::Moved(pos) => {
+                            *settings_position.lock().unwrap() = Some((pos.x, pos.y));
+                        }
+                        _ => {}
                     }
                 });
             }

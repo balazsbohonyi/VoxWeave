@@ -17,12 +17,11 @@
         "url": "index.html",
         "width": 560,
         "height": 450,
-        "minWidth": 480,
-        "minHeight": 360,
+        "center": true,
         "visible": false,
         "skipTaskbar": false,
         "decorations": true,
-        "resizable": true
+        "resizable": false
       },
       {
         "label": "indicator",

@@ -5,7 +5,7 @@ use tauri::{
     image::Image,
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, TrayIconBuilder, TrayIconEvent},
-    App, AppHandle, Manager, Runtime,
+    App, AppHandle, Manager, PhysicalPosition, Runtime,
 };
 
 const TRAY_ID: &str = "main";
@@ -39,23 +39,17 @@ fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event: tauri::menu::MenuEve
     match event.id().as_ref() {
         "open_settings" => show_settings_window(app),
         "quit" => {
-            // Signal quit intent so the close-to-hide handler lets the window
-            // destroy rather than hiding - WebView2 must tear down before exit.
+            // Signal quit intent so close-to-hide handlers let windows destroy.
+            // Exit is driven by the settings window's Destroyed event in lib.rs
+            // so WebView2 has fully torn down before the process exits.
             if let Some(state) = app.try_state::<crate::state::AppState>() {
                 *state.quitting.lock().unwrap() = true;
             }
-            if let Some(win) = app.get_webview_window("settings") {
-                let _ = win.close();
+            for label in ["settings", "indicator", "toast"] {
+                if let Some(win) = app.get_webview_window(label) {
+                    let _ = win.close();
+                }
             }
-            if let Some(win) = app.get_webview_window("indicator") {
-                let _ = win.close();
-            }
-            let app_for_exit = app.clone();
-            std::thread::spawn(move || {
-                std::thread::sleep(std::time::Duration::from_millis(250));
-                app_for_exit.cleanup_before_exit();
-                app_for_exit.exit(0);
-            });
         }
         START_STOP_ID => {
             crate::hotkey::service::toggle_recording_state(app);
@@ -76,9 +70,12 @@ fn handle_tray_event<R: Runtime>(tray: &tauri::tray::TrayIcon<R>, event: TrayIco
 }
 
 /// Show the single settings window, creating it if hidden, focusing if already visible.
-/// Never creates a second instance - Tauri windows are identified by label.
+/// Restores the last user-set position for the current session; centers on first open.
 pub fn show_settings_window<R: Runtime>(app: &AppHandle<R>) {
     if let Some(window) = app.get_webview_window("settings") {
+        if let Some((x, y)) = *app.state::<crate::state::AppState>().settings_position.lock().unwrap() {
+            let _ = window.set_position(PhysicalPosition::new(x, y));
+        }
         let _ = window.show();
         let _ = window.set_focus();
     }
