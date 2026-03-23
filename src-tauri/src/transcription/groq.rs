@@ -61,7 +61,7 @@ impl TranscriptionProviderTrait for GroqProvider {
 
         let mut form = reqwest::multipart::Form::new()
             .part("file", file_part)
-            .text("model", config.groq_model.clone())
+            .text("model", config.providers.groq.model.clone())
             .text("response_format", "text");
 
         if !config.language.is_empty() {
@@ -71,7 +71,7 @@ impl TranscriptionProviderTrait for GroqProvider {
         let response = self
             .client
             .post(GROQ_ENDPOINT)
-            .bearer_auth(&config.groq_api_key)
+            .bearer_auth(&config.providers.groq.api_key)
             .multipart(form)
             .send()
             .await

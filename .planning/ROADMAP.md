@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Cloud Transcription** - OpenAI, Groq, and OpenRouter providers with error handling (completed 2026-03-17)
 - [x] **Phase 6: Text Injection** - FlashPaste, keystroke, and clipboard injection with fallback chain (completed 2026-03-21)
 - [x] **Phase 7: Pipeline Integration** - End-to-end hotkey-to-text pipeline with toast notifications (completed 2026-03-22)
-- [ ] **Phase 8: Settings UI** - Full settings window for all configurable parameters
+- [x] **Phase 8: Settings UI** - Full settings window for all configurable parameters (completed 2026-03-22)
 - [ ] **Phase 9: Setup Wizard** - First-launch onboarding flow
 - [ ] **Phase 10: Local Transcription** - whisper.cpp integration with on-demand model download
 
@@ -157,14 +157,21 @@ Plans:
 **Depends on**: Phase 7
 **Requirements**: SETT-01, SETT-02, SETT-03, SETT-04, SETT-05, SETT-06, SETT-07
 **Note from Phase 3 context**: Audio settings must expose an `Auto-stop on silence` toggle and silence-duration control; defaults remain backend-managed until this phase.
+**Note (config refactor)**: Before building the Settings UI, migrate `TranscriptionConfig` from its current flat shape (`openai_api_key`, `groq_api_key`, `openai_model`, `groq_model`) to a nested `providers` map keyed by provider id, with a single global `language` field. Update all consumers: `src-tauri/src/config/mod.rs`, `src/types/index.ts`, provider impls in `src-tauri/src/transcription/`, and `service.rs`. Remove all OpenRouter fields. Expose available model lists as Rust constants via a `get_provider_models` command. This must land in the first plan of Phase 8 before any UI work.
 **Success Criteria** (what must be TRUE):
   1. The settings window has four sections: General, Audio, Transcription, and Injection, each exposing all relevant controls
   2. General section includes the hotkey capture input, a "Launch on Windows startup" toggle (default OFF), and a minimize-to-tray toggle
-  3. Transcription section has a Cloud/Local engine toggle; Cloud shows a tabbed interface (OpenAI, Groq, OpenRouter) with API key (masked), model dropdown, "Test connection", and "Set as active" per tab
+  3. Transcription section has a Cloud/Local engine toggle; Cloud shows a tabbed interface (OpenAI, Groq) with API key (masked), model dropdown, language hint input, "Test connection", and "Set as active" per tab
   4. Local transcription sub-section lists model variants with sizes, download/delete buttons, and a progress bar
   5. Injection section provides method selector (FlashPaste/Keystrokes/Clipboard), speed selector (shown only for Keystrokes), auto-fallback checkbox
   6. All setting changes persist immediately with no save button and are correctly restored on app restart
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 08-01-PLAN.md — TranscriptionConfig migration: nested providers struct + on-disk field promotion + TS types
+- [ ] 08-02-PLAN.md — New Rust commands: get_provider_models, test_connection, set_launch_at_login + autostart plugin
+- [ ] 08-03-PLAN.md — App.vue shell (480px) + SectionDivider + GeneralSection + AudioSection + HotkeyCapture
+- [ ] 08-04-PLAN.md — TranscriptionSection: cloud tabs, API key, model, test-connection, local stubs
+- [ ] 08-05-PLAN.md — InjectionSection + final App.vue wiring + human-verify checkpoint
 
 ### Phase 9: Setup Wizard
 **Goal**: A new user completes first-time configuration through a guided 3-step wizard before the app begins minimizing to tray on launch
@@ -207,6 +214,6 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | 5.1. PCM + Opus | 5/5 | Complete   | 2026-03-20 |
 | 6. Text Injection | 4/4 | Complete   | 2026-03-21 |
 | 7. Pipeline Integration | 4/4 | Complete   | 2026-03-22 |
-| 8. Settings UI | 0/TBD | Not started | - |
+| 8. Settings UI | 5/5 | Complete   | 2026-03-22 |
 | 9. Setup Wizard | 0/TBD | Not started | - |
 | 10. Local Transcription | 0/TBD | Not started | - |

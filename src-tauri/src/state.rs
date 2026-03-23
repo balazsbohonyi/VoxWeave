@@ -99,6 +99,12 @@ pub struct AppState {
     /// Last known indicator visual state for late frontend subscribers.
     pub indicator_visual_state: Arc<Mutex<IndicatorVisualState>>,
 
+    /// Last user-set position of the settings window (x, y in physical pixels).
+    /// Persists within the current app session only — cleared on restart.
+    /// `None` means the window has not been moved yet; show_settings_window
+    /// will center it via tauri.conf.json `center: true` initial placement.
+    pub settings_position: Arc<Mutex<Option<(i32, i32)>>>,
+
     /// Set to `true` when the app is quitting via the tray Quit action.
     /// The close-to-hide handler checks this to allow window destruction
     /// instead of hiding, so WebView2 tears down cleanly before exit.
@@ -133,6 +139,7 @@ impl AppState {
                     audio_session: Arc::new(Mutex::new(None)),
                     indicator_drag_active: Arc::new(Mutex::new(false)),
                     indicator_visual_state: Arc::new(Mutex::new(IndicatorVisualState::Hidden)),
+                    settings_position: Arc::new(Mutex::new(None)),
                     quitting: Arc::new(Mutex::new(false)),
                     last_encoded_audio: Arc::new(Mutex::new(None)),
                     foreground_window: Arc::new(Mutex::new(None)),
@@ -156,6 +163,7 @@ impl AppState {
                     audio_session: Arc::new(Mutex::new(None)),
                     indicator_drag_active: Arc::new(Mutex::new(false)),
                     indicator_visual_state: Arc::new(Mutex::new(IndicatorVisualState::Hidden)),
+                    settings_position: Arc::new(Mutex::new(None)),
                     quitting: Arc::new(Mutex::new(false)),
                     last_encoded_audio: Arc::new(Mutex::new(None)),
                     foreground_window: Arc::new(Mutex::new(None)),

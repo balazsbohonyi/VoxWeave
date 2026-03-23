@@ -6,6 +6,24 @@ current_phase: 5
 current_phase_name: Cloud Transcription
 current_plan: 2
 status: verifying
+stopped_at: Completed 08-settings-ui 08-05-PLAN.md
+last_updated: "2026-03-22T22:00:14.916Z"
+last_activity: 2026-03-22
+progress:
+  total_phases: 11
+  completed_phases: 8
+  total_plans: 42
+  completed_plans: 43
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+current_phase: 5
+current_phase_name: Cloud Transcription
+current_plan: 2
+status: verifying
 stopped_at: Completed 07-pipeline-integration 07-04-PLAN.md
 last_updated: "2026-03-22T16:53:22.938Z"
 last_activity: 2026-03-22
@@ -137,6 +155,12 @@ Progress: [███░░░░░░░] 33%
 | Phase 07-pipeline-integration P01 | 214 | 2 tasks | 2 files |
 | Phase 07-pipeline-integration P03 | 15 | 2 tasks | 1 files |
 | Phase 07-pipeline-integration P04 | 4 | 2 tasks | 1 files |
+| Phase 08-settings-ui P01 | 5 | 3 tasks | 6 files |
+| Phase 08-settings-ui P03 | 3 | 3 tasks | 5 files |
+| Phase 08-settings-ui P02 | 4min | 2 tasks | 3 files |
+| Phase 08-settings-ui P04 | 2 | 2 tasks | 2 files |
+| Phase 08-settings-ui P05 | 1 | 1 tasks | 2 files |
+| Phase 08-settings-ui P05 | 10 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -212,6 +236,19 @@ Recent decisions affecting current work:
 - [Phase 07-pipeline-integration]: injection_cancel_message uses typed==0 guard: cancel before any chars typed shows 'Paste cancelled' regardless of total length
 - [Phase 07-pipeline-integration]: RecordingState reset to Idle moved before match result block: new hotkey during 10s toast window starts fresh recording
 - [Phase 07-pipeline-integration]: cancel_flag reset to false at Idle->Recording entry: stale cancel from prior session cannot abort new transcription
+- [Pre-Phase-08]: transcription.providers nested structure adopted — per-provider api_key and model stored under providers.<id>; available model lists are Rust constants (not stored in config), exposed to frontend via get_provider_models command; language hint stays global; OpenRouter fields removed from config entirely
+- [Phase 08-settings-ui]: migrate_transcription_fields runs at load time on raw JSON Value — no disk rewrite needed, old flat keys coexist safely
+- [Phase 08-settings-ui]: TranscriptionConfig field access: config.providers.openai.api_key / config.providers.groq.model replaces 4 flat fields
+- [Phase 08-settings-ui]: App.vue delegates state to section components via independent useConfig() calls — avoids prop-drilling
+- [Phase 08-settings-ui]: minimize_to_tray rendered as always-on disabled checkbox (SETT-02) without adding new Rust config field
+- [Phase 08-settings-ui]: test_connection treats any non-401/non-network response as connected — 400 confirms key validity
+- [Phase 08-settings-ui]: MutexGuard scoped before .await to avoid holding lock across async boundary in test_connection
+- [Phase 08-settings-ui]: activeTab is local UI state only — Set as active button is the only way to update config.transcription.provider
+- [Phase 08-settings-ui]: Language hint rendered outside per-tab block as a global field (one LanguageSelect regardless of active tab)
+- [Phase 08-settings-ui]: Radio buttons chosen over select for injection method — three options, clearer UX at this scale
+- [Phase 08-settings-ui]: Speed selector uses v-if (not v-show) so DOM is absent when FlashPaste/Clipboard selected
+- [Phase 08-settings-ui]: Radio buttons chosen over select for injection method — three options, clearer UX at this scale
+- [Phase 08-settings-ui]: Speed selector uses v-if (not v-show) so DOM is absent when FlashPaste/Clipboard selected
 
 ### Roadmap Evolution
 
@@ -230,7 +267,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-22T15:58:55.239Z
-Stopped at: Completed 07-pipeline-integration 07-04-PLAN.md
+Last session: 2026-03-22T21:57:53.285Z
+Stopped at: Completed 08-settings-ui 08-05-PLAN.md
 Resume file: None
 

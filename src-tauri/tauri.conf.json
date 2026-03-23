@@ -15,14 +15,13 @@
         "label": "settings",
         "title": "VoxFlow Settings",
         "url": "index.html",
-        "width": 800,
-        "height": 600,
-        "minWidth": 640,
-        "minHeight": 480,
+        "width": 560,
+        "height": 450,
+        "center": true,
         "visible": false,
         "skipTaskbar": false,
         "decorations": true,
-        "resizable": true
+        "resizable": false
       },
       {
         "label": "indicator",

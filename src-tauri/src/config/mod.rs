@@ -10,6 +10,7 @@ pub mod persistence;
 // Enumerations
 // ---------------------------------------------------------------------------
 
+
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum InjectionMode {
@@ -78,6 +79,67 @@ impl std::str::FromStr for TranscriptionProvider {
 // Nested config sections
 // ---------------------------------------------------------------------------
 
+/// Per-provider cloud transcription config (API key + model selection).
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct CloudProviderConfig {
+    #[serde(default)]
+    pub api_key: String,
+    #[serde(default)]
+    pub model: String,
+}
+
+impl Default for CloudProviderConfig {
+    fn default() -> Self {
+        Self {
+            api_key: String::new(),
+            model: String::new(),
+        }
+    }
+}
+
+fn default_openai_provider() -> CloudProviderConfig {
+    CloudProviderConfig {
+        api_key: String::new(),
+        model: "whisper-1".to_string(),
+    }
+}
+
+fn default_groq_provider() -> CloudProviderConfig {
+    CloudProviderConfig {
+        api_key: String::new(),
+        model: "whisper-large-v3".to_string(),
+    }
+}
+
+/// Local Whisper provider config.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, Default)]
+pub struct LocalProviderConfig {
+    /// Path to a local whisper.cpp model file (.bin). None = not yet downloaded.
+    #[serde(default)]
+    pub model_path: Option<String>,
+}
+
+/// Nested map of all provider configs.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct TranscriptionProviders {
+    #[serde(default = "default_openai_provider")]
+    pub openai: CloudProviderConfig,
+    #[serde(default = "default_groq_provider")]
+    pub groq: CloudProviderConfig,
+    #[serde(default)]
+    pub local: LocalProviderConfig,
+}
+
+impl Default for TranscriptionProviders {
+    fn default() -> Self {
+        Self {
+            openai: default_openai_provider(),
+            groq: default_groq_provider(),
+            local: LocalProviderConfig::default(),
+        }
+    }
+}
+
 /// Audio capture settings.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct AudioConfig {
@@ -112,26 +174,14 @@ pub struct TranscriptionConfig {
     #[serde(default)]
     pub provider: TranscriptionProvider,
 
-    // --- API keys ---
+    /// Per-provider API key and model selections.
     #[serde(default)]
-    pub openai_api_key: String,
-    #[serde(default)]
-    pub groq_api_key: String,
-
-    // --- Model selections (hardcoded lists in UI, stored as string) ---
-    #[serde(default = "default_openai_model")]
-    pub openai_model: String,
-    #[serde(default = "default_groq_model")]
-    pub groq_model: String,
+    pub providers: TranscriptionProviders,
 
     /// BCP-47 language hint sent to the transcription API (e.g. "en", "hu").
     /// Empty string means auto-detect.
     #[serde(default)]
     pub language: String,
-
-    /// Path to local whisper.cpp model file. Used only when provider = Local.
-    #[serde(default)]
-    pub local_model_path: Option<String>,
 
     /// Ordered list of providers to try when the primary provider fails.
     /// Deserialized from old configs that lack this field using the default.
@@ -143,12 +193,8 @@ impl Default for TranscriptionConfig {
     fn default() -> Self {
         Self {
             provider: TranscriptionProvider::default(),
-            openai_api_key: String::new(),
-            groq_api_key: String::new(),
-            openai_model: default_openai_model(),
-            groq_model: default_groq_model(),
+            providers: TranscriptionProviders::default(),
             language: String::new(),
-            local_model_path: None,
             fallback_order: default_fallback_order(),
         }
     }
@@ -272,12 +318,6 @@ impl Default for AppConfig {
 fn default_hotkey() -> String {
     "Ctrl+Shift+Space".to_string()
 }
-fn default_openai_model() -> String {
-    "whisper-1".to_string()
-}
-fn default_groq_model() -> String {
-    "whisper-large-v3".to_string()
-}
 fn default_true() -> bool {
     true
 }
@@ -300,6 +340,25 @@ fn default_fallback_order() -> Vec<TranscriptionProvider> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // --- TranscriptionConfig nested providers tests ---
+
+    #[test]
+    fn test_transcription_config_default_provider_models() {
+        let config = TranscriptionConfig::default();
+        assert_eq!(config.providers.openai.model, "whisper-1");
+        assert_eq!(config.providers.groq.model, "whisper-large-v3");
+        assert!(config.providers.openai.api_key.is_empty());
+        assert!(config.providers.groq.api_key.is_empty());
+    }
+
+    #[test]
+    fn test_transcription_config_nested_json_round_trips() {
+        let json = r#"{"provider":"openai","providers":{"openai":{"api_key":"sk-abc","model":"gpt-4o-transcribe"},"groq":{"api_key":"","model":"whisper-large-v3"},"local":{"model_path":null}},"language":"","fallback_order":["openai","groq"]}"#;
+        let config: TranscriptionConfig = serde_json::from_str(json).unwrap();
+        assert_eq!(config.providers.openai.api_key, "sk-abc");
+        assert_eq!(config.providers.openai.model, "gpt-4o-transcribe");
+    }
 
     #[test]
     fn keystroke_speed_delay_ms() {

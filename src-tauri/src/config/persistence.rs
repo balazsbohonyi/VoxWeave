@@ -201,8 +201,8 @@ mod tests {
             config.transcription.provider,
             TranscriptionProvider::Openai
         ));
-        assert_eq!(config.transcription.openai_model, "whisper-1");
-        assert_eq!(config.transcription.groq_model, "whisper-large-v3");
+        assert_eq!(config.transcription.providers.openai.model, "whisper-1");
+        assert_eq!(config.transcription.providers.groq.model, "whisper-large-v3");
         assert!(config.indicator.show);
         assert!(!config.launch_at_login);
         assert!(config.first_launch);
@@ -219,7 +219,7 @@ mod tests {
         let config: AppConfig = serde_json::from_value(raw).unwrap_or_default();
         assert_eq!(config.hotkey, "Ctrl+F9");
         // Nested sections should be at defaults.
-        assert_eq!(config.transcription.openai_model, "whisper-1");
+        assert_eq!(config.transcription.providers.openai.model, "whisper-1");
         assert!(config.indicator.show);
     }
 
@@ -237,14 +237,13 @@ mod tests {
             "future_top_level_field": "v2_value",
             "transcription": {
                 "provider": "openai",
-                "openai_api_key": "",
-                "groq_api_key": "",
-                "openrouter_api_key": "",
-                "openai_model": "whisper-1",
-                "groq_model": "whisper-large-v3",
-                "openrouter_model": "",
+                "providers": {
+                    "openai": {"api_key": "", "model": "whisper-1"},
+                    "groq": {"api_key": "", "model": "whisper-large-v3"},
+                    "local": {"model_path": null}
+                },
                 "language": "",
-                "local_model_path": null,
+                "fallback_order": ["openai", "groq"],
                 "future_transcription_field": 42
             },
             "injection": {"mode": "flash_paste"},
