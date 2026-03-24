@@ -6,14 +6,14 @@ current_phase: 5
 current_phase_name: Cloud Transcription
 current_plan: 2
 status: verifying
-stopped_at: Phase 9 context gathered
-last_updated: "2026-03-24T19:12:58.026Z"
-last_activity: 2026-03-22
+stopped_at: Completed 09-setup-wizard 09-01-PLAN.md
+last_updated: "2026-03-24T20:09:16.190Z"
+last_activity: 2026-03-24
 progress:
   total_phases: 11
   completed_phases: 8
-  total_plans: 42
-  completed_plans: 43
+  total_plans: 45
+  completed_plans: 44
 ---
 
 ---
@@ -104,7 +104,7 @@ Current Phase Name: Cloud Transcription
 Current Plan: 2
 Total Plans in Phase: 2
 status: ready_to_execute
-Last Activity: 2026-03-22
+Last Activity: 2026-03-24
 
 Progress: [███░░░░░░░] 33%
 
@@ -161,6 +161,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 08-settings-ui P04 | 2 | 2 tasks | 2 files |
 | Phase 08-settings-ui P05 | 1 | 1 tasks | 2 files |
 | Phase 08-settings-ui P05 | 10 | 2 tasks | 2 files |
+| Phase 09-setup-wizard P01 | 3 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -249,6 +250,8 @@ Recent decisions affecting current work:
 - [Phase 08-settings-ui]: Speed selector uses v-if (not v-show) so DOM is absent when FlashPaste/Clipboard selected
 - [Phase 08-settings-ui]: Radio buttons chosen over select for injection method — three options, clearer UX at this scale
 - [Phase 08-settings-ui]: Speed selector uses v-if (not v-show) so DOM is absent when FlashPaste/Clipboard selected
+- [Phase 09-setup-wizard]: Wizard close-to-hide omits Destroyed handler — wizard does not drive cleanup_before_exit
+- [Phase 09-setup-wizard]: MutexGuard intermediate let binding required for first_launch read to satisfy borrow checker before block end
 
 ### Roadmap Evolution
 
@@ -267,7 +270,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-24T19:12:58.013Z
-Stopped at: Phase 9 context gathered
-Resume file: .planning/phases/09-setup-wizard/09-CONTEXT.md
+Last session: 2026-03-24T20:09:16.183Z
+Stopped at: Completed 09-setup-wizard 09-01-PLAN.md
+Resume file: None
 
