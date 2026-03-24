@@ -27,7 +27,7 @@ A 3-step first-launch wizard that opens automatically when `first_launch=true`. 
 
 ### Component Reuse
 - Step 1: Custom radio card selection (Cloud / Local) — new simple component, not from settings
-- Step 2 (Cloud): slim custom component — provider tabs (OpenAI / Groq), API key field (masked + eye toggle), "Test connection" button with inline result; no model dropdown or language hint
+- Step 2 (Cloud): slim custom component — provider tabs (OpenAI / Groq), API key field (masked + eye toggle), "Test connection" button with inline result; no model dropdown or language hint; whichever tab is active when Next is clicked becomes the active provider (implicit selection, no "Set as active" button)
 - Step 2 (Local): placeholder message — "Local transcription coming soon. You can configure it later in Settings." — step advances to Step 3 immediately (no user input needed)
 - Step 3: Reuse `HotkeyCapture.vue` directly — same press-to-capture widget as GeneralSection
 - `useConfig()` + `saveConfig()` pattern throughout — same as all other windows
