@@ -165,6 +165,8 @@ pub fn run() {
             commands::transcription::open_settings_on_transcription_tab,
             commands::indicator::hide_toast_window,
             commands::wizard::open_wizard_window,
+            commands::wizard::hide_wizard_window,
+            commands::config::open_settings_window,
         ])
         .run(tauri::generate_context!())
         .expect("error while running VoxFlow");

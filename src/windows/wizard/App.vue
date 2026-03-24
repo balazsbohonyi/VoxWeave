@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { invoke } from "@tauri-apps/api/core";
 import { useConfig } from "../../composables/useConfig";
 import type { TranscriptionProvider } from "../../types/index";
 import WizardStepper from "./components/WizardStepper.vue";
@@ -19,13 +20,16 @@ const engineChoice = ref<"cloud" | "local">("cloud");
 const activeCloudTab = ref<"openai" | "groq">("openai");
 const openaiKey = ref("");
 const groqKey = ref("");
-
+const showSuccessBanner = ref(false);
 
 onMounted(async () => {
   await loadConfig();
   if (config.value) {
     openaiKey.value = config.value.transcription.providers.openai.api_key ?? "";
     groqKey.value = config.value.transcription.providers.groq.api_key ?? "";
+    // Pre-fill engine choice from current config (for re-open from Settings)
+    engineChoice.value = config.value.transcription.provider === "local" ? "local" : "cloud";
+    activeCloudTab.value = config.value.transcription.provider === "groq" ? "groq" : "openai";
   }
 });
 
@@ -37,6 +41,10 @@ function back() {
   if (currentStep.value > 1) {
     currentStep.value = (currentStep.value - 1) as 1 | 2 | 3;
   }
+}
+
+function goToStep(step: 1 | 2 | 3) {
+  currentStep.value = step;
 }
 
 function advanceFromStep1() {
@@ -59,9 +67,41 @@ function skipStep2() {
   currentStep.value = 3;
 }
 
-// Stub — implemented in Plan 03
-async function finish() {
-  /* Plan 03 */
+async function finish(): Promise<void> {
+  if (!config.value) return;
+
+  try {
+    // Build the full updated config inline — bypass the composable's ensureListeners
+    // so a missing event-listener capability never silently swallows the save.
+    const updatedConfig = {
+      ...config.value,
+      first_launch: false,
+      transcription: {
+        ...config.value.transcription,
+        provider: (engineChoice.value === "local" ? "local" : activeCloudTab.value) as TranscriptionProvider,
+        language: config.value.transcription.language || "en",
+        providers: {
+          ...config.value.transcription.providers,
+          openai: { ...config.value.transcription.providers.openai, api_key: openaiKey.value },
+          groq: { ...config.value.transcription.providers.groq, api_key: groqKey.value },
+        },
+      },
+    };
+
+    // Direct invoke — does not go through ensureListeners()
+    await invoke("save_config", { config: updatedConfig });
+  } catch (e) {
+    console.error("Wizard: save_config failed:", e);
+    return;
+  }
+
+  showSuccessBanner.value = true;
+
+  setTimeout(async () => {
+    await invoke("open_settings_window");
+    // Use a dedicated Rust command — does not require frontend window permissions
+    await invoke("hide_wizard_window");
+  }, 1200);
 }
 
 // ---------------------------------------------------------------------------
@@ -78,14 +118,24 @@ async function onNext() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-[480px] p-8">
+  <div class="h-screen bg-white dark:bg-gray-800 flex flex-col px-8 py-6">
 
-      <!-- Stepper header -->
-      <WizardStepper :current-step="currentStep" />
+    <!-- Stepper header -->
+    <WizardStepper :current-step="currentStep" @go-to="goToStep" />
 
-      <!-- Step content -->
-      <div class="min-h-[200px]">
+    <!-- Step content -->
+    <div class="flex-1 min-h-0 overflow-y-auto">
+      <!-- Success banner (replaces step content after Finish) -->
+      <div
+        v-if="showSuccessBanner"
+        class="mt-8 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 p-6 text-center"
+      >
+        <p class="text-base font-medium text-green-700 dark:text-green-400">
+          VoxFlow is ready! Opening Settings…
+        </p>
+      </div>
+
+      <template v-else>
         <Step1Engine
           v-if="currentStep === 1"
           v-model="engineChoice"
@@ -105,11 +155,13 @@ async function onNext() {
         <Step3Hotkey
           v-else-if="currentStep === 3"
         />
-      </div>
+      </template>
+    </div>
 
-      <!-- Bottom button bar -->
-      <div class="mt-8 flex items-center">
-        <!-- Back (Steps 2 and 3) -->
+    <!-- Bottom button bar — hidden while success banner is shown -->
+    <div v-if="!showSuccessBanner" class="pt-4 flex items-center">
+      <!-- Left group: Back + Skip for now (close together) -->
+      <div class="flex items-center gap-4">
         <button
           v-if="currentStep > 1"
           type="button"
@@ -118,36 +170,34 @@ async function onNext() {
         >
           Back
         </button>
-
-        <!-- Skip for now (Step 2 only) -->
         <button
           v-if="currentStep === 2"
           type="button"
-          class="text-sm text-blue-600 dark:text-blue-400 hover:underline mx-auto"
+          class="text-sm text-blue-600 dark:text-blue-400 hover:underline"
           @click="skipStep2"
         >
           Skip for now
         </button>
-
-        <!-- Next / Finish (right-aligned) -->
-        <button
-          v-if="currentStep < 3"
-          type="button"
-          class="ml-auto rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-          @click="onNext"
-        >
-          Next
-        </button>
-        <button
-          v-else
-          type="button"
-          class="ml-auto rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-          @click="finish"
-        >
-          Finish
-        </button>
       </div>
 
+      <!-- Right: Next / Finish (fixed width so they don't shift) -->
+      <button
+        v-if="currentStep < 3"
+        type="button"
+        class="ml-auto w-24 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        @click="onNext"
+      >
+        Next
+      </button>
+      <button
+        v-else
+        type="button"
+        class="ml-auto w-24 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        @click="finish"
+      >
+        Finish
+      </button>
     </div>
+
   </div>
 </template>

@@ -20,7 +20,7 @@ async function onHotkeySave(combo: string) {
       Confirm your hotkey
     </h2>
     <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-      Press your desired combination. You can change this anytime in Settings.
+      Click the field and press a new combination. Avoid pressing your current hotkey — it will trigger recording instead.
     </p>
 
     <HotkeyCapture

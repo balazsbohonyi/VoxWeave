@@ -53,22 +53,34 @@ function onBlurKey() {
 
 async function testConnection() {
   testResult.value = "testing";
+  // Pass the current draft key directly — the wizard hasn't saved to config yet.
+  const currentKey = props.activeTab === "openai" ? openaiDraft.value : groqDraft.value;
   try {
-    const result = await invoke<string>("test_connection", { provider: props.activeTab });
-    testResult.value = result as TestResult;
-  } catch {
-    testResult.value = "network_error";
+    await invoke<void>("test_connection", { provider: props.activeTab, apiKey: currentKey });
+    testResult.value = "ok";
+  } catch (e) {
+    const msg = String(e);
+    if (msg.includes("Invalid API key") || msg.includes("401")) {
+      testResult.value = "invalid_key";
+    } else if (msg.includes("timed out") || msg.includes("timeout") || msg.includes("Timeout")) {
+      testResult.value = "timeout";
+    } else {
+      testResult.value = "network_error";
+    }
   }
 }
 </script>
 
 <template>
   <div>
-    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">
       Add your API key
     </h2>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+    <p class="text-sm text-gray-500 dark:text-gray-400">
       Your key is stored locally and never leaves your machine.
+    </p>
+    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 mb-6">
+      You only need to add a key for one provider — OpenAI or Groq.
     </p>
 
     <!-- Provider tab bar -->
@@ -93,13 +105,14 @@ async function testConnection() {
       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
         {{ activeTab === 'openai' ? 'OpenAI' : 'Groq' }} API Key
       </label>
-      <div class="flex items-center gap-2">
+      <!-- Input wrapper: relative so the eye button can be absolutely positioned inside -->
+      <div class="relative">
         <input
           v-if="activeTab === 'openai'"
           v-model="openaiDraft"
           :type="showKey ? 'text' : 'password'"
           placeholder="sk-..."
-          class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-10 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 [&::-ms-reveal]:hidden [&::-webkit-credentials-auto-fill-button]:hidden"
           @blur="onBlurKey"
         />
         <input
@@ -107,30 +120,32 @@ async function testConnection() {
           v-model="groqDraft"
           :type="showKey ? 'text' : 'password'"
           placeholder="gsk_..."
-          class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-10 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 [&::-ms-reveal]:hidden [&::-webkit-credentials-auto-fill-button]:hidden"
           @blur="onBlurKey"
         />
+        <!-- Eye toggle: absolutely positioned inside the input -->
         <button
           type="button"
-          class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none"
           :title="showKey ? 'Hide key' : 'Show key'"
+          tabindex="-1"
           @click="showKey = !showKey"
         >
           <!-- Eye open -->
-          <svg v-if="!showKey" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          <svg v-if="!showKey" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
           </svg>
           <!-- Eye closed -->
-          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
           </svg>
         </button>
       </div>
     </div>
 
-    <!-- Test connection -->
-    <div>
+    <!-- Test connection: result is absolutely positioned so it never grows the layout -->
+    <div class="relative inline-block">
       <button
         type="button"
         class="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
@@ -147,17 +162,29 @@ async function testConnection() {
         <span v-else>Test connection</span>
       </button>
 
-      <!-- Inline result -->
-      <p v-if="testResult === 'ok'" class="mt-2 text-sm text-green-600 dark:text-green-400">
+      <!-- Result: absolute so it overlays below the button without shifting layout -->
+      <p
+        v-if="testResult === 'ok'"
+        class="absolute left-0 top-full mt-1 whitespace-nowrap text-sm text-green-600 dark:text-green-400"
+      >
         Connected
       </p>
-      <p v-else-if="testResult === 'invalid_key'" class="mt-2 text-sm text-red-600 dark:text-red-400">
+      <p
+        v-else-if="testResult === 'invalid_key'"
+        class="absolute left-0 top-full mt-1 whitespace-nowrap text-sm text-red-600 dark:text-red-400"
+      >
         Invalid API key
       </p>
-      <p v-else-if="testResult === 'network_error'" class="mt-2 text-sm text-amber-600 dark:text-amber-400">
+      <p
+        v-else-if="testResult === 'network_error'"
+        class="absolute left-0 top-full mt-1 whitespace-nowrap text-sm text-amber-600 dark:text-amber-400"
+      >
         Network error
       </p>
-      <p v-else-if="testResult === 'timeout'" class="mt-2 text-sm text-amber-600 dark:text-amber-400">
+      <p
+        v-else-if="testResult === 'timeout'"
+        class="absolute left-0 top-full mt-1 whitespace-nowrap text-sm text-amber-600 dark:text-amber-400"
+      >
         Request timed out
       </p>
     </div>

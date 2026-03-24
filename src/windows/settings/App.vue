@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from "vue";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useConfig } from "../../composables/useConfig";
 import GeneralSection from "./components/GeneralSection.vue";
 import AudioSection from "./components/AudioSection.vue";
@@ -31,7 +32,12 @@ const activeProviderLabel = computed<{ provider: string; detail: string } | null
 });
 
 onMounted(() => {
-  loadConfig();
+  void loadConfig();
+  void getCurrentWindow().onFocusChanged(({ payload: focused }) => {
+    if (focused) {
+      void loadConfig();
+    }
+  });
 });
 </script>
 

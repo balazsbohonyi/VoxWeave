@@ -61,10 +61,10 @@
       },
       {
         "label": "wizard",
-        "title": "VoxFlow Setup",
+        "title": "VoxFlow Wizard",
         "url": "wizard.html",
         "width": 560,
-        "height": 450,
+        "height": 520,
         "center": true,
         "visible": false,
         "skipTaskbar": false,

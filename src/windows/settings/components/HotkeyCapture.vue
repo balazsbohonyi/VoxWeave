@@ -113,7 +113,7 @@ function onMouseDown(e: MouseEvent): void {
       <span v-else-if="isCapturing" class="text-gray-400 italic">
         Press keys...
       </span>
-      <span v-else>
+      <span v-else class="text-gray-900 dark:text-white">
         {{ modelValue || "Click to set hotkey" }}
       </span>
     </div>
