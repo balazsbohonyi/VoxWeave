@@ -215,5 +215,5 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | 6. Text Injection | 4/4 | Complete   | 2026-03-21 |
 | 7. Pipeline Integration | 4/4 | Complete   | 2026-03-22 |
 | 8. Settings UI | 5/5 | Complete   | 2026-03-22 |
-| 9. Setup Wizard | 1/3 | In Progress|  |
+| 9. Setup Wizard | 2/3 | In Progress|  |
 | 10. Local Transcription | 0/TBD | Not started | - |
