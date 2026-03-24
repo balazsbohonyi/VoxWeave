@@ -45,7 +45,7 @@ fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event: tauri::menu::MenuEve
             if let Some(state) = app.try_state::<crate::state::AppState>() {
                 *state.quitting.lock().unwrap() = true;
             }
-            for label in ["settings", "indicator", "toast"] {
+            for label in ["settings", "indicator", "toast", "wizard"] {
                 if let Some(win) = app.get_webview_window(label) {
                     let _ = win.close();
                 }
