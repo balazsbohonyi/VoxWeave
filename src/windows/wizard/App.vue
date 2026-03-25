@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { invoke } from "@tauri-apps/api/core";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getCurrentWindow } from "@tauri-apps/api/window"; // used in onMounted for first-launch show
 import { useConfig } from "../../composables/useConfig";
 import type { TranscriptionProvider } from "../../types/index";
 import WizardStepper from "./components/WizardStepper.vue";
@@ -32,11 +32,14 @@ onMounted(async () => {
     engineChoice.value = config.value.transcription.provider === "local" ? "local" : "cloud";
     activeCloudTab.value = config.value.transcription.provider === "groq" ? "groq" : "openai";
   }
-  // Show the window now that content is rendered — prevents the blank-window flash
-  // that occurs when Rust calls show() before the webview has painted.
-  // On re-open from Settings, Rust already called show(); calling it again is a no-op.
-  await getCurrentWindow().show();
-  await getCurrentWindow().setFocus();
+  // Show the window only on first launch — prevents the blank-window flash that
+  // occurs when Rust calls show() before the webview has painted.
+  // On re-open from Settings, open_wizard_window (Rust) already calls show().
+  if (config.value?.first_launch) {
+    await getCurrentWindow().show();
+    await getCurrentWindow().setFocus();
+  }
+
 });
 
 // ---------------------------------------------------------------------------
@@ -107,6 +110,9 @@ async function finish(): Promise<void> {
     await invoke("open_settings_window");
     // Use a dedicated Rust command — does not require frontend window permissions
     await invoke("hide_wizard_window");
+    // Reset state after hiding so re-open from Settings starts fresh
+    showSuccessBanner.value = false;
+    currentStep.value = 1;
   }, 1200);
 }
 
