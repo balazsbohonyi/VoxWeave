@@ -10,6 +10,10 @@ async function onHotkeySave(combo: string): Promise<void> {
   // Backend emits hotkey-warning if conflicting — HotkeyCapture shows it via :warning prop
 }
 
+async function onOpenWizard(): Promise<void> {
+  await invoke<void>("open_wizard_window");
+}
+
 async function onLaunchAtLoginChange(e: Event): Promise<void> {
   const enabled = (e.target as HTMLInputElement).checked;
   await saveConfig({ launch_at_login: enabled });
@@ -56,6 +60,19 @@ async function onLaunchAtLoginChange(e: Event): Promise<void> {
       >
     </div>
 
+    <!-- Setup Wizard re-open -->
+    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <button
+        type="button"
+        class="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+        @click="onOpenWizard"
+      >
+        Setup Wizard...
+      </button>
+      <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">
+        Re-run the first-launch setup guide
+      </p>
+    </div>
 
   </section>
 </template>

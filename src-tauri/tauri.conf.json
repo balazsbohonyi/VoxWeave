@@ -58,6 +58,18 @@
         "transparent": true,
         "resizable": false,
         "focus": false
+      },
+      {
+        "label": "wizard",
+        "title": "VoxFlow Wizard",
+        "url": "wizard.html",
+        "width": 560,
+        "height": 520,
+        "center": true,
+        "visible": false,
+        "skipTaskbar": false,
+        "decorations": true,
+        "resizable": false
       }
     ],
     "security": {

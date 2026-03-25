@@ -64,11 +64,13 @@ pub fn get_provider_models() -> ProviderModels {
 pub async fn test_connection(
     state: State<'_, AppState>,
     provider: String,
+    api_key: Option<String>,
 ) -> Result<(), String> {
     // Clone config fields before any await — never hold MutexGuard across await.
+    // `api_key` param overrides the stored key (used by wizard before keys are saved).
     let (api_key, endpoint) = {
         let cfg = state.config.lock().map_err(|e| e.to_string())?;
-        match provider.as_str() {
+        let (cfg_key, endpoint) = match provider.as_str() {
             "openai" => (
                 cfg.transcription.providers.openai.api_key.clone(),
                 "https://api.openai.com/v1/audio/transcriptions",
@@ -78,7 +80,8 @@ pub async fn test_connection(
                 "https://api.groq.com/openai/v1/audio/transcriptions",
             ),
             _ => return Err(format!("Unknown provider: {provider}")),
-        }
+        };
+        (api_key.unwrap_or(cfg_key), endpoint)
     };
 
     if api_key.is_empty() {
@@ -137,6 +140,14 @@ pub fn set_launch_at_login(app: AppHandle, enabled: bool) -> Result<(), String> 
     } else {
         autostart.disable().map_err(|e| e.to_string())?;
     }
+    Ok(())
+}
+
+/// Show the Settings window (delegates to tray::show_settings_window).
+/// Used by the wizard's Finish sequence.
+#[tauri::command]
+pub fn open_settings_window(app: AppHandle) -> Result<(), String> {
+    crate::tray::show_settings_window(&app);
     Ok(())
 }
 

@@ -88,12 +88,12 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### Setup Wizard
 
-- [ ] **WIZR-01**: On first launch (no config), app opens a 3-step setup wizard instead of minimizing to tray
-- [ ] **WIZR-02**: Step 1: choose engine (Cloud or Local)
-- [ ] **WIZR-03**: Step 2: configure provider/API key with inline validation (Cloud) or download model (Local)
-- [ ] **WIZR-04**: Step 3: confirm default hotkey with option to change
+- [x] **WIZR-01**: On first launch (no config), app opens a 3-step setup wizard instead of minimizing to tray
+- [x] **WIZR-02**: Step 1: choose engine (Cloud or Local)
+- [x] **WIZR-03**: Step 2: configure provider/API key with inline validation (Cloud) or download model (Local)
+- [x] **WIZR-04**: Step 3: confirm default hotkey with option to change
 - [ ] **WIZR-05**: "Finish" saves config and shows "VoxFlow is ready" toast
-- [ ] **WIZR-06**: Wizard can be re-opened from Settings at any time
+- [x] **WIZR-06**: Wizard can be re-opened from Settings at any time
 
 ### Notifications
 
@@ -197,12 +197,12 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 | SETT-05 | Phase 8 | Complete |
 | SETT-06 | Phase 8 | Complete |
 | SETT-07 | Phase 8 | Complete |
-| WIZR-01 | Phase 9 | Pending |
-| WIZR-02 | Phase 9 | Pending |
-| WIZR-03 | Phase 9 | Pending |
-| WIZR-04 | Phase 9 | Pending |
+| WIZR-01 | Phase 9 | Complete |
+| WIZR-02 | Phase 9 | Complete |
+| WIZR-03 | Phase 9 | Complete |
+| WIZR-04 | Phase 9 | Complete |
 | WIZR-05 | Phase 9 | Pending |
-| WIZR-06 | Phase 9 | Pending |
+| WIZR-06 | Phase 9 | Complete |
 | NOTF-01 | Phase 7 | Complete |
 | NOTF-02 | Phase 7 | Complete |
 | NOTF-03 | Phase 7 | Complete |

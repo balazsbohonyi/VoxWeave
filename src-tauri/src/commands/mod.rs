@@ -5,3 +5,4 @@ pub mod audio;
 pub mod config;
 pub mod indicator;
 pub mod transcription;
+pub mod wizard;

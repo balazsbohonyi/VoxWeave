@@ -92,6 +92,26 @@ pub fn run() {
                 });
             }
 
+            // Wizard window is defined in tauri.conf with `visible: false`.
+            // CloseRequested → hide instead of destroy (unless quitting).
+            // No Destroyed handler needed — wizard does not drive cleanup_before_exit.
+            if let Some(wizard_win) = app.get_webview_window("wizard") {
+                let win_clone = wizard_win.clone();
+                let quitting = app.state::<AppState>().quitting.clone();
+                wizard_win.on_window_event(move |event| {
+                    match event {
+                        WindowEvent::CloseRequested { api, .. } => {
+                            if *quitting.lock().unwrap() {
+                                return;
+                            }
+                            api.prevent_close();
+                            let _ = win_clone.hide();
+                        }
+                        _ => {}
+                    }
+                });
+            }
+
             // Indicator window is pre-defined in tauri.conf and starts hidden.
             // Enforce non-focus/click-through defaults. Toast is now a separate window
             // so there is no expanded height to reset — never call resize_window here
@@ -110,6 +130,11 @@ pub fn run() {
             if show_on_startup {
                 let _ = indicator::show_idle(&app.handle());
             }
+
+            // Wizard is shown from the frontend (App.vue onMounted) on first launch.
+            // Showing from Rust here causes a blank-window flash because the webview
+            // hasn't rendered yet. The frontend calls show_wizard_window once content
+            // is ready, eliminating the flash entirely.
 
             Ok(())
         })
@@ -131,6 +156,9 @@ pub fn run() {
             commands::transcription::retry_transcription_with_fallback,
             commands::transcription::open_settings_on_transcription_tab,
             commands::indicator::hide_toast_window,
+            commands::wizard::open_wizard_window,
+            commands::wizard::hide_wizard_window,
+            commands::config::open_settings_window,
         ])
         .run(tauri::generate_context!())
         .expect("error while running VoxFlow");
