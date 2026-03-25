@@ -92,7 +92,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 - [x] **WIZR-02**: Step 1: choose engine (Cloud or Local)
 - [x] **WIZR-03**: Step 2: configure provider/API key with inline validation (Cloud) or download model (Local)
 - [x] **WIZR-04**: Step 3: confirm default hotkey with option to change
-- [ ] **WIZR-05**: "Finish" saves config and shows "VoxFlow is ready" toast
+- [x] **WIZR-05**: "Finish" saves config and shows "VoxFlow is ready" ~~toast~~ success banner
 - [x] **WIZR-06**: Wizard can be re-opened from Settings at any time
 
 ### Notifications
