@@ -201,3 +201,12 @@ async function onNext() {
 
   </div>
 </template>
+
+<style>
+/* Subtle scrollbars — matches Settings window */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(156,163,175,0.45); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(156,163,175,0.75); }
+::-webkit-scrollbar-button { display: none; }
+</style>
