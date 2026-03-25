@@ -36,7 +36,7 @@ const emit = defineEmits<{
         :class="props.currentStep >= 2 ? 'bg-blue-600' : 'border-2 border-gray-400 dark:border-gray-600 bg-transparent'"
         @click="emit('go-to', 2)"
       />
-      <span class="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">API key</span>
+      <span class="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">Configure</span>
     </div>
 
     <!-- Line 2→3 -->

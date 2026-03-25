@@ -131,18 +131,10 @@ pub fn run() {
                 let _ = indicator::show_idle(&app.handle());
             }
 
-            // Show wizard on first launch.
-            let first_launch = {
-                let state = app.state::<AppState>();
-                let cfg = state.config.lock().unwrap();
-                cfg.first_launch
-            };
-            if first_launch {
-                if let Some(wizard_win) = app.get_webview_window("wizard") {
-                    let _ = wizard_win.show();
-                    let _ = wizard_win.set_focus();
-                }
-            }
+            // Wizard is shown from the frontend (App.vue onMounted) on first launch.
+            // Showing from Rust here causes a blank-window flash because the webview
+            // hasn't rendered yet. The frontend calls show_wizard_window once content
+            // is ready, eliminating the flash entirely.
 
             Ok(())
         })
