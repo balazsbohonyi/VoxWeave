@@ -20,7 +20,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 6: Text Injection** - FlashPaste, keystroke, and clipboard injection with fallback chain (completed 2026-03-21)
 - [x] **Phase 7: Pipeline Integration** - End-to-end hotkey-to-text pipeline with toast notifications (completed 2026-03-22)
 - [x] **Phase 8: Settings UI** - Full settings window for all configurable parameters (completed 2026-03-22)
-- [ ] **Phase 9: Setup Wizard** - First-launch onboarding flow
+- [x] **Phase 9: Setup Wizard** - First-launch onboarding flow (completed 2026-03-25)
 - [ ] **Phase 10: Local Transcription** - whisper.cpp integration with on-demand model download
 
 ## Phase Details
@@ -167,11 +167,11 @@ Plans:
   6. All setting changes persist immediately with no save button and are correctly restored on app restart
 **Plans**: 5 plans
 Plans:
-- [ ] 08-01-PLAN.md — TranscriptionConfig migration: nested providers struct + on-disk field promotion + TS types
-- [ ] 08-02-PLAN.md — New Rust commands: get_provider_models, test_connection, set_launch_at_login + autostart plugin
-- [ ] 08-03-PLAN.md — App.vue shell (480px) + SectionDivider + GeneralSection + AudioSection + HotkeyCapture
-- [ ] 08-04-PLAN.md — TranscriptionSection: cloud tabs, API key, model, test-connection, local stubs
-- [ ] 08-05-PLAN.md — InjectionSection + final App.vue wiring + human-verify checkpoint
+- [x] 08-01-PLAN.md — TranscriptionConfig migration: nested providers struct + on-disk field promotion + TS types
+- [x] 08-02-PLAN.md — New Rust commands: get_provider_models, test_connection, set_launch_at_login + autostart plugin
+- [x] 08-03-PLAN.md — App.vue shell (480px) + SectionDivider + GeneralSection + AudioSection + HotkeyCapture
+- [x] 08-04-PLAN.md — TranscriptionSection: cloud tabs, API key, model, test-connection, local stubs
+- [x] 08-05-PLAN.md — InjectionSection + final App.vue wiring + human-verify checkpoint
 
 ### Phase 9: Setup Wizard
 **Goal**: A new user completes first-time configuration through a guided 3-step wizard before the app begins minimizing to tray on launch
@@ -184,7 +184,11 @@ Plans:
   4. Step 3 lets the user confirm or change the default hotkey
   5. Clicking "Finish" saves config and shows "VoxFlow is ready" toast, after which the app behaves normally (tray-only)
   6. The wizard can be re-opened from Settings at any time
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [x] 09-01-PLAN.md — Wizard window scaffold: Vite entry, Vue shell, Rust command, tauri.conf.json, close-to-hide lifecycle
+- [x] 09-02-PLAN.md — Wizard step components: WizardStepper, Step1Engine, Step2Cloud, Step2Local, Step3Hotkey, App.vue step router
+- [x] 09-03-PLAN.md — Finish sequence: save config first_launch=false, success banner, open Settings, hide wizard; Setup Wizard button in GeneralSection
 
 ### Phase 10: Local Transcription
 **Goal**: Users who prefer local, offline transcription can download and use whisper.cpp models of their choice without affecting the cloud pipeline
@@ -215,5 +219,5 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | 6. Text Injection | 4/4 | Complete   | 2026-03-21 |
 | 7. Pipeline Integration | 4/4 | Complete   | 2026-03-22 |
 | 8. Settings UI | 5/5 | Complete   | 2026-03-22 |
-| 9. Setup Wizard | 2/3 | In Progress|  |
+| 9. Setup Wizard | 3/3 | Complete   | 2026-03-25 |
 | 10. Local Transcription | 0/TBD | Not started | - |

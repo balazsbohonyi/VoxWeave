@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 5
-current_phase_name: Cloud Transcription
-current_plan: 2
-status: verifying
-stopped_at: "Checkpoint 09-02: awaiting human verification of wizard UI"
-last_updated: "2026-03-24T20:14:22.053Z"
-last_activity: 2026-03-24
+current_phase: 10
+current_phase_name: Local Transcription
+current_plan: 0
+status: ready — phase 9 complete and merged
+stopped_at: "Phase 09-setup-wizard UAT complete (11/11 passed). PR #9 merged to main 2026-03-25."
+last_updated: "2026-03-25T21:30:00.000Z"
+last_activity: 2026-03-25
 progress:
   total_phases: 11
-  completed_phases: 8
-  total_plans: 45
-  completed_plans: 45
+  completed_phases: 9
+  total_plans: 48
+  completed_plans: 48
 ---
 
 ---
@@ -97,16 +97,13 @@ See: .planning/PROJECT.md (updated 2026-03-14)
 
 ## Current Position
 
-Phase: 5 of 10 (Cloud Transcription)
-Plan: 1 of 2 in current phase
-Current Phase: 5
-Current Phase Name: Cloud Transcription
-Current Plan: 2
-Total Plans in Phase: 2
-status: ready_to_execute
-Last Activity: 2026-03-24
+Phase: 10 of 10 (Local Transcription) — not yet started
+Current Phase: 10
+Current Phase Name: Local Transcription
+status: ready — awaiting /gsd:plan-phase 10
+Last Activity: 2026-03-25
 
-Progress: [███░░░░░░░] 33%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
@@ -163,6 +160,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 08-settings-ui P05 | 10 | 2 tasks | 2 files |
 | Phase 09-setup-wizard P01 | 3 | 2 tasks | 8 files |
 | Phase 09-setup-wizard P02 | 3 | 2 tasks | 6 files |
+| Phase 09-setup-wizard P03 | 5 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -254,6 +252,9 @@ Recent decisions affecting current work:
 - [Phase 09-setup-wizard]: Wizard close-to-hide omits Destroyed handler — wizard does not drive cleanup_before_exit
 - [Phase 09-setup-wizard]: MutexGuard intermediate let binding required for first_launch read to satisfy borrow checker before block end
 - [Phase 09-setup-wizard]: showSuccessBanner ref deferred to Plan 03 — unused ref fails vue-tsc noUnusedLocals
+- [Phase 09-setup-wizard]: Wizard shows itself from frontend onMounted (gated on first_launch) to prevent blank-window flash; core:window:allow-show capability required
+- [Phase 09-setup-wizard]: Wizard state reset (showSuccessBanner=false, currentStep=1) in finish() after hide_wizard_window — prevents stale banner on re-open from Settings
+- [Phase 09-setup-wizard]: WizardStepper Step 2 label renamed from "API key" to "Configure" — engine-agnostic for Phase 10 local model config
 
 ### Roadmap Evolution
 
@@ -261,7 +262,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- `2026-03-18-implement-real-pcm-accumulation-and-opus-encoder.md` — Implement real PCM accumulation and Opus encoder (Phase 3 gap: synthetic_capture_pcm stub + fake Opus encoder + no log backend)
+- `2026-03-25-implement-wizard-step-2-local-model-configuration.md` — Wizard Step 2 local model config: replace "coming soon" placeholder with real model/device selection UI (Phase 10 scope)
 
 ### Blockers/Concerns
 
@@ -272,7 +273,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-24T20:14:22.048Z
-Stopped at: Checkpoint 09-02: awaiting human verification of wizard UI
+Last session: 2026-03-25T21:30:00.000Z
+Stopped at: Phase 09 UAT complete, PR #9 merged to main
 Resume file: None
 
