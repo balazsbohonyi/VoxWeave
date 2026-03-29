@@ -253,10 +253,20 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
             let cfg = state.config.lock().unwrap();
             if cfg.transcription.provider == crate::config::TranscriptionProvider::Local {
                 let model_path = cfg.transcription.providers.local.model_path.clone();
-                let has_model = model_path
-                    .as_deref()
-                    .map(|p| !p.is_empty() && std::path::Path::new(p).exists())
-                    .unwrap_or(false);
+                let has_model = model_path.as_deref().map(|p| {
+                    if p.is_empty() { return false; }
+                    let path = std::path::Path::new(p);
+                    if path.is_absolute() {
+                        path.exists()
+                    } else {
+                        // Legacy relative path (e.g. "ggml-tiny.bin") — reconstruct absolute
+                        p.strip_prefix("ggml-")
+                            .and_then(|s| s.strip_suffix(".bin"))
+                            .and_then(|id| crate::transcription::download::model_file_path(id).ok())
+                            .map(|abs| abs.exists())
+                            .unwrap_or(false)
+                    }
+                }).unwrap_or(false);
                 if !has_model {
                     drop(cfg);
                     // Reset state back to Idle (it was advanced to Recording above)

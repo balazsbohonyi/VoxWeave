@@ -201,7 +201,7 @@ async function onNext() {
           Back
         </button>
         <button
-          v-if="currentStep === 2 && engineChoice === 'cloud'"
+          v-if="currentStep === 2"
           type="button"
           class="text-sm text-blue-600 dark:text-blue-400 hover:underline"
           @click="skipStep2"

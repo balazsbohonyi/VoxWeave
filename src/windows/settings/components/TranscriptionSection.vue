@@ -6,7 +6,7 @@ import { useConfig } from "../../../composables/useConfig";
 import LanguageSelect from "./LanguageSelect.vue";
 import type { TranscriptionProvider } from "../../../types/index";
 
-const { config, saveConfig } = useConfig();
+const { config, saveConfig, loadConfig } = useConfig();
 
 // ---------------------------------------------------------------------------
 // Component-level constant — not reactive
@@ -132,6 +132,8 @@ onMounted(async () => {
         downloadPercent.value[model_id] = 100;
       }
       activeDownloadId.value = null;
+      // Reload config to pick up the absolute model_path the Rust backend saved
+      void loadConfig();
     }),
     await listen<DownloadEventPayload>("model-download-cancelled", (event) => {
       const { model_id } = event.payload;
@@ -298,23 +300,18 @@ async function cancelDownload() {
 }
 
 async function deleteModel(modelId: string) {
-  // Clear state immediately before invoking so the Active badge never flickers
-  // on a card that is being deleted.
+  // Clear state immediately so the Active badge never flickers on a card being deleted.
   modelStates.value[modelId] = "idle";
   downloadPercent.value[modelId] = 0;
   try {
     await invoke("delete_model", { modelId });
-    // If this was the active model, clear the model_path
-    if (config.value?.transcription.providers.local.model_path?.includes(modelId)) {
-      await saveConfig({
-        transcription: {
-          ...config.value.transcription,
-          providers: {
-            ...config.value.transcription.providers,
-            local: { model_path: null },
-          },
-        },
-      });
+    // Reload config — Rust already cleared model_path if this was the active model
+    await loadConfig();
+    // Auto-activate the single remaining downloaded model (if any, and not already active)
+    const remaining = LOCAL_MODELS.map(m => m.id)
+      .filter(id => id !== modelId && modelStates.value[id] === "downloaded");
+    if (remaining.length === 1 && !isActiveLocalModel(remaining[0])) {
+      await setActiveModel(remaining[0]);
     }
   } catch (e) {
     console.error(`Failed to delete model ${modelId}:`, e);
@@ -646,7 +643,7 @@ async function saveLanguage(lang: string) {
                   <span class="text-xs text-gray-500 dark:text-gray-400">{{ Math.round(downloadPercent[model.id]) }}%</span>
                   <button
                     type="button"
-                    class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
+                    class="text-xs text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 transition-colors"
                     @click="cancelDownload()"
                   >
                     Cancel
@@ -678,17 +675,6 @@ async function saveLanguage(lang: string) {
                     </svg>
                     Active
                   </span>
-                  <!-- Downloaded badge (shown when not active) -->
-                  <span
-                    v-else
-                    class="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800"
-                    style="border-radius: 4px;"
-                  >
-                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Downloaded
-                  </span>
                 </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ model.quality }}</p>
               </div>
@@ -701,10 +687,10 @@ async function saveLanguage(lang: string) {
                 >
                   Set Active
                 </button>
-                <!-- Trash icon delete button — no text label -->
+                <!-- Trash icon delete button — no text label, no border -->
                 <button
                   type="button"
-                  class="p-1.5 text-red-500 hover:text-red-700 dark:hover:text-red-400 border border-red-200 dark:border-red-800 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  class="p-1.5 text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 transition-colors"
                   title="Delete model"
                   @click="deleteModel(model.id)"
                 >

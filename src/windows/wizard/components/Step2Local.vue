@@ -17,7 +17,7 @@ const emit = defineEmits<{
 // Config
 // ---------------------------------------------------------------------------
 
-const { config } = useConfig();
+const { config, saveConfig, loadConfig } = useConfig();
 
 // ---------------------------------------------------------------------------
 // Model definitions
@@ -51,12 +51,11 @@ const downloadPercent = ref<Record<string, number>>({
 });
 const activeDownloadId = ref<string | null>(null);
 const anyDownloaded = ref(false);
-const skipClicked = ref(false);
 
 const unlistenFns: UnlistenFn[] = [];
 
 function updateCanProceed() {
-  emit("canProceed", anyDownloaded.value || skipClicked.value);
+  emit("canProceed", anyDownloaded.value);
 }
 
 function isActiveLocalModel(modelId: string): boolean {
@@ -85,11 +84,39 @@ async function cancelDownload() {
   }
 }
 
-function onSkip() {
-  skipClicked.value = true;
-  updateCanProceed();
-  // Auto-advance to next step immediately on skip
-  emit("navigateNext");
+async function setActiveModel(modelId: string) {
+  if (!config.value) return;
+  const absolutePath = await invoke<string>("get_model_path", { modelId });
+  await saveConfig({
+    transcription: {
+      ...config.value.transcription,
+      providers: {
+        ...config.value.transcription.providers,
+        local: { model_path: absolutePath },
+      },
+    },
+  });
+}
+
+async function deleteModel(modelId: string) {
+  // Clear state immediately so the Active badge never flickers on a card being deleted.
+  modelStates.value[modelId] = "idle";
+  downloadPercent.value[modelId] = 0;
+  try {
+    await invoke("delete_model", { modelId });
+    // Reload config — Rust already cleared model_path if this was the active model
+    await loadConfig();
+    anyDownloaded.value = Object.values(modelStates.value).some(s => s === "downloaded");
+    updateCanProceed();
+    // Auto-activate the single remaining downloaded model (if any, and not already active)
+    const remaining = LOCAL_MODELS.map(m => m.id)
+      .filter(id => id !== modelId && modelStates.value[id] === "downloaded");
+    if (remaining.length === 1 && !isActiveLocalModel(remaining[0])) {
+      await setActiveModel(remaining[0]);
+    }
+  } catch (e) {
+    console.error(`Failed to delete model ${modelId}:`, e);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -136,6 +163,8 @@ onMounted(async () => {
         updateCanProceed();
       }
       activeDownloadId.value = null;
+      // Reload config to pick up the absolute model_path the Rust backend saved
+      void loadConfig();
     }),
     await listen<DownloadEventPayload>("model-download-cancelled", (event) => {
       const { model_id } = event.payload;
@@ -205,7 +234,7 @@ onUnmounted(() => {
               <span class="text-xs text-gray-500 dark:text-gray-400">{{ Math.round(downloadPercent[model.id]) }}%</span>
               <button
                 type="button"
-                class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
+                class="text-xs text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 transition-colors"
                 @click="cancelDownload()"
               >
                 Cancel
@@ -240,26 +269,29 @@ onUnmounted(() => {
             </div>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ model.quality }}</p>
           </div>
-          <!-- Downloaded checkmark badge -->
-          <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800 rounded">
-            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-            Downloaded
-          </span>
+          <!-- Action buttons: Set Active + Delete -->
+          <div class="flex items-center gap-2">
+            <button
+              v-if="!isActiveLocalModel(model.id)"
+              type="button"
+              class="px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              @click="setActiveModel(model.id)"
+            >
+              Set Active
+            </button>
+            <button
+              type="button"
+              class="p-1.5 text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 transition-colors"
+              title="Delete model"
+              @click="deleteModel(model.id)"
+            >
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- Skip for now -->
-    <div class="mt-4 text-center">
-      <button
-        type="button"
-        class="text-sm text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-        @click="onSkip"
-      >
-        Skip for now
-      </button>
     </div>
   </div>
 </template>
