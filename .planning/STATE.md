@@ -5,8 +5,8 @@ milestone_name: milestone
 current_phase: 10
 current_phase_name: Local Transcription
 status: completed
-stopped_at: Completed 10-03 auto tasks — awaiting human verify checkpoint (Task 3)
-last_updated: "2026-03-29T11:45:55.905Z"
+stopped_at: Completed 10-03-PLAN.md (all 8 post-UAT bugs fixed, SUMMARY.md complete)
+last_updated: "2026-03-29T12:38:28.472Z"
 last_activity: 2026-03-25
 progress:
   total_phases: 11
@@ -181,6 +181,7 @@ Progress: [█████████░] 90%
 | Phase 10-local-transcription P02 | 6 | 2 tasks | 8 files |
 | Phase 10 P01 | 9 | 2 tasks | 6 files |
 | Phase 10-local-transcription P03 | 5 | 2 tasks | 6 files |
+| Phase 10-local-transcription P03 | 40 | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -283,6 +284,8 @@ Recent decisions affecting current work:
 - [Phase 10-local-transcription]: show_plain_toast Rust command mediates wizard-to-toast-window communication for programmatic plain toasts
 - [Phase 10-local-transcription]: Step2Local emits canProceed(boolean) — parent wizard gates Next button; Skip button inside component owns canProceed(true) emit for local mode
 - [Phase 10-local-transcription]: model_missing toast follows invalid_key pattern: error type, Open Settings action, invoke open_settings_on_transcription_tab with provider local
+- [Phase 10-local-transcription]: LocalFeatureDisabledProvider stub instead of panic(): app never crashes when local-transcription feature not compiled in
+- [Phase 10-local-transcription]: Pre-recording guard uses std::path::Path::new().exists() at hotkey time to block audio capture when no local model is available
 
 ### Roadmap Evolution
 
@@ -301,7 +304,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-29T11:45:55.902Z
-Stopped at: Completed 10-03 auto tasks — awaiting human verify checkpoint (Task 3)
+Last session: 2026-03-29T12:38:28.466Z
+Stopped at: Completed 10-03-PLAN.md (all 8 post-UAT bugs fixed, SUMMARY.md complete)
 Resume file: None
 

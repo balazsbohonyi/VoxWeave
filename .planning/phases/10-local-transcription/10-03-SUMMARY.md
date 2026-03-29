@@ -13,13 +13,15 @@ requires:
 provides:
   - Functional Settings local model cards with download/progress/cancel/delete/set-active UI
   - Step2Local wizard component with full model picker replacing "coming soon" placeholder
-  - Wizard Next button gated on model downloaded or Skip clicked
+  - Wizard Next button gated on model downloaded or Skip clicked; Skip auto-advances to Step 3
   - Post-finish nudge toast when local engine chosen but no model downloaded
   - model_missing toast handler with Open Settings action in toast/App.vue
   - show_plain_toast Tauri command for programmatic plain toasts
+  - Pre-recording guard emitting model_missing toast at hotkey press (before audio capture)
+  - LocalFeatureDisabledProvider stub replacing panic when feature not compiled in
 
 affects:
-  - Local transcription end-to-end pipeline (human verify in Task 3)
+  - Local transcription end-to-end pipeline
 
 tech-stack:
   added: []
@@ -27,6 +29,9 @@ tech-stack:
     - UnlistenFn array pattern for bulk event cleanup in onUnmounted
     - Emit-gate pattern: component emits canProceed(boolean) to parent for Next button gating
     - show_plain_toast Rust command wraps show_toast_window for frontend-invokable plain toasts
+    - Immediate state reset before async invoke to prevent UI badge flicker on delete
+    - navigateNext emit from child component to trigger parent navigation on skip
+    - LocalFeatureDisabledProvider stub: graceful error return instead of panic for disabled features
 
 key-files:
   created:
@@ -37,103 +42,129 @@ key-files:
     - src/windows/toast/App.vue
     - src-tauri/src/commands/indicator.rs
     - src-tauri/src/lib.rs
+    - src-tauri/src/transcription/service.rs
+    - src-tauri/src/hotkey/service.rs
 
 key-decisions:
   - "show_plain_toast added as Rust command to allow wizard finish() to trigger nudge toast after hide_wizard_window — direct window.eval() not possible from wizard to toast window without Rust mediation"
-  - "Skip for now in App.vue hidden when engineChoice === local — Step2Local owns its own Skip button that emits canProceed(true)"
+  - "Skip for now in App.vue hidden when engineChoice === local — Step2Local owns its own Skip button that emits canProceed(true) and navigateNext"
   - "updatedConfig hoisted out of try block in wizard finish() so noModelDownloaded check can use it post-save"
   - "model_missing toast follows invalid_key pattern exactly: error type, Open Settings action, invoke open_settings_on_transcription_tab with provider: local"
+  - "LocalFeatureDisabledProvider stub instead of panic(): app never crashes when local-transcription feature not compiled in"
+  - "Pre-recording guard uses std::path::Path::new().exists() at hotkey time to check model availability before audio stream opens"
+  - "modelState set to idle immediately on delete (before invoke) so Active badge never appears on a card being deleted"
+  - "CSS transition removed from progress bar fill so percentage text and bar fill stay in visual sync"
 
 patterns-established:
-  - "canProceed emit pattern: Step2Local emits canProceed(boolean); parent App.vue binds to @can-proceed and disables Next button"
+  - "canProceed + navigateNext emit pattern: child emits canProceed(boolean) for Next button gate; also emits navigateNext for skip-triggered navigation"
   - "Download event listeners registered in onMounted and cleaned up in onUnmounted via UnlistenFn[] array"
+  - "Pre-recording guards: check requirements at hotkey press, emit toast immediately, never open audio stream if check fails"
 
 requirements-completed: [LOCL-02, LOCL-03, LOCL-07]
 
-duration: 5min
+duration: 40min
 completed: 2026-03-29
 ---
 
 # Phase 10 Plan 03: Local Transcription Frontend Wiring Summary
 
-**Settings model cards with real download/delete/active UI, Step2Local wizard model picker replacing placeholder, and model_missing error toast with Open Settings action**
+**Settings model cards with real download/delete/active UI, Step2Local wizard model picker, pre-recording model availability guard, and LocalFeatureDisabledProvider stub replacing panic — 8 post-UAT bugs fixed**
 
 ## Performance
 
-- **Duration:** 5 min
+- **Duration:** 40 min (initial 5 min + 35 min bug fix continuation)
 - **Started:** 2026-03-29T11:39:34Z
-- **Completed:** 2026-03-29T11:44:12Z
-- **Tasks:** 2 (Task 3 is human-verify checkpoint — awaiting)
-- **Files modified:** 6 (1 created, 5 modified)
+- **Completed:** 2026-03-29T12:35:00Z
+- **Tasks:** 3 (2 auto + 1 human-verify with 8 bug fixes)
+- **Files modified:** 8 (1 created, 7 modified)
 
 ## Accomplishments
 
-- TranscriptionSection.vue local model cards are fully functional: idle/downloading/downloaded states, progress bar with Cancel, Set Active + Delete buttons, green Active badge
-- Step2Local.vue replaced entirely with 4-card model picker, progress tracking via events, Skip for now button emitting canProceed
-- Wizard Next button on Step 2 local mode disabled until model downloaded or Skip clicked
-- Post-finish nudge toast when user chose local engine but skipped downloading
-- toast/App.vue handles model_missing code with "No local model downloaded" error + Open Settings button
-- show_plain_toast Rust command added to allow wizard to show toast after window manipulation
+- TranscriptionSection.vue local model cards fully functional with correct styling (blue Active badge, 2px border, trash icon delete, Downloaded badge)
+- Step2Local.vue wizard model picker with auto-advance on Skip
+- App never panics when local-transcription feature not compiled — LocalFeatureDisabledProvider stub emits model_missing toast
+- Pre-recording guard prevents audio capture when no local model file exists on disk
+- All 8 post-UAT bugs fixed and committed
 
 ## Task Commits
 
 Each task was committed atomically:
 
 1. **Task 1: Wire Settings TranscriptionSection.vue local model cards** - `c6a0e5e` (feat)
-2. **Task 2: Replace Step2Local.vue placeholder with model picker + missing model error handling** - `927cbb8` (feat)
-
-**Plan metadata:** (docs commit follows after human verify)
+2. **Task 2: Replace Step2Local.vue placeholder with model picker** - `927cbb8` (feat)
+3. **Task 3 bug fixes — Frontend UI (Issues 1-4, 7, 8)** - `dfa87bb` (fix)
+4. **Task 3 bug fixes — Rust panic + pre-recording guard (Issues 5-6)** - `8bf127c` (fix)
 
 ## Files Created/Modified
 
-- `src/windows/settings/components/TranscriptionSection.vue` - Added modelStates/downloadPercent/activeDownloadId refs, event listeners, startDownload/cancelDownload/deleteModel/setActiveModel actions, full idle/downloading/downloaded card templates
-- `src/windows/wizard/components/Step2Local.vue` - Full replacement: 4 model cards with download/progress/cancel UI, Skip for now button, canProceed emit
-- `src/windows/wizard/App.vue` - localCanProceed ref, @can-proceed handler on Step2Local, Next button disabled when local+!localCanProceed, Skip for now hidden for local mode, noModelDownloaded nudge toast logic
-- `src/windows/toast/App.vue` - Added model_missing to TranscriptionErrorPayload code union, added model_missing handler showing Open Settings action
-- `src-tauri/src/commands/indicator.rs` - Added show_plain_toast command (PlainToastPayload struct, calls indicator::show_toast_window)
-- `src-tauri/src/lib.rs` - Registered show_plain_toast in invoke_handler
+- `src/windows/settings/components/TranscriptionSection.vue` - Full download/delete/active cards; blue Active badge, 2px border, Downloaded badge, trash icon; immediate state reset on delete; whole-number % without CSS transition
+- `src/windows/wizard/components/Step2Local.vue` - Full model picker; navigateNext emit; same badge/border/percentage fixes
+- `src/windows/wizard/App.vue` - localCanProceed ref, @can-proceed + @navigate-next handlers on Step2Local
+- `src/windows/toast/App.vue` - model_missing handler with Open Settings action
+- `src-tauri/src/commands/indicator.rs` - Added show_plain_toast command
+- `src-tauri/src/lib.rs` - Registered show_plain_toast
+- `src-tauri/src/transcription/service.rs` - LocalFeatureDisabledProvider stub replacing panic!()
+- `src-tauri/src/hotkey/service.rs` - Pre-recording guard for local provider with no model
 
 ## Decisions Made
 
-- Added `show_plain_toast` Rust command: wizard's `finish()` calls `hide_wizard_window` then triggers a nudge toast — direct eval from wizard window to toast window isn't possible, so a Rust command mediating `show_toast_window` is the correct approach
-- `updatedConfig` hoisted outside try block in `finish()` so `noModelDownloaded` check is available after the save
-- Skip for now in App.vue (for cloud Step 2) is now conditionally shown only for cloud mode — Step2Local has its own Skip inside the component that emits canProceed(true)
-- `model_missing` toast follows the same pattern as `invalid_key`: error type, action button invoking `open_settings_on_transcription_tab` with `provider: "local"`
+- `LocalFeatureDisabledProvider` implements `TranscriptionProviderTrait` returning `ModelMissing` — no behavioral change for builds with the feature; safe fallback otherwise
+- Pre-recording model check uses `std::path::Path::new(&path).exists()` before touching audio hardware
+- Active badge: `bg-blue-600 text-white` with `border-radius: 4px`; active card: `border-2 border-blue-600`
+- Delete pre-clears `modelState` to "idle" before async invoke to prevent badge flicker
+- CSS transition removed from progress bar fill to keep text and bar visually synchronized
 
 ## Deviations from Plan
 
-### Auto-fixed Issues
+### Auto-fixed Issues (initial tasks)
 
 **1. [Rule 2 - Missing Critical] Added show_plain_toast Rust command**
-- **Found during:** Task 2 (wizard App.vue nudge toast implementation)
-- **Issue:** Plan says "after Finish with skip: toast nudges to Settings" but no existing Rust command for showing a plain toast from the wizard window context. The `window.__voxflowShowToast` mechanism requires calling `eval()` on the toast webview, which must be mediated by Rust
-- **Fix:** Added `show_plain_toast(toast_type, message)` command to `commands/indicator.rs` that calls `indicator::show_toast_window` with a `PlainToastPayload` struct; registered in `lib.rs`
-- **Files modified:** src-tauri/src/commands/indicator.rs, src-tauri/src/lib.rs
-- **Verification:** cargo check passes cleanly, vue-tsc passes
-- **Committed in:** 927cbb8 (Task 2 commit)
+- **Found during:** Task 2
+- **Fix:** `show_plain_toast(toast_type, message)` command calls `indicator::show_toast_window` with PlainToastPayload
+- **Committed in:** 927cbb8
 
-**2. [Rule 1 - Bug] Fixed updatedConfig scope issue in wizard finish()**
+**2. [Rule 1 - Bug] Fixed updatedConfig scope in wizard finish()**
 - **Found during:** Task 2 (TypeScript typecheck)
-- **Issue:** `updatedConfig` was defined inside `try` block but referenced after it for the `noModelDownloaded` check, causing TS2304 error
-- **Fix:** Hoisted `updatedConfig` construction before the `try` block; only the `invoke("save_config")` call remains inside try
-- **Files modified:** src/windows/wizard/App.vue
-- **Verification:** npx vue-tsc --noEmit passes cleanly
-- **Committed in:** 927cbb8 (Task 2 commit)
+- **Fix:** Hoisted `updatedConfig` before try block
+- **Committed in:** 927cbb8
+
+### Post-UAT Bug Fixes (Task 3 checkpoint response)
+
+**3. [Rule 1 - Bug] Progress bar percentage showed decimal places** — `dfa87bb`
+
+**4. [Rule 1 - Bug] Delete flashed Active badge** — Immediate state reset before invoke — `dfa87bb`
+
+**5. [Rule 1 - Bug] Progress bar visual out of sync** — Removed `transition-all duration-300` — `dfa87bb`
+
+**6. [Rule 1 - Bug] Active badge wrong styling** — Blue bg, white text, 4px radius, 2px border — `dfa87bb`
+
+**7. [Rule 1 - Bug] App panics when local-transcription feature not compiled** — LocalFeatureDisabledProvider stub — `8bf127c`
+
+**8. [Rule 2 - Missing Critical] No pre-recording check for missing model** — Pre-recording guard in hotkey/service.rs — `8bf127c`
+
+**9. [Rule 1 - Bug] Settings missing "Downloaded" status text; text Delete button** — Downloaded badge + trash SVG icon — `dfa87bb`
+
+**10. [Rule 1 - Bug] Skip for now didn't auto-advance** — navigateNext emit wired to advanceFromStep2 — `dfa87bb`
 
 ---
 
-**Total deviations:** 2 auto-fixed (1 missing critical, 1 bug)
-**Impact on plan:** Both fixes required for correct operation. No scope creep.
+**Total deviations:** 10 auto-fixed (8 Rule 1 bugs, 2 Rule 2 missing critical)
+**Impact on plan:** All fixes required for correct UX and safety. No scope creep.
 
 ## Issues Encountered
 
-- `npm run lint` script doesn't exist in this project — ESLint not configured as an npm script. TypeScript check via `vue-tsc --noEmit` used instead (matches CLAUDE.md guidance).
+- `cargo check --features local-transcription` requires libclang (whisper-rs bindgen) which is not in PATH — confirms panic scenario when user's build lacks deps; stub fix resolves both cases.
+- `npm run lint` script not configured in this project — TypeScript check via `vue-tsc --noEmit` used instead.
+
+## User Setup Required
+
+None - no external service configuration required.
 
 ## Next Phase Readiness
 
-- All 2 auto tasks complete; awaiting human verification (Task 3 checkpoint)
-- Build command: `cargo tauri dev --features local-transcription`
-- Human verifies 15-step checklist: download, progress, cancel, set active, delete, recording, error toast, wizard
+- All 3 plans of Phase 10 complete (10-01, 10-02, 10-03)
+- Phase 10 ready for PR and merge to main
+- To run with local transcription: install CMake + MSVC BuildTools + libclang, rebuild with `--features local-transcription`
 
 ---
 *Phase: 10-local-transcription*
