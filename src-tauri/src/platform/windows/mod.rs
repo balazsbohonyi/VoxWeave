@@ -7,12 +7,12 @@ use windows::core::PCWSTR;
 use windows::Win32::Foundation::{CloseHandle, HANDLE, HWND};
 use windows::Win32::Security::{
     GetTokenInformation, GetSidSubAuthority, GetSidSubAuthorityCount,
-    TokenElevation, TokenIntegrityLevel,
-    TOKEN_ELEVATION, TOKEN_MANDATORY_LABEL, TOKEN_QUERY,
+    TokenIntegrityLevel,
+    TOKEN_MANDATORY_LABEL, TOKEN_QUERY,
 };
 use windows::Win32::System::Threading::{
-    GetCurrentProcess, GetCurrentProcessId, OpenProcess, OpenProcessToken,
-    QueryFullProcessImageNameW, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION,
+    GetCurrentProcessId, OpenProcess, OpenProcessToken,
+    PROCESS_QUERY_LIMITED_INFORMATION,
 };
 use windows::Win32::UI::Shell::ShellExecuteW;
 use windows::Win32::UI::WindowsAndMessaging::{
@@ -121,30 +121,11 @@ impl WindowInfo for WindowsProvider {
             let mut pid: u32 = 0;
             GetWindowThreadProcessId(hwnd, Some(&mut pid));
 
-            // Open process and query exe name
-            let hproc =
-                OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid).ok()?;
-
-            let mut exe_buf = [0u16; 1024];
-            let mut exe_len = exe_buf.len() as u32;
-            let name_ok =
-                QueryFullProcessImageNameW(hproc, PROCESS_NAME_WIN32, windows::core::PWSTR(exe_buf.as_mut_ptr()), &mut exe_len);
-            let _ = CloseHandle(hproc);
-            name_ok.ok()?;
-
-            let full_path = String::from_utf16_lossy(&exe_buf[..exe_len as usize]);
-            let exe_name = full_path
-                .rsplit('\\')
-                .next()
-                .unwrap_or(&full_path)
-                .to_string();
-
             let integrity_level = query_integrity_level(pid).unwrap_or(0);
 
             Some(ForegroundWindowInfo {
                 handle: hwnd.0 as usize,
                 class_name,
-                exe_name,
                 integrity_level,
             })
         }
@@ -166,28 +147,6 @@ impl WindowInfo for WindowsProvider {
 // ---------------------------------------------------------------------------
 
 impl ElevationChecker for WindowsProvider {
-    fn is_elevated(&self) -> bool {
-        unsafe {
-            let mut htoken = HANDLE::default();
-            if OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut htoken).is_err() {
-                return false;
-            }
-
-            let mut elevation = TOKEN_ELEVATION::default();
-            let mut return_length: u32 = 0;
-            let ok = GetTokenInformation(
-                htoken,
-                TokenElevation,
-                Some(&mut elevation as *mut _ as *mut _),
-                std::mem::size_of::<TOKEN_ELEVATION>() as u32,
-                &mut return_length,
-            );
-            let _ = CloseHandle(htoken);
-
-            ok.is_ok() && elevation.TokenIsElevated != 0
-        }
-    }
-
     fn current_integrity_level(&self) -> u32 {
         let pid = unsafe { GetCurrentProcessId() };
         query_integrity_level(pid).unwrap_or(0)
