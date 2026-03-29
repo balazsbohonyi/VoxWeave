@@ -2,7 +2,10 @@
 // The service module (plan 02) is the single entry point consumed by the hotkey pipeline.
 #![allow(dead_code, unused_imports)]
 
+pub mod download;
 pub mod groq;
+#[cfg(feature = "local-transcription")]
+pub mod local;
 pub mod openai;
 pub mod provider;
 pub mod service;

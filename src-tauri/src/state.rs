@@ -118,6 +118,12 @@ pub struct AppState {
     /// The foreground window captured at recording START (before the indicator
     /// shows). Injection uses this to restore focus to the correct window.
     pub foreground_window: Arc<Mutex<Option<ForegroundWindowInfo>>>,
+
+    /// Cancel flag for any in-progress model download. Set to true to abort.
+    pub download_cancel: Arc<Mutex<Option<Arc<std::sync::atomic::AtomicBool>>>>,
+
+    /// Model ID currently being downloaded, if any.
+    pub downloading_model: Arc<Mutex<Option<String>>>,
 }
 
 impl AppState {
@@ -143,6 +149,8 @@ impl AppState {
                     quitting: Arc::new(Mutex::new(false)),
                     last_encoded_audio: Arc::new(Mutex::new(None)),
                     foreground_window: Arc::new(Mutex::new(None)),
+                    download_cancel: Arc::new(Mutex::new(None)),
+                    downloading_model: Arc::new(Mutex::new(None)),
                 }
             }
             Err(e) => {
@@ -167,6 +175,8 @@ impl AppState {
                     quitting: Arc::new(Mutex::new(false)),
                     last_encoded_audio: Arc::new(Mutex::new(None)),
                     foreground_window: Arc::new(Mutex::new(None)),
+                    download_cancel: Arc::new(Mutex::new(None)),
+                    downloading_model: Arc::new(Mutex::new(None)),
                 }
             }
         }
