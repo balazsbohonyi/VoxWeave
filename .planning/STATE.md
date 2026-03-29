@@ -5,14 +5,14 @@ milestone_name: milestone
 current_phase: 10
 current_phase_name: Local Transcription
 status: completed
-stopped_at: Completed 10-local-transcription 10-02-PLAN.md
-last_updated: "2026-03-29T11:35:15.528Z"
+stopped_at: Completed 10-01-PLAN.md (LocalProvider core implementation)
+last_updated: "2026-03-29T11:38:09.486Z"
 last_activity: 2026-03-25
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 48
-  completed_plans: 46
+  completed_plans: 47
 ---
 
 ---
@@ -179,6 +179,7 @@ Progress: [█████████░] 90%
 | Phase 09-setup-wizard P02 | 3 | 2 tasks | 6 files |
 | Phase 09-setup-wizard P03 | 5 | 2 tasks | 5 files |
 | Phase 10-local-transcription P02 | 6 | 2 tasks | 8 files |
+| Phase 10 P01 | 9 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -275,6 +276,9 @@ Recent decisions affecting current work:
 - [Phase 09-setup-wizard]: WizardStepper Step 2 label renamed from "API key" to "Configure" — engine-agnostic for Phase 10 local model config
 - [Phase 10-local-transcription]: run_download uses .bin.partial extension during streaming; prevents incomplete models from appearing as downloaded
 - [Phase 10-local-transcription]: start_model_download returns Ok() immediately; progress tracked via model-download-progress events not AppState polling
+- [Phase 10]: whisper-rs 0.16 used (latest 0.x; 0.14 does not exist on crates.io)
+- [Phase 10]: wav_bytes_to_f32 compiled unconditionally for testability without CMake/libclang; LocalProvider gated in feature submodule
+- [Phase 10]: make_provider extended to accept &TranscriptionConfig to route model_path to LocalProvider
 
 ### Roadmap Evolution
 
@@ -293,7 +297,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-29T11:35:15.516Z
-Stopped at: Completed 10-local-transcription 10-02-PLAN.md
+Last session: 2026-03-29T11:38:09.480Z
+Stopped at: Completed 10-01-PLAN.md (LocalProvider core implementation)
 Resume file: None
 
