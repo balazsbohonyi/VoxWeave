@@ -323,12 +323,13 @@ async function deleteModel(modelId: string) {
 
 async function setActiveModel(modelId: string) {
   if (!config.value) return;
+  const absolutePath = await invoke<string>("get_model_path", { modelId });
   await saveConfig({
     transcription: {
       ...config.value.transcription,
       providers: {
         ...config.value.transcription.providers,
-        local: { model_path: `ggml-${modelId}.bin` },
+        local: { model_path: absolutePath },
       },
     },
   });

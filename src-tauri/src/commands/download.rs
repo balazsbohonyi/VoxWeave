@@ -117,6 +117,16 @@ pub fn get_downloaded_models(
     download::get_downloaded_model_ids()
 }
 
+/// Returns the absolute filesystem path for a model ID without checking existence.
+/// Used by the frontend when setting a model as active to avoid saving a relative path.
+#[tauri::command]
+pub fn get_model_path(model_id: String) -> Result<String, String> {
+    let path = download::model_file_path(&model_id)?;
+    path.to_str()
+        .ok_or_else(|| "Model path is not valid UTF-8".to_string())
+        .map(|s| s.to_string())
+}
+
 /// Delete a downloaded model file and clear the config if it was the active model.
 #[tauri::command]
 pub fn delete_model(

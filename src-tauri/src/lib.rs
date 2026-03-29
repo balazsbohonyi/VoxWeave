@@ -177,6 +177,7 @@ pub fn run() {
             commands::download::cancel_model_download,
             commands::download::get_downloaded_models,
             commands::download::delete_model,
+            commands::download::get_model_path,
         ])
         .run(tauri::generate_context!())
         .expect("error while running VoxFlow");

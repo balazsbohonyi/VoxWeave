@@ -178,7 +178,7 @@ async function onNext() {
 
         <Step2Local
           v-else-if="currentStep === 2 && engineChoice === 'local'"
-          @can-proceed="(val) => { localCanProceed = val; }"
+          @can-proceed="localCanProceed = $event"
           @navigate-next="advanceFromStep2"
         />
 
