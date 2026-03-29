@@ -21,7 +21,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 7: Pipeline Integration** - End-to-end hotkey-to-text pipeline with toast notifications (completed 2026-03-22)
 - [x] **Phase 8: Settings UI** - Full settings window for all configurable parameters (completed 2026-03-22)
 - [x] **Phase 9: Setup Wizard** - First-launch onboarding flow (completed 2026-03-25)
-- [ ] **Phase 10: Local Transcription** - whisper.cpp integration with on-demand model download
+- [x] **Phase 10: Local Transcription** - whisper.cpp integration with on-demand model download (completed 2026-03-29)
 
 ## Phase Details
 
@@ -224,4 +224,4 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | 7. Pipeline Integration | 4/4 | Complete   | 2026-03-22 |
 | 8. Settings UI | 5/5 | Complete   | 2026-03-22 |
 | 9. Setup Wizard | 3/3 | Complete   | 2026-03-25 |
-| 10. Local Transcription | 2/3 | In Progress|  |
+| 10. Local Transcription | 3/3 | Complete   | 2026-03-29 |

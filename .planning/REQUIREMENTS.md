@@ -49,7 +49,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 - [x] **LOCL-01**: App supports local transcription via whisper.cpp (whisper-rs)
 - [x] **LOCL-02**: Models are NOT bundled — downloaded on-demand from settings with progress bar and cancel option
-- [ ] **LOCL-03**: Available models: tiny (~75MB), base (~150MB), small (~500MB), medium (~1.5GB) with quality/speed descriptions
+- [x] **LOCL-03**: Available models: tiny (~75MB), base (~150MB), small (~500MB), medium (~1.5GB) with quality/speed descriptions
 - [x] **LOCL-04**: Downloaded models stored in `%APPDATA%/VoxFlow/models/`; user can delete models to free space
 - [x] **LOCL-05**: Local transcription runs on a background thread without freezing the UI
 - [x] **LOCL-06**: Audio is passed as WAV/PCM float32 to whisper.cpp
@@ -170,7 +170,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 | CLOD-10 | Phase 5 | Complete |
 | LOCL-01 | Phase 10 | Complete |
 | LOCL-02 | Phase 10 | Complete |
-| LOCL-03 | Phase 10 | Pending |
+| LOCL-03 | Phase 10 | Complete |
 | LOCL-04 | Phase 10 | Complete |
 | LOCL-05 | Phase 10 | Complete |
 | LOCL-06 | Phase 10 | Complete |
