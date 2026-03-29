@@ -5,14 +5,14 @@ milestone_name: milestone
 current_phase: 10
 current_phase_name: Local Transcription
 status: completed
-stopped_at: Phase 10 context gathered
-last_updated: "2026-03-29T09:50:26.361Z"
+stopped_at: Completed 10-local-transcription 10-02-PLAN.md
+last_updated: "2026-03-29T11:35:15.528Z"
 last_activity: 2026-03-25
 progress:
   total_phases: 11
   completed_phases: 8
-  total_plans: 45
-  completed_plans: 45
+  total_plans: 48
+  completed_plans: 46
 ---
 
 ---
@@ -178,6 +178,7 @@ Progress: [█████████░] 90%
 | Phase 09-setup-wizard P01 | 3 | 2 tasks | 8 files |
 | Phase 09-setup-wizard P02 | 3 | 2 tasks | 6 files |
 | Phase 09-setup-wizard P03 | 5 | 2 tasks | 5 files |
+| Phase 10-local-transcription P02 | 6 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -272,6 +273,8 @@ Recent decisions affecting current work:
 - [Phase 09-setup-wizard]: Wizard shows itself from frontend onMounted (gated on first_launch) to prevent blank-window flash; core:window:allow-show capability required
 - [Phase 09-setup-wizard]: Wizard state reset (showSuccessBanner=false, currentStep=1) in finish() after hide_wizard_window — prevents stale banner on re-open from Settings
 - [Phase 09-setup-wizard]: WizardStepper Step 2 label renamed from "API key" to "Configure" — engine-agnostic for Phase 10 local model config
+- [Phase 10-local-transcription]: run_download uses .bin.partial extension during streaming; prevents incomplete models from appearing as downloaded
+- [Phase 10-local-transcription]: start_model_download returns Ok() immediately; progress tracked via model-download-progress events not AppState polling
 
 ### Roadmap Evolution
 
@@ -290,7 +293,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-29T09:50:26.347Z
-Stopped at: Phase 10 context gathered
-Resume file: .planning/phases/10-local-transcription/10-CONTEXT.md
+Last session: 2026-03-29T11:35:15.516Z
+Stopped at: Completed 10-local-transcription 10-02-PLAN.md
+Resume file: None
 
