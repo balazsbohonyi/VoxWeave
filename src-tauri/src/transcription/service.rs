@@ -52,12 +52,34 @@ pub struct TranscriptionErrorPayload {
 // ---------------------------------------------------------------------------
 
 /// Instantiate a concrete provider implementation for the given config variant.
-pub fn make_provider(p: &TranscriptionProvider) -> Box<dyn TranscriptionProviderTrait> {
+///
+/// Accepts the full `TranscriptionConfig` so that provider-specific config
+/// (e.g. model_path for the local provider) can be passed through.
+pub fn make_provider(
+    p: &TranscriptionProvider,
+    config: &TranscriptionConfig,
+) -> Box<dyn TranscriptionProviderTrait> {
     match p {
         TranscriptionProvider::Openai => Box::new(OpenAiProvider::new()),
         TranscriptionProvider::Groq => Box::new(GroqProvider::new()),
         TranscriptionProvider::Local => {
-            unimplemented!("local transcription is phase 10")
+            #[cfg(feature = "local-transcription")]
+            {
+                let model_path = config
+                    .providers
+                    .local
+                    .model_path
+                    .clone()
+                    .unwrap_or_default();
+                return Box::new(crate::transcription::local::LocalProvider::new(model_path));
+            }
+            #[cfg(not(feature = "local-transcription"))]
+            {
+                panic!(
+                    "Local transcription requires the local-transcription cargo feature. \
+                     Rebuild with `--features local-transcription`."
+                );
+            }
         }
     }
 }
@@ -177,7 +199,7 @@ pub async fn transcribe_with_retry<R: tauri::Runtime>(
         guard.transcription.clone()
     };
 
-    let provider_impl = make_provider(&config.provider);
+    let provider_impl = make_provider(&config.provider, &config);
     let mut attempt = 0u32;
 
     loop {
@@ -322,7 +344,7 @@ pub async fn transcribe_with_provider<R: tauri::Runtime>(
     call_config.provider = target_provider;
 
     // Delegate to the provider implementation directly (no retry — fallback gets one attempt)
-    let provider_impl = make_provider(&call_config.provider);
+    let provider_impl = make_provider(&call_config.provider, &call_config);
     match provider_impl.transcribe(audio, &call_config).await {
         Ok(text) => {
             let text = text.trim_end().to_string();
