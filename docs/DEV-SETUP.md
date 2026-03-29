@@ -115,29 +115,9 @@ pnpm --version
 
 ---
 
-### 6. CMake *(local transcription only)*
+### 6. LLVM / libclang *(local transcription only)*
 
-CMake is required only when building with the `local-transcription` cargo feature (whisper.cpp/whisper-rs). The base app builds and runs fine without it.
-
-Install via winget:
-
-```powershell
-winget install Kitware.CMake
-```
-
-Or download from https://cmake.org/download/ — use the Windows x64 installer and select **"Add CMake to the system PATH"** during installation.
-
-Verify after restarting your terminal:
-
-```powershell
-cmake --version
-```
-
----
-
-### 7. LLVM / libclang *(local transcription only)*
-
-Also required for the `local-transcription` feature. `whisper-rs-sys` uses `bindgen` to generate Rust bindings for whisper.cpp's C API, and `bindgen` needs `libclang.dll` at build time.
+Required for the `local-transcription` feature. `whisper-rs-sys` uses `bindgen` to generate Rust bindings for whisper.cpp's C API, and `bindgen` needs `libclang.dll` at build time. **Install this before CMake.**
 
 Install via winget:
 
@@ -147,16 +127,36 @@ winget install LLVM.LLVM
 
 Or download the `LLVM-xx.x.x-win64.exe` installer from https://github.com/llvm/llvm-project/releases — select **"Add LLVM to the system PATH"** during installation.
 
-Verify after restarting your terminal:
+**Restart your terminal**, then verify:
 
 ```powershell
 clang --version
 ```
 
-If the build still can't find `libclang.dll`, set the env var manually in your terminal session:
+If the build still can't find `libclang.dll`, set the env var manually:
 
 ```powershell
 $env:LIBCLANG_PATH = "C:\Program Files\LLVM\bin"
+```
+
+---
+
+### 7. CMake *(local transcription only)*
+
+Also required for the `local-transcription` feature — whisper.cpp builds itself via CMake at compile time. The base app builds and runs fine without it.
+
+Install via winget:
+
+```powershell
+winget install Kitware.CMake
+```
+
+Or download from https://cmake.org/download/ — use the Windows x64 installer and select **"Add CMake to the system PATH"** during installation.
+
+**Restart your terminal**, then verify:
+
+```powershell
+cmake --version
 ```
 
 ---
@@ -231,8 +231,8 @@ The first run compiles all Rust dependencies — this takes several minutes. Sub
 [ ] Rust via rustup (MSVC toolchain, stable channel)
 [ ] Node.js 20+
 [ ] pnpm
-[ ] CMake (only for --features local-transcription)
 [ ] LLVM (only for --features local-transcription)
+[ ] CMake (only for --features local-transcription)
 [ ] WebView2 Runtime (pre-installed on Win10 1803+ / Win11)
 [ ] WiX Toolset (only if building .msi)
 [ ] Git
