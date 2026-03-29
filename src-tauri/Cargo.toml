@@ -32,7 +32,7 @@ dirs-next = "2"
 cpal = "0.15"
 reqwest = { version = "0.12", features = ["multipart", "json", "stream"] }
 futures-util = "0.3"
-whisper-rs = { version = "0.14", optional = true }
+whisper-rs = { version = "0.16", optional = true }
 async-trait = "0.1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 audiopus = "0.2"

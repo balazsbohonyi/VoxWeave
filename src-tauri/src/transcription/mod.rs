@@ -4,7 +4,6 @@
 
 pub mod download;
 pub mod groq;
-#[cfg(feature = "local-transcription")]
 pub mod local;
 pub mod openai;
 pub mod provider;

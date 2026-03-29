@@ -20,6 +20,10 @@ pub enum TranscriptionError {
     Server { status: u16, message: String },
     /// Transcription was cancelled by the user.
     Cancelled,
+    /// Local model file not found at configured path.
+    ModelMissing { message: String },
+    /// Local model file exists but could not be loaded (corrupt, wrong format, etc.).
+    ModelLoadFailed { message: String },
 }
 
 // ---------------------------------------------------------------------------

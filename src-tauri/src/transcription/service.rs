@@ -32,6 +32,7 @@ pub enum TranscriptionErrorCode {
     Network,
     Server,
     Cancelled,
+    ModelMissing,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -233,6 +234,28 @@ pub async fn transcribe_with_retry<R: tauri::Runtime>(
                 return Err(());
             }
 
+            Err(TranscriptionError::ModelMissing { message }) => {
+                emit_transcription_error(app, TranscriptionErrorPayload {
+                    code: TranscriptionErrorCode::ModelMissing,
+                    message,
+                    provider: Some("local".to_string()),
+                    fallback_provider: None,
+                    retryable: false,
+                });
+                return Err(());
+            }
+
+            Err(TranscriptionError::ModelLoadFailed { message }) => {
+                emit_transcription_error(app, TranscriptionErrorPayload {
+                    code: TranscriptionErrorCode::ModelMissing,
+                    message,
+                    provider: Some("local".to_string()),
+                    fallback_provider: None,
+                    retryable: false,
+                });
+                return Err(());
+            }
+
             // Retryable error and still within retry budget.
             Err(_err) if attempt < 3 => {
                 let delay_ms = 1000u64 * (1u64 << attempt);
@@ -328,6 +351,14 @@ pub async fn transcribe_with_provider<R: tauri::Runtime>(
                 crate::transcription::provider::TranscriptionError::Cancelled => {
                     (TranscriptionErrorCode::Cancelled, "Transcription cancelled.".into())
                 }
+                crate::transcription::provider::TranscriptionError::ModelMissing { message } => (
+                    TranscriptionErrorCode::ModelMissing,
+                    message.clone(),
+                ),
+                crate::transcription::provider::TranscriptionError::ModelLoadFailed { message } => (
+                    TranscriptionErrorCode::ModelMissing,
+                    message.clone(),
+                ),
             };
             emit_transcription_error(app, TranscriptionErrorPayload {
                 code,
