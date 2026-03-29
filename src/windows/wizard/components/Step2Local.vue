@@ -10,6 +10,7 @@ import { useConfig } from "../../../composables/useConfig";
 
 const emit = defineEmits<{
   canProceed: [value: boolean];
+  navigateNext: [];
 }>();
 
 // ---------------------------------------------------------------------------
@@ -87,6 +88,8 @@ async function cancelDownload() {
 function onSkip() {
   skipClicked.value = true;
   updateCanProceed();
+  // Auto-advance to next step immediately on skip
+  emit("navigateNext");
 }
 
 // ---------------------------------------------------------------------------
@@ -172,7 +175,10 @@ onUnmounted(() => {
       <div
         v-for="model in LOCAL_MODELS"
         :key="model.id"
-        class="p-3 border border-gray-200 dark:border-gray-700 rounded-lg"
+        class="p-3 rounded-lg"
+        :class="isActiveLocalModel(model.id)
+          ? 'border-2 border-blue-600 dark:border-blue-500'
+          : 'border border-gray-200 dark:border-gray-700'"
       >
         <!-- Idle state -->
         <div v-if="modelStates[model.id] === 'idle'" class="flex items-center justify-between">
@@ -196,7 +202,7 @@ onUnmounted(() => {
           <div class="flex items-center justify-between mb-2">
             <span class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ model.label }}</span>
             <div class="flex items-center gap-3">
-              <span class="text-xs text-gray-500 dark:text-gray-400">{{ downloadPercent[model.id] }}%</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400">{{ Math.round(downloadPercent[model.id]) }}%</span>
               <button
                 type="button"
                 class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
@@ -208,8 +214,8 @@ onUnmounted(() => {
           </div>
           <div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
             <div
-              class="bg-blue-500 h-2 rounded-full transition-all duration-300"
-              :style="{ width: `${downloadPercent[model.id]}%` }"
+              class="bg-blue-500 h-2 rounded-full"
+              :style="{ width: `${Math.round(downloadPercent[model.id])}%` }"
             />
           </div>
         </div>
@@ -220,10 +226,11 @@ onUnmounted(() => {
             <div class="flex items-center gap-2">
               <span class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ model.label }}</span>
               <span class="ml-1 text-xs text-gray-400">{{ model.size }}</span>
-              <!-- Active badge -->
+              <!-- Active badge — blue bg, white text, 4px radius -->
               <span
                 v-if="isActiveLocalModel(model.id)"
-                class="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full"
+                class="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-600 text-white"
+                style="border-radius: 4px;"
               >
                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />

@@ -298,10 +298,12 @@ async function cancelDownload() {
 }
 
 async function deleteModel(modelId: string) {
+  // Clear state immediately before invoking so the Active badge never flickers
+  // on a card that is being deleted.
+  modelStates.value[modelId] = "idle";
+  downloadPercent.value[modelId] = 0;
   try {
     await invoke("delete_model", { modelId });
-    modelStates.value[modelId] = "idle";
-    downloadPercent.value[modelId] = 0;
     // If this was the active model, clear the model_path
     if (config.value?.transcription.providers.local.model_path?.includes(modelId)) {
       await saveConfig({
@@ -613,7 +615,10 @@ async function saveLanguage(lang: string) {
           <div
             v-for="model in LOCAL_MODELS"
             :key="model.id"
-            class="p-3 border border-gray-200 dark:border-gray-700 rounded-lg"
+            class="p-3 rounded-lg"
+            :class="isActiveLocalModel(model.id)
+              ? 'border-2 border-blue-600 dark:border-blue-500'
+              : 'border border-gray-200 dark:border-gray-700'"
           >
             <!-- Idle state -->
             <div v-if="modelStates[model.id] === 'idle'" class="flex items-center justify-between">
@@ -637,7 +642,7 @@ async function saveLanguage(lang: string) {
               <div class="flex items-center justify-between mb-2">
                 <span class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ model.label }}</span>
                 <div class="flex items-center gap-3">
-                  <span class="text-xs text-gray-500 dark:text-gray-400">{{ downloadPercent[model.id] }}%</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400">{{ Math.round(downloadPercent[model.id]) }}%</span>
                   <button
                     type="button"
                     class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
@@ -649,8 +654,8 @@ async function saveLanguage(lang: string) {
               </div>
               <div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
                 <div
-                  class="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                  :style="{ width: `${downloadPercent[model.id]}%` }"
+                  class="bg-blue-500 h-2 rounded-full"
+                  :style="{ width: `${Math.round(downloadPercent[model.id])}%` }"
                 />
               </div>
             </div>
@@ -661,15 +666,27 @@ async function saveLanguage(lang: string) {
                 <div class="flex items-center gap-2">
                   <span class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ model.label }}</span>
                   <span class="ml-1 text-xs text-gray-400">{{ model.size }}</span>
-                  <!-- Active badge -->
+                  <!-- Active badge — blue bg, white text, 4px radius -->
                   <span
                     v-if="isActiveLocalModel(model.id)"
-                    class="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full"
+                    class="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-600 text-white"
+                    style="border-radius: 4px;"
                   >
                     <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                     Active
+                  </span>
+                  <!-- Downloaded badge (shown when not active) -->
+                  <span
+                    v-else
+                    class="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800"
+                    style="border-radius: 4px;"
+                  >
+                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Downloaded
                   </span>
                 </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ model.quality }}</p>
@@ -683,12 +700,16 @@ async function saveLanguage(lang: string) {
                 >
                   Set Active
                 </button>
+                <!-- Trash icon delete button — no text label -->
                 <button
                   type="button"
-                  class="px-2 py-1.5 text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 border border-red-200 dark:border-red-800 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  class="p-1.5 text-red-500 hover:text-red-700 dark:hover:text-red-400 border border-red-200 dark:border-red-800 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  title="Delete model"
                   @click="deleteModel(model.id)"
                 >
-                  Delete
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
                 </button>
               </div>
             </div>
