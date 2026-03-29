@@ -169,6 +169,7 @@ pub fn run() {
             commands::transcription::retry_transcription_with_fallback,
             commands::transcription::open_settings_on_transcription_tab,
             commands::indicator::hide_toast_window,
+            commands::indicator::show_plain_toast,
             commands::wizard::open_wizard_window,
             commands::wizard::hide_wizard_window,
             commands::config::open_settings_window,

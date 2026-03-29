@@ -2,6 +2,7 @@ use crate::hotkey::service;
 use crate::indicator;
 use crate::indicator::events::{IndicatorStatePayload, IndicatorVisualState};
 use crate::state::{AppState, RecordingState};
+use serde::Serialize;
 use tauri::AppHandle;
 use tauri::State;
 
@@ -62,4 +63,18 @@ pub fn hide_indicator(app: AppHandle) -> Result<(), String> {
 #[tauri::command]
 pub fn hide_toast_window(app: AppHandle) -> Result<(), String> {
     indicator::hide_toast_window(&app)
+}
+
+/// Shows a plain informational / warning toast in the toast window.
+/// `toast_type` must be one of: "info" | "warning" | "error" | "success"
+#[tauri::command]
+pub fn show_plain_toast(app: AppHandle, toast_type: String, message: String) -> Result<(), String> {
+    #[derive(Serialize)]
+    struct PlainToastPayload {
+        #[serde(rename = "type")]
+        toast_type: String,
+        message: String,
+    }
+    let payload = PlainToastPayload { toast_type, message };
+    indicator::show_toast_window(&app, &payload)
 }
