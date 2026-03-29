@@ -75,10 +75,9 @@ pub fn make_provider(
             }
             #[cfg(not(feature = "local-transcription"))]
             {
-                panic!(
-                    "Local transcription requires the local-transcription cargo feature. \
-                     Rebuild with `--features local-transcription`."
-                );
+                // Feature not compiled in — return a stub that emits a clear error toast
+                // instead of panicking and crashing the app.
+                return Box::new(LocalFeatureDisabledProvider);
             }
         }
     }
@@ -391,6 +390,32 @@ pub async fn transcribe_with_provider<R: tauri::Runtime>(
             });
             Err(())
         }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Feature-disabled stub provider — only compiled when local-transcription is off
+// ---------------------------------------------------------------------------
+
+/// Stub provider returned by `make_provider` when the `local-transcription`
+/// cargo feature is not enabled. Immediately returns a `ModelMissing` error
+/// with an actionable message so the user sees a toast rather than a crash.
+#[cfg(not(feature = "local-transcription"))]
+struct LocalFeatureDisabledProvider;
+
+#[cfg(not(feature = "local-transcription"))]
+#[async_trait::async_trait]
+impl crate::transcription::provider::TranscriptionProviderTrait for LocalFeatureDisabledProvider {
+    async fn transcribe(
+        &self,
+        _audio: &crate::audio::encode::EncodedAudio,
+        _config: &crate::config::TranscriptionConfig,
+    ) -> Result<String, crate::transcription::provider::TranscriptionError> {
+        Err(crate::transcription::provider::TranscriptionError::ModelMissing {
+            message: "Local transcription is not enabled in this build. \
+                      Rebuild with `--features local-transcription`."
+                .to_string(),
+        })
     }
 }
 
