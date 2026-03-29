@@ -140,7 +140,7 @@ onMounted(() => {
 
     if (transcriptionPayload.code === "model_missing") {
       showTranscriptionErrorToast({
-        message: "No local model downloaded.",
+        message: transcriptionPayload.message || "No local model downloaded.",
         type: "error",
         action: {
           label: "Open Settings",
