@@ -7,10 +7,6 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[features]
-# Local transcription via whisper.cpp — requires CMake and MSVC; off by default
-local-transcription = ["dep:whisper-rs"]
-
 [lib]
 # The `_lib` suffix may seem redundant but it is necessary
 # to make the lib name unique and wouldn't conflict with the bin name.
@@ -32,7 +28,7 @@ dirs-next = "2"
 cpal = "0.15"
 reqwest = { version = "0.12", features = ["multipart", "json", "stream"] }
 futures-util = "0.3"
-whisper-rs = { version = "0.16", optional = true }
+whisper-rs = { version = "0.16" }
 async-trait = "0.1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 audiopus = "0.2"

@@ -1,7 +1,4 @@
 // Local transcription provider — offline Whisper inference via whisper-rs.
-//
-// wav_bytes_to_f32 is a pure audio helper compiled unconditionally.
-// LocalProvider (which links whisper-rs) is gated behind `local-transcription`.
 
 // ---------------------------------------------------------------------------
 // WAV helper — always compiled (no native dependency)
@@ -38,7 +35,6 @@ pub fn wav_bytes_to_f32(wav_bytes: &[u8]) -> Result<Vec<f32>, String> {
 // LocalProvider — requires whisper-rs native library (CMake + MSVC)
 // ---------------------------------------------------------------------------
 
-#[cfg(feature = "local-transcription")]
 mod provider_impl {
     use super::wav_bytes_to_f32;
     use crate::audio::encode::{EncodedAudio, EncodedFormat};
@@ -134,17 +130,14 @@ mod provider_impl {
                 })?;
 
                 // Collect segment text
-                let n_segments =
-                    state
-                        .full_n_segments()
-                        .map_err(|e| TranscriptionError::Network {
-                            message: format!("Failed to get segment count: {:?}", e),
-                        })?;
+                let n_segments = state.full_n_segments();
 
                 let mut text = String::new();
                 for i in 0..n_segments {
-                    if let Ok(segment) = state.full_get_segment_text(i) {
-                        text.push_str(&segment);
+                    if let Some(segment) = state.get_segment(i) {
+                        if let Ok(s) = segment.to_str() {
+                            text.push_str(s);
+                        }
                     }
                 }
 
@@ -160,7 +153,6 @@ mod provider_impl {
     }
 }
 
-#[cfg(feature = "local-transcription")]
 pub use provider_impl::LocalProvider;
 
 // ---------------------------------------------------------------------------

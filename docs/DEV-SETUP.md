@@ -115,9 +115,9 @@ pnpm --version
 
 ---
 
-### 6. LLVM / libclang *(local transcription only)*
+### 6. LLVM / libclang
 
-Required for the `local-transcription` feature. `whisper-rs-sys` uses `bindgen` to generate Rust bindings for whisper.cpp's C API, and `bindgen` needs `libclang.dll` at build time. **Install this before CMake.**
+Required for the build. `whisper-rs-sys` uses `bindgen` to generate Rust bindings for whisper.cpp's C API, and `bindgen` needs `libclang.dll` at build time. **Install this before CMake.**
 
 Install via winget:
 
@@ -141,9 +141,9 @@ $env:LIBCLANG_PATH = "C:\Program Files\LLVM\bin"
 
 ---
 
-### 7. CMake *(local transcription only)*
+### 7. CMake
 
-Also required for the `local-transcription` feature — whisper.cpp builds itself via CMake at compile time. The base app builds and runs fine without it.
+Required for the build — whisper.cpp builds itself via CMake at compile time.
 
 Install via winget:
 
@@ -200,16 +200,8 @@ git --version
 
 ### Running the dev server
 
-**Standard build** (no CMake/LLVM required):
-
 ```powershell
 pnpm tauri dev
-```
-
-**With local transcription** (requires CMake + LLVM from steps 6–7):
-
-```powershell
-pnpm tauri dev --features local-transcription
 ```
 
 The first run compiles all Rust dependencies — this takes several minutes. Subsequent runs are much faster.
@@ -231,8 +223,8 @@ The first run compiles all Rust dependencies — this takes several minutes. Sub
 [ ] Rust via rustup (MSVC toolchain, stable channel)
 [ ] Node.js 20+
 [ ] pnpm
-[ ] LLVM (only for --features local-transcription)
-[ ] CMake (only for --features local-transcription)
+[ ] LLVM
+[ ] CMake
 [ ] WebView2 Runtime (pre-installed on Win10 1803+ / Win11)
 [ ] WiX Toolset (only if building .msi)
 [ ] Git
@@ -295,7 +287,7 @@ npm install -g pnpm@latest-10
 
 ---
 
-### 6. CMake *(local transcription only)*
+### 6. CMake
 
 ```bash
 brew install cmake
@@ -303,7 +295,7 @@ brew install cmake
 
 ---
 
-### 7. LLVM / libclang *(local transcription only)*
+### 7. LLVM / libclang
 
 macOS ships with Apple Clang which does not include `libclang` in the form bindgen expects. Install the full LLVM toolchain via Homebrew:
 
@@ -323,8 +315,6 @@ export LIBCLANG_PATH="$(brew --prefix llvm)/lib"
 
 ```bash
 pnpm tauri dev
-# or with local transcription:
-pnpm tauri dev --features local-transcription
 ```
 
 ---
@@ -337,6 +327,6 @@ pnpm tauri dev --features local-transcription
 [ ] Rust via rustup
 [ ] Node.js 20+
 [ ] pnpm
-[ ] CMake (only for --features local-transcription)
-[ ] LLVM via Homebrew (only for --features local-transcription)
+[ ] CMake
+[ ] LLVM via Homebrew
 ```
