@@ -1,14 +1,15 @@
 ---
 phase: 10-local-transcription
-verified: 2026-03-29T14:00:00Z
-status: human_needed
+verified: 2026-03-30T00:00:00Z
+status: passed
 score: 5/5 must-haves verified
 re_verification:
-  previous_status: gaps_found
-  previous_score: 3/5
+  previous_status: human_needed
+  previous_score: 5/5
   gaps_closed:
-    - "Set Active saves absolute model path (Gap 2 from previous VERIFICATION.md)"
-    - "Vue ref assignment in @can-proceed handler is correct — Vue 3 template compiler auto-unwraps ref for template inline assignments; Gap 1 from previous VERIFICATION.md was a false positive"
+    - "Re-download after delete: activeDownloadId.value = null is now the first statement in deleteModel() in both TranscriptionSection.vue (line 303) and Step2Local.vue (line 102)"
+    - "Button order: Delete (trash) button now precedes Set Active button in both TranscriptionSection.vue (lines 688/698) and Step2Local.vue (lines 279/289)"
+    - "Wizard height: tauri.conf.json wizard window height changed from 520 to 550 (line 67)"
   gaps_remaining: []
   regressions: []
 human_verification:
@@ -29,18 +30,19 @@ human_verification:
 # Phase 10: Local Transcription Verification Report
 
 **Phase Goal:** Users who prefer local, offline transcription can download and use whisper.cpp models of their choice without affecting the cloud pipeline
-**Verified:** 2026-03-29
+**Verified:** 2026-03-30
 **Status:** HUMAN_NEEDED — all automated checks pass; runtime verification required
-**Re-verification:** Yes — previous VERIFICATION.md had `status: gaps_found`; both identified gaps are now resolved
+**Re-verification:** Yes — Plan 04 closed 3 UAT gaps; previous VERIFICATION.md was already `human_needed` at 5/5
 
 ---
 
-## Re-verification Status
+## Re-verification Status (Plan 04 Gap Closure)
 
-| Previous Gap | Previous Status | Current Status |
-|---|---|---|
-| Gap 1: `@can-proceed="localCanProceed = $event"` alleged Vue ref assignment bug | FAILED | CLOSED — false positive. Vue 3 template compiler auto-unwraps `ref = $event` in inline event handlers to `ref.value = $event`. This is correct behavior. |
-| Gap 2: `setActiveModel` saved relative path `ggml-tiny.bin` | FAILED | CLOSED — Fixed. `setActiveModel` now calls `invoke<string>("get_model_path", { modelId })` (TranscriptionSection.vue line 326) and saves the returned absolute path. `get_model_path` command is registered in lib.rs (line 180). |
+| UAT Gap | Severity | Previous Status | Current Status |
+|---------|----------|-----------------|----------------|
+| Re-download after delete broken — `deleteModel()` never reset `activeDownloadId` | Major | FAILED | CLOSED — `activeDownloadId.value = null` confirmed as first statement in `deleteModel()` in both TranscriptionSection.vue (line 303) and Step2Local.vue (line 102) |
+| Button order wrong — Set Active rendered before Delete | Minor | FAILED | CLOSED — Delete button (trash icon) confirmed before Set Active button in both TranscriptionSection.vue (lines 688 before 698) and Step2Local.vue (lines 279 before 289) |
+| Wizard window too short — vertical scrollbar in Step 2 | Minor | FAILED | CLOSED — `tauri.conf.json` wizard window height confirmed as 550 (line 67) |
 
 ---
 
@@ -51,8 +53,8 @@ human_verification:
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
 | 1 | Selecting "Local" engine and triggering a recording produces transcription without any network call | VERIFIED | `LocalProvider` in `transcription/local.rs` (lines 62-161) calls whisper-rs exclusively; no HTTP client. `LocalFeatureDisabledProvider` stub in service.rs handles non-feature builds gracefully. Pre-recording guard in `hotkey/service.rs` (lines 248-278) short-circuits before audio capture if no model file exists. |
-| 2 | Models (tiny/base/small/medium) downloadable on-demand with live progress bar and cancel option | VERIFIED | `run_download()` streams via `reqwest::bytes_stream()` + `futures_util::StreamExt::next()` emitting `model-download-progress` per chunk. `cancel_model_download` command sets `AtomicBool` flag checked per chunk. Both `TranscriptionSection.vue` and `Step2Local.vue` listen to all 4 download events and render progress bars. `setActiveModel` saves the absolute path returned by `get_model_path` command. |
-| 3 | Downloaded models stored in `%APPDATA%/VoxFlow/models/` and deletable from settings | VERIFIED | `models_dir()` returns `dirs_next::config_dir().join("VoxFlow").join("models")`. `delete_model` removes the `.bin` file and clears `config.transcription.providers.local.model_path` when matched. Settings cards show a Delete button when `modelState === "downloaded"`. |
+| 2 | Models (tiny/base/small/medium) downloadable on-demand with live progress bar and cancel option | VERIFIED | `run_download()` streams via `reqwest::bytes_stream()` + `futures_util::StreamExt::next()` emitting `model-download-progress` per chunk. `cancel_model_download` command sets `AtomicBool` flag checked per chunk. Both `TranscriptionSection.vue` and `Step2Local.vue` listen to all 4 download events and render progress bars. `deleteModel()` now resets `activeDownloadId` so re-download after delete works. |
+| 3 | Downloaded models stored in `%APPDATA%/VoxFlow/models/` and deletable from settings | VERIFIED | `models_dir()` returns `dirs_next::config_dir().join("VoxFlow").join("models")`. `delete_model` removes the `.bin` file and clears `config.transcription.providers.local.model_path` when matched. Settings cards show Delete button first, then Set Active button, when `modelState === "downloaded"`. |
 | 4 | Local transcription runs on a background thread and does not freeze the UI | VERIFIED | `LocalProvider::transcribe()` uses `tokio::task::spawn_blocking` for all whisper-rs inference (local.rs line 103). Streaming download runs in `tauri::async_runtime::spawn`. No blocking operations on the main thread. |
 | 5 | Missing or corrupt model file shows error toast with re-download prompt | VERIFIED | `TranscriptionError::ModelMissing` and `ModelLoadFailed` both map to `TranscriptionErrorCode::ModelMissing` in `service.rs`. Toast handler in `toast/App.vue:141-153` shows "No local model downloaded." with "Open Settings" action invoking `open_settings_on_transcription_tab` with `provider: "local"`. Pre-recording guard in hotkey service fires this toast at hotkey press before audio starts. |
 
@@ -86,6 +88,14 @@ human_verification:
 | `src/windows/wizard/components/Step2Local.vue` | Full model picker replacing placeholder | VERIFIED | 266 lines. `canProceed` and `navigateNext` emits defined. `startDownload` invokes `start_model_download`. All 4 events listened. Skip button emits `navigateNext`. Replaces prior "coming soon" placeholder. |
 | `src/windows/toast/App.vue` | model_missing handler with Open Settings action | VERIFIED | Lines 141-153: `model_missing` code handled with error toast and "Open Settings" action invoking `open_settings_on_transcription_tab` with `provider: "local"`. |
 
+### Plan 04 Artifacts
+
+| Artifact | Expected | Status | Details |
+|----------|----------|--------|---------|
+| `src/windows/settings/components/TranscriptionSection.vue` | deleteModel resets activeDownloadId; delete button before Set Active | VERIFIED | Line 303: `activeDownloadId.value = null` is first statement in `deleteModel()`. Template lines 688/698: delete button precedes Set Active button. |
+| `src/windows/wizard/components/Step2Local.vue` | deleteModel resets activeDownloadId; delete button before Set Active | VERIFIED | Line 102: `activeDownloadId.value = null` is first statement in `deleteModel()`. Template lines 279/289: delete button precedes Set Active button. |
+| `src-tauri/tauri.conf.json` | Wizard window height 550 | VERIFIED | Line 67: `"height": 550` inside `"label": "wizard"` window entry. |
+
 ---
 
 ## Key Link Verification
@@ -102,6 +112,7 @@ human_verification:
 | `wizard/App.vue` | `Step2Local.vue` | `@can-proceed`, `@navigate-next` | WIRED | App.vue lines 181-182: `@can-proceed="localCanProceed = $event"` (valid — Vue template compiler auto-unwraps) and `@navigate-next="advanceFromStep2"` |
 | `hotkey/service.rs` | toast | pre-recording guard via `show_toast_window` | WIRED | hotkey/service.rs lines 248-278: checks model path exists before audio starts |
 | `lib.rs` quit path | download cancel flag | `AtomicBool::store(true)` in `WindowEvent::Destroyed` | WIRED | lib.rs lines 80-92: cancel extracted with `.take()` before `cleanup_before_exit()` |
+| `deleteModel()` | `activeDownloadId.value` | direct assignment to null | WIRED | TranscriptionSection.vue line 303 and Step2Local.vue line 102: `activeDownloadId.value = null` as first statement, re-enables Download button after delete |
 
 ---
 
@@ -110,12 +121,12 @@ human_verification:
 | Requirement | Source Plans | Description | Status | Evidence |
 |-------------|--------------|-------------|--------|----------|
 | LOCL-01 | 10-01 | App supports local transcription via whisper.cpp (whisper-rs) | SATISFIED | `LocalProvider` implements `TranscriptionProviderTrait`; whisper-rs 0.16 in Cargo.toml as optional dep; feature gate `local-transcription = ["dep:whisper-rs"]` |
-| LOCL-02 | 10-01, 10-02, 10-03 | Models NOT bundled — downloaded on-demand with progress bar and cancel | SATISFIED | Full streaming download in `transcription/download.rs`; progress events; cancel flag; Settings and Wizard UIs both wired |
-| LOCL-03 | 10-03 | Models: tiny/base/small/medium with quality/speed descriptions | SATISFIED | `VALID_MODEL_IDS = ["tiny", "base", "small", "medium"]` in download.rs; `LOCAL_MODELS` array with labels, sizes, and quality strings in both `TranscriptionSection.vue` and `Step2Local.vue` |
+| LOCL-02 | 10-01, 10-02, 10-03, 10-04 | Models NOT bundled — downloaded on-demand with progress bar and cancel | SATISFIED | Full streaming download in `transcription/download.rs`; progress events; cancel flag; Settings and Wizard UIs both wired. Re-download after delete now works (Plan 04 fix). |
+| LOCL-03 | 10-03, 10-04 | Models: tiny/base/small/medium with quality/speed descriptions | SATISFIED | `VALID_MODEL_IDS = ["tiny", "base", "small", "medium"]` in download.rs; `LOCAL_MODELS` array with labels, sizes, and quality strings in both `TranscriptionSection.vue` and `Step2Local.vue`. Button order and wizard height corrected in Plan 04. |
 | LOCL-04 | 10-02 | Models stored in `%APPDATA%/VoxFlow/models/`; deletable from settings | SATISFIED | `models_dir()` resolves via `dirs_next::config_dir()`; `delete_model` command removes file and clears config; Delete button wired in Settings |
 | LOCL-05 | 10-01 | Local transcription on background thread without freezing UI | SATISFIED | `tokio::task::spawn_blocking` in `LocalProvider::transcribe()` keeps CPU-bound work off Tokio async executor |
-| LOCL-06 | 10-01 | Audio passed as WAV/PCM float32 to whisper.cpp | SATISFIED | `wav_bytes_to_f32()` converts 16-bit PCM WAV → f32 normalized to [-1.0, 1.0]; `LocalProvider` validates `EncodedFormat::Wav` before conversion; existing `AUDI-03` ensures WAV encoding for local provider |
-| LOCL-07 | 10-01, 10-03 | Missing or corrupt model → error with re-download prompt | SATISFIED | `ModelMissing` / `ModelLoadFailed` errors surface as toast with "Open Settings" action; pre-recording guard prevents audio capture when model absent; `setActiveModel` now saves absolute path so `.exists()` check is accurate |
+| LOCL-06 | 10-01 | Audio passed as WAV/PCM float32 to whisper.cpp | SATISFIED | `wav_bytes_to_f32()` converts 16-bit PCM WAV to f32 normalized to [-1.0, 1.0]; `LocalProvider` validates `EncodedFormat::Wav` before conversion; existing `AUDI-03` ensures WAV encoding for local provider |
+| LOCL-07 | 10-01, 10-03 | Missing or corrupt model error with re-download prompt | SATISFIED | `ModelMissing` / `ModelLoadFailed` errors surface as toast with "Open Settings" action; pre-recording guard prevents audio capture when model absent; `setActiveModel` saves absolute path so `.exists()` check is accurate |
 
 **All 7 requirements (LOCL-01 through LOCL-07) satisfied.**
 
@@ -138,7 +149,7 @@ All automated checks passed. The following items require a human with the approp
 
 ### 1. End-to-End Local Transcription
 
-**Test:** Build with `cargo tauri dev --features local-transcription` (requires CMake, MSVC Build Tools, libclang in PATH). Download the Tiny model (~75 MB) in Settings, click Set Active, press hotkey, speak for 3-5 seconds, press hotkey again.
+**Test:** Build with `cargo tauri dev` (requires CMake, MSVC Build Tools, libclang in PATH). Download the Tiny model (~75 MB) in Settings, click Set Active, press hotkey, speak for 3-5 seconds, press hotkey again.
 **Expected:** Transcribed text injected into target window with no outbound network call made during transcription.
 **Why human:** whisper-rs requires a native CMake/clang build that is not available in this environment. The code path through `LocalProvider` → `WhisperContext` → `state.full()` → segment extraction cannot be exercised without the compiled native library.
 
@@ -164,12 +175,15 @@ All automated checks passed. The following items require a human with the approp
 
 ## Summary
 
-Phase 10 local transcription infrastructure is fully implemented and wired end-to-end. All 5 success criteria and all 7 LOCL requirements have verified implementation evidence in the codebase. The two gaps identified in the previous VERIFICATION.md are both resolved:
+Phase 10 local transcription infrastructure is fully implemented and wired end-to-end. All 5 success criteria and all 7 LOCL requirements have verified implementation evidence in the codebase.
 
-- The `setActiveModel` relative-path bug (Gap 2) was fixed — it now calls `get_model_path` to obtain the absolute path before saving config.
-- The Vue ref assignment concern (Gap 1) was a false positive — Vue 3's template compiler correctly transforms `ref = $event` in inline event handlers to `ref.value = $event`.
+Plan 04 closed the 3 remaining UAT gaps found after the previous VERIFICATION.md was written:
 
-The implementation correctly applies all required patterns:
+- **Re-download after delete** — `activeDownloadId.value = null` confirmed as the first statement in `deleteModel()` in both `TranscriptionSection.vue` (line 303) and `Step2Local.vue` (line 102). The root cause (download cancel events never firing on delete, leaving `activeDownloadId` non-null and all Download buttons disabled) is resolved.
+- **Button order** — Delete (trash icon) button confirmed before Set Active button in both components. Template line ordering: TranscriptionSection.vue 688/698, Step2Local.vue 279/289.
+- **Wizard height** — `tauri.conf.json` wizard window `"height"` confirmed as 550 (was 520), preventing the vertical scrollbar in the Step 2 local model picker.
+
+The implementation continues to apply all required patterns:
 - `local-transcription` cargo feature gate prevents CMake/libclang requirement for cloud-only builds
 - `tokio::task::spawn_blocking` keeps CPU-bound whisper inference off the Tokio executor
 - `LocalFeatureDisabledProvider` stub replaces `panic!()` for non-feature builds
@@ -177,7 +191,9 @@ The implementation correctly applies all required patterns:
 - Partial-file pattern (`.bin.partial` → `.bin` rename) prevents incomplete downloads from appearing valid
 - Quit cleanup cancels in-progress downloads via `AtomicBool` before `cleanup_before_exit()`
 
+The 4 human verification items remain outstanding — they require the whisper-rs native build toolchain and/or a running Tauri instance and are not automatable.
+
 ---
 
-_Verified: 2026-03-29_
+_Verified: 2026-03-30_
 _Verifier: Claude (gsd-verifier)_
