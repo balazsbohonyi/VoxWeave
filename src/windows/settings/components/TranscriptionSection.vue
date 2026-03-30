@@ -300,6 +300,7 @@ async function cancelDownload() {
 }
 
 async function deleteModel(modelId: string) {
+  activeDownloadId.value = null;
   // Clear state immediately so the Active badge never flickers on a card being deleted.
   modelStates.value[modelId] = "idle";
   downloadPercent.value[modelId] = 0;
