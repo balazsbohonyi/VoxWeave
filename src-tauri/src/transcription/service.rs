@@ -32,6 +32,7 @@ pub enum TranscriptionErrorCode {
     Network,
     Server,
     Cancelled,
+    ModelMissing,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -51,12 +52,24 @@ pub struct TranscriptionErrorPayload {
 // ---------------------------------------------------------------------------
 
 /// Instantiate a concrete provider implementation for the given config variant.
-pub fn make_provider(p: &TranscriptionProvider) -> Box<dyn TranscriptionProviderTrait> {
+///
+/// Accepts the full `TranscriptionConfig` so that provider-specific config
+/// (e.g. model_path for the local provider) can be passed through.
+pub fn make_provider(
+    p: &TranscriptionProvider,
+    config: &TranscriptionConfig,
+) -> Box<dyn TranscriptionProviderTrait> {
     match p {
         TranscriptionProvider::Openai => Box::new(OpenAiProvider::new()),
         TranscriptionProvider::Groq => Box::new(GroqProvider::new()),
         TranscriptionProvider::Local => {
-            unimplemented!("local transcription is phase 10")
+            let model_path = config
+                .providers
+                .local
+                .model_path
+                .clone()
+                .unwrap_or_default();
+            Box::new(crate::transcription::local::LocalProvider::new(model_path))
         }
     }
 }
@@ -176,7 +189,7 @@ pub async fn transcribe_with_retry<R: tauri::Runtime>(
         guard.transcription.clone()
     };
 
-    let provider_impl = make_provider(&config.provider);
+    let provider_impl = make_provider(&config.provider, &config);
     let mut attempt = 0u32;
 
     loop {
@@ -230,6 +243,28 @@ pub async fn transcribe_with_retry<R: tauri::Runtime>(
                         retryable: false,
                     },
                 );
+                return Err(());
+            }
+
+            Err(TranscriptionError::ModelMissing { message }) => {
+                emit_transcription_error(app, TranscriptionErrorPayload {
+                    code: TranscriptionErrorCode::ModelMissing,
+                    message,
+                    provider: Some("local".to_string()),
+                    fallback_provider: None,
+                    retryable: false,
+                });
+                return Err(());
+            }
+
+            Err(TranscriptionError::ModelLoadFailed { message }) => {
+                emit_transcription_error(app, TranscriptionErrorPayload {
+                    code: TranscriptionErrorCode::ModelMissing,
+                    message,
+                    provider: Some("local".to_string()),
+                    fallback_provider: None,
+                    retryable: false,
+                });
                 return Err(());
             }
 
@@ -299,7 +334,7 @@ pub async fn transcribe_with_provider<R: tauri::Runtime>(
     call_config.provider = target_provider;
 
     // Delegate to the provider implementation directly (no retry — fallback gets one attempt)
-    let provider_impl = make_provider(&call_config.provider);
+    let provider_impl = make_provider(&call_config.provider, &call_config);
     match provider_impl.transcribe(audio, &call_config).await {
         Ok(text) => {
             let text = text.trim_end().to_string();
@@ -328,6 +363,14 @@ pub async fn transcribe_with_provider<R: tauri::Runtime>(
                 crate::transcription::provider::TranscriptionError::Cancelled => {
                     (TranscriptionErrorCode::Cancelled, "Transcription cancelled.".into())
                 }
+                crate::transcription::provider::TranscriptionError::ModelMissing { message } => (
+                    TranscriptionErrorCode::ModelMissing,
+                    message.clone(),
+                ),
+                crate::transcription::provider::TranscriptionError::ModelLoadFailed { message } => (
+                    TranscriptionErrorCode::ModelMissing,
+                    message.clone(),
+                ),
             };
             emit_transcription_error(app, TranscriptionErrorPayload {
                 code,

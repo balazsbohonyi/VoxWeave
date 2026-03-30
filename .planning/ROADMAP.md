@@ -21,7 +21,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 7: Pipeline Integration** - End-to-end hotkey-to-text pipeline with toast notifications (completed 2026-03-22)
 - [x] **Phase 8: Settings UI** - Full settings window for all configurable parameters (completed 2026-03-22)
 - [x] **Phase 9: Setup Wizard** - First-launch onboarding flow (completed 2026-03-25)
-- [ ] **Phase 10: Local Transcription** - whisper.cpp integration with on-demand model download
+- [x] **Phase 10: Local Transcription** - whisper.cpp integration with on-demand model download (completed 2026-03-29)
 
 ## Phase Details
 
@@ -200,7 +200,12 @@ Plans:
   3. Downloaded models are stored in `%APPDATA%/VoxFlow/models/` and can be deleted from within settings to free disk space
   4. Local transcription runs on a background thread and does not freeze the UI during processing
   5. If a model file is missing or corrupt, an error notification prompts the user to re-download
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [x] 10-01-PLAN.md — LocalProvider: whisper-rs behind feature gate, WAV-to-f32 conversion, error variants, make_provider wiring
+- [x] 10-02-PLAN.md — Download infrastructure: streaming download with progress events, cancel, delete, quit cleanup
+- [x] 10-03-PLAN.md — Frontend: Settings local cards + Wizard Step2Local model picker + missing model error toast + human-verify
+- [ ] 10-04-PLAN.md — Gap closure: fix re-download after delete, wizard height, button order
 
 ## Progress
 
@@ -220,4 +225,4 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 | 7. Pipeline Integration | 4/4 | Complete   | 2026-03-22 |
 | 8. Settings UI | 5/5 | Complete   | 2026-03-22 |
 | 9. Setup Wizard | 3/3 | Complete   | 2026-03-25 |
-| 10. Local Transcription | 0/TBD | Not started | - |
+| 10. Local Transcription | 4/4 | Complete    | 2026-03-30 |

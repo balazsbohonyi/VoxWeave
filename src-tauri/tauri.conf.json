@@ -64,7 +64,7 @@
         "title": "VoxFlow Wizard",
         "url": "wizard.html",
         "width": 560,
-        "height": 520,
+        "height": 550,
         "center": true,
         "visible": false,
         "skipTaskbar": false,

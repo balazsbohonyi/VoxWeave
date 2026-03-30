@@ -77,6 +77,19 @@ pub fn run() {
                         }
                         WindowEvent::Destroyed => {
                             if *quitting.lock().unwrap() {
+                                // Cancel any in-progress model download
+                                let maybe_cancel = app_handle
+                                    .state::<AppState>()
+                                    .download_cancel
+                                    .lock()
+                                    .unwrap()
+                                    .take();
+                                if let Some(cancel) = maybe_cancel {
+                                    cancel.store(
+                                        true,
+                                        std::sync::atomic::Ordering::Relaxed,
+                                    );
+                                }
                                 let handle = app_handle.clone();
                                 std::thread::spawn(move || {
                                     handle.cleanup_before_exit();
@@ -156,9 +169,15 @@ pub fn run() {
             commands::transcription::retry_transcription_with_fallback,
             commands::transcription::open_settings_on_transcription_tab,
             commands::indicator::hide_toast_window,
+            commands::indicator::show_plain_toast,
             commands::wizard::open_wizard_window,
             commands::wizard::hide_wizard_window,
             commands::config::open_settings_window,
+            commands::download::start_model_download,
+            commands::download::cancel_model_download,
+            commands::download::get_downloaded_models,
+            commands::download::delete_model,
+            commands::download::get_model_path,
         ])
         .run(tauri::generate_context!())
         .expect("error while running VoxFlow");

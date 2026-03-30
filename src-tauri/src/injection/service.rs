@@ -49,7 +49,7 @@ enum ElevationDialogResult {
 
 /// Returns false if the window handle is no longer valid (window was closed).
 /// Always returns true on non-Windows so injection proceeds without a check.
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(test)))]
 fn is_window_open(handle: usize) -> bool {
     unsafe {
         use windows::Win32::Foundation::HWND;
@@ -58,7 +58,7 @@ fn is_window_open(handle: usize) -> bool {
     }
 }
 
-#[cfg(not(target_os = "windows"))]
+#[cfg(any(not(target_os = "windows"), test))]
 fn is_window_open(_handle: usize) -> bool {
     true
 }
@@ -487,9 +487,6 @@ mod tests {
     }
 
     impl ElevationChecker for MockElevation {
-        fn is_elevated(&self) -> bool {
-            self.self_il >= 0x3000
-        }
         fn current_integrity_level(&self) -> u32 {
             self.self_il
         }
@@ -517,7 +514,6 @@ mod tests {
         ForegroundWindowInfo {
             handle: 0,
             class_name: class_name.to_string(),
-            exe_name: "test.exe".to_string(),
             integrity_level,
         }
     }

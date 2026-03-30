@@ -23,6 +23,9 @@ const openaiKey = ref("");
 const groqKey = ref("");
 const showSuccessBanner = ref(false);
 
+// Step 2 Local: canProceed gate (model downloaded OR Skip clicked)
+const localCanProceed = ref(false);
+
 onMounted(async () => {
   await loadConfig();
   if (config.value) {
@@ -79,30 +82,35 @@ function skipStep2() {
 async function finish(): Promise<void> {
   if (!config.value) return;
 
-  try {
-    // Build the full updated config inline — bypass the composable's ensureListeners
-    // so a missing event-listener capability never silently swallows the save.
-    const updatedConfig = {
-      ...config.value,
-      first_launch: false,
-      transcription: {
-        ...config.value.transcription,
-        provider: (engineChoice.value === "local" ? "local" : activeCloudTab.value) as TranscriptionProvider,
-        language: config.value.transcription.language || "en",
-        providers: {
-          ...config.value.transcription.providers,
-          openai: { ...config.value.transcription.providers.openai, api_key: openaiKey.value },
-          groq: { ...config.value.transcription.providers.groq, api_key: groqKey.value },
-        },
+  // Build the full updated config inline — bypass the composable's ensureListeners
+  // so a missing event-listener capability never silently swallows the save.
+  const updatedConfig = {
+    ...config.value,
+    first_launch: false,
+    transcription: {
+      ...config.value.transcription,
+      provider: (engineChoice.value === "local" ? "local" : activeCloudTab.value) as TranscriptionProvider,
+      language: config.value.transcription.language || "en",
+      providers: {
+        ...config.value.transcription.providers,
+        openai: { ...config.value.transcription.providers.openai, api_key: openaiKey.value },
+        groq: { ...config.value.transcription.providers.groq, api_key: groqKey.value },
       },
-    };
+    },
+  };
 
+  try {
     // Direct invoke — does not go through ensureListeners()
     await invoke("save_config", { config: updatedConfig });
   } catch (e) {
     console.error("Wizard: save_config failed:", e);
     return;
   }
+
+  const chosenProvider = engineChoice.value === "local" ? "local" : activeCloudTab.value;
+  const noModelDownloaded =
+    chosenProvider === "local" &&
+    !updatedConfig.transcription.providers.local.model_path;
 
   showSuccessBanner.value = true;
 
@@ -113,6 +121,14 @@ async function finish(): Promise<void> {
     // Reset state after hiding so re-open from Settings starts fresh
     showSuccessBanner.value = false;
     currentStep.value = 1;
+    localCanProceed.value = false;
+    // Nudge toast if user chose Local but skipped downloading a model
+    if (noModelDownloaded) {
+      await invoke("show_plain_toast", {
+        toastType: "warning",
+        message: "Download a local model from Settings to start transcribing.",
+      });
+    }
   }, 1200);
 }
 
@@ -162,6 +178,8 @@ async function onNext() {
 
         <Step2Local
           v-else-if="currentStep === 2 && engineChoice === 'local'"
+          @can-proceed="localCanProceed = $event"
+          @navigate-next="advanceFromStep2"
         />
 
         <Step3Hotkey
@@ -196,7 +214,8 @@ async function onNext() {
       <button
         v-if="currentStep < 3"
         type="button"
-        class="ml-auto w-24 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        :disabled="currentStep === 2 && engineChoice === 'local' && !localCanProceed"
+        class="ml-auto w-24 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         @click="onNext"
       >
         Next

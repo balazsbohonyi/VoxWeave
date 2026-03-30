@@ -4,6 +4,23 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 10
 current_phase_name: Local Transcription
+status: completed
+stopped_at: Completed 10-04-PLAN.md (3 UAT gaps closed, phase 10 ready for completion)
+last_updated: "2026-03-30T20:16:17.947Z"
+last_activity: 2026-03-25
+progress:
+  total_phases: 11
+  completed_phases: 9
+  total_plans: 49
+  completed_plans: 49
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+current_phase: 10
+current_phase_name: Local Transcription
 current_plan: 0
 status: ready — phase 9 complete and merged
 stopped_at: "Phase 09-setup-wizard UAT complete (11/11 passed). PR #9 merged to main 2026-03-25."
@@ -161,6 +178,11 @@ Progress: [█████████░] 90%
 | Phase 09-setup-wizard P01 | 3 | 2 tasks | 8 files |
 | Phase 09-setup-wizard P02 | 3 | 2 tasks | 6 files |
 | Phase 09-setup-wizard P03 | 5 | 2 tasks | 5 files |
+| Phase 10-local-transcription P02 | 6 | 2 tasks | 8 files |
+| Phase 10 P01 | 9 | 2 tasks | 6 files |
+| Phase 10-local-transcription P03 | 5 | 2 tasks | 6 files |
+| Phase 10-local-transcription P03 | 40 | 3 tasks | 8 files |
+| Phase 10 P04 | 2 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -255,6 +277,17 @@ Recent decisions affecting current work:
 - [Phase 09-setup-wizard]: Wizard shows itself from frontend onMounted (gated on first_launch) to prevent blank-window flash; core:window:allow-show capability required
 - [Phase 09-setup-wizard]: Wizard state reset (showSuccessBanner=false, currentStep=1) in finish() after hide_wizard_window — prevents stale banner on re-open from Settings
 - [Phase 09-setup-wizard]: WizardStepper Step 2 label renamed from "API key" to "Configure" — engine-agnostic for Phase 10 local model config
+- [Phase 10-local-transcription]: run_download uses .bin.partial extension during streaming; prevents incomplete models from appearing as downloaded
+- [Phase 10-local-transcription]: start_model_download returns Ok() immediately; progress tracked via model-download-progress events not AppState polling
+- [Phase 10]: whisper-rs 0.16 used (latest 0.x; 0.14 does not exist on crates.io)
+- [Phase 10]: wav_bytes_to_f32 compiled unconditionally for testability without CMake/libclang; LocalProvider gated in feature submodule
+- [Phase 10]: make_provider extended to accept &TranscriptionConfig to route model_path to LocalProvider
+- [Phase 10-local-transcription]: show_plain_toast Rust command mediates wizard-to-toast-window communication for programmatic plain toasts
+- [Phase 10-local-transcription]: Step2Local emits canProceed(boolean) — parent wizard gates Next button; Skip button inside component owns canProceed(true) emit for local mode
+- [Phase 10-local-transcription]: model_missing toast follows invalid_key pattern: error type, Open Settings action, invoke open_settings_on_transcription_tab with provider local
+- [Phase 10-local-transcription]: LocalFeatureDisabledProvider stub instead of panic(): app never crashes when local-transcription feature not compiled in
+- [Phase 10-local-transcription]: Pre-recording guard uses std::path::Path::new().exists() at hotkey time to block audio capture when no local model is available
+- [Phase 10-local-transcription]: activeDownloadId.value = null added as first statement in deleteModel() — ensures Download button re-enables immediately after delete without waiting for any download lifecycle event
 
 ### Roadmap Evolution
 
@@ -273,7 +306,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T21:30:00.000Z
-Stopped at: Phase 09 UAT complete, PR #9 merged to main
+Last session: 2026-03-30T20:06:37.595Z
+Stopped at: Completed 10-04-PLAN.md (3 UAT gaps closed, phase 10 ready for completion)
 Resume file: None
 

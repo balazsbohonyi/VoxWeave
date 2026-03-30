@@ -556,6 +556,7 @@ fn drain_pcm_buffer(buffer: &Arc<Mutex<Vec<f32>>>) -> Vec<f32> {
 
 /// Enforce the 5-minute hard cap: truncate the buffer to at most 4,800,000 samples.
 /// The 5-minute limit = 5 * 60 * 16_000 = 4_800_000 samples at 16kHz mono.
+#[cfg(test)]
 fn apply_pcm_cap(buffer: &Arc<Mutex<Vec<f32>>>) {
     const MAX_SAMPLES: usize = 4_800_000;
     let mut buf = buffer.lock().expect("pcm_buffer lock poisoned");
@@ -564,6 +565,7 @@ fn apply_pcm_cap(buffer: &Arc<Mutex<Vec<f32>>>) {
 
 /// Validate that the buffer holds at least 0.5 seconds of audio (8,000 samples at 16kHz).
 /// Returns Err with a user-friendly "too short" message if the threshold is not met.
+#[cfg(test)]
 fn validate_pcm_length(buffer: &Arc<Mutex<Vec<f32>>>) -> Result<(), String> {
     const MIN_SAMPLES: usize = 8_000;
     let buf = buffer.lock().expect("pcm_buffer lock poisoned");

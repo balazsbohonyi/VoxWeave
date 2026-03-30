@@ -5,7 +5,7 @@ import { useToast } from "../../composables/useToast";
 import type { ShowToastOptions } from "../../composables/useToast";
 
 interface TranscriptionErrorPayload {
-  code: "invalid_key" | "rate_limit" | "network" | "server" | "cancelled" | "too_short";
+  code: "invalid_key" | "rate_limit" | "network" | "server" | "cancelled" | "too_short" | "model_missing";
   message: string;
   provider?: string;
   fallback_provider?: string;
@@ -132,6 +132,20 @@ onMounted(() => {
           label: "Open Settings",
           onClick: () => {
             void invoke("open_settings_on_transcription_tab", { provider });
+          },
+        },
+      });
+      return;
+    }
+
+    if (transcriptionPayload.code === "model_missing") {
+      showTranscriptionErrorToast({
+        message: transcriptionPayload.message || "No local model downloaded.",
+        type: "error",
+        action: {
+          label: "Open Settings",
+          onClick: () => {
+            void invoke("open_settings_on_transcription_tab", { provider: "local" });
           },
         },
       });

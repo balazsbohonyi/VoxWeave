@@ -245,6 +245,48 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
     tray::update_recording_menu(app, next_state.clone());
 
     if previous_state == RecordingState::Idle {
+        // Pre-recording guard: if Local provider is selected but no model is
+        // available, emit an error toast immediately and never start audio capture.
+        // This prevents the indicator from entering processing state when transcription
+        // would fail anyway (Issue 6).
+        {
+            let cfg = state.config.lock().unwrap();
+            if cfg.transcription.provider == crate::config::TranscriptionProvider::Local {
+                let model_path = cfg.transcription.providers.local.model_path.clone();
+                let has_model = model_path.as_deref().map(|p| {
+                    if p.is_empty() { return false; }
+                    let path = std::path::Path::new(p);
+                    if path.is_absolute() {
+                        path.exists()
+                    } else {
+                        // Legacy relative path (e.g. "ggml-tiny.bin") — reconstruct absolute
+                        p.strip_prefix("ggml-")
+                            .and_then(|s| s.strip_suffix(".bin"))
+                            .and_then(|id| crate::transcription::download::model_file_path(id).ok())
+                            .map(|abs| abs.exists())
+                            .unwrap_or(false)
+                    }
+                }).unwrap_or(false);
+                if !has_model {
+                    drop(cfg);
+                    // Reset state back to Idle (it was advanced to Recording above)
+                    *state.recording_state.lock().unwrap() = RecordingState::Idle;
+                    tray::update_recording_menu(app, RecordingState::Idle);
+                    let payload = TranscriptionErrorPayload {
+                        code: TranscriptionErrorCode::ModelMissing,
+                        message: "No local model downloaded.".to_string(),
+                        provider: Some("local".to_string()),
+                        fallback_provider: None,
+                        retryable: false,
+                    };
+                    if let Err(e) = indicator::show_toast_window(app, &payload) {
+                        log::warn!("Failed to show model-missing toast: {e}");
+                    }
+                    return;
+                }
+            }
+        }
+
         // Reset cancel flag so a stale true from a previous cancel does not
         // abort the new transcription before it starts.
         *state.cancel_flag.lock().unwrap() = false;

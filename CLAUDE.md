@@ -42,16 +42,17 @@ npm run lint             # ESLint for Vue/TS
 - Rust stable toolchain (rustup)
 - Node.js 20+
 - MSVC Build Tools 2022 (required for `windows` crate and `whisper-rs`)
-- CMake (required only for local transcription feature — `whisper-rs`/whisper.cpp)
-- Feature-gate `whisper-rs` behind a cargo feature (`local-transcription`) so the app builds without CMake/whisper.cpp during early phases
+- CMake (required for `whisper-rs`/whisper.cpp — always a hard dependency)
 
 ## Architecture
 
-### Two-Window App
+### App Windows
 
-Tauri manages two windows:
+Tauri manages four windows:
 - **Settings window** (`src/windows/settings/`) — full configuration UI, opens on demand
 - **Floating indicator** (`src/windows/indicator/`) — always-on-top, transparent, click-through, ~200×48px pill shown during recording
+- **Toast window** (`src/windows/toast/`) — always-on-top notification overlay shown after injection or on errors
+- **Wizard window** (`src/windows/wizard/`) — first-launch onboarding flow (3 steps), hidden after completion
 
 The indicator is a separate Tauri window with `always_on_top: true`, `decorations: false`, `skip_taskbar: true`, `transparent: true`.
 
@@ -62,8 +63,10 @@ src-tauri/src/
 ├── main.rs                  # Tauri setup, plugin registration, window creation
 ├── commands/                # Thin Tauri command handlers only — no business logic here
 ├── audio/                   # cpal capture, RMS computation, Opus/WAV encoding
-├── transcription/           # TranscriptionProvider trait + OpenAI/Groq/Local impls
+├── transcription/           # TranscriptionProvider trait + OpenAI/Groq/Local impls + download
 ├── injection/               # FlashPaste, keystroke, clipboard modes + fallback pipeline
+├── hotkey/                  # Global hotkey registration, toggle handler, key normalization
+├── indicator/               # Indicator window show/hide, position, visual state enum
 ├── platform/                # Platform abstraction traits + Windows implementations
 │   └── windows/             # GetForegroundWindow, SendInput, integrity checks, ShellExecuteW
 ├── config/                  # AppConfig serde struct, load/save to %APPDATA%/VoxFlow/config.json
@@ -77,6 +80,7 @@ src-tauri/src/
 src/
 ├── windows/settings/        # Settings window components (General, Audio, Transcription, Injection)
 ├── windows/indicator/       # Floating indicator + Waveform.vue
+├── windows/toast/           # Toast notification window
 ├── windows/wizard/          # First-launch setup wizard (3 steps)
 ├── composables/             # useConfig.ts, useRecording.ts, useToast.ts
 └── types/index.ts           # TypeScript types that mirror Rust structs exactly
@@ -96,7 +100,7 @@ Rust commands return `Result<T, String>` — the frontend maps error strings to 
 Hotkey press → Rust shortcut handler → Recording state (save foreground window, open cpal stream)
 → Audio callback emits "audio-level" events at ~30fps to floating indicator
 → Second hotkey press → stop cpal → encode (Opus for cloud, WAV for local)
-→ Transcribe (Tokio task for cloud, std::thread for local whisper.cpp — never block Tokio with CPU work)
+→ Transcribe (Tokio task for cloud, spawn_blocking for local whisper.cpp — never block Tokio with CPU work)
 → Check target window integrity level → inject via selected method
 → Emit "injection-done" → hide indicator → show toast
 ```
@@ -121,13 +125,12 @@ Terminal window classes for FlashPaste paste shortcut switching: `ConsoleWindowC
 | Decision | Reason |
 |----------|--------|
 | `arboard` directly for FlashPaste (not `tauri-plugin-clipboard-manager`) | Plugin is async and breaks the tight save→paste→restore timing |
-| `std::thread` for whisper.cpp inference (not Tokio) | CPU-bound work starves the async runtime on a Tokio thread |
+| `tokio::task::spawn_blocking` for whisper.cpp inference | CPU-bound work starves the async runtime on a Tokio thread; spawn_blocking uses a dedicated blocking thread pool |
 | `windows` crate (not `winapi` or `windows-sys`) | Microsoft-maintained, safe wrappers, actively developed |
 | No `pinia` | Tauri managed state + Vue reactivity is sufficient; Pinia is overkill |
 | No heavy UI libraries (Vuetify, PrimeVue) | Custom Tailwind UI keeps the floating indicator lightweight |
 | Hardcoded model lists (not dynamic API calls) | Avoids API calls just to populate dropdowns; exposed via `get_provider_models` Rust command |
 | OpenRouter support dropped (never add back without re-evaluation) | OpenRouter has no Whisper-style STT endpoint; chat completions with base64 audio is a poor fit for dictation — inconsistent results, not purpose-built for STT. Confirmed by user testing. |
-| Feature-gate `whisper-rs` behind cargo feature | Avoids MSVC + CMake build requirement during cloud-only phases |
 | `transcription.provider` in config controls the active provider; `fallback_order` is the failover chain | These are separate concerns — changing fallback order does not change the active provider. |
 | `TranscriptionConfig` uses nested `providers` map (not flat fields) | Per-provider api_key/model stored under `providers.<id>`; language hint is global; migrated at load time via `migrate_transcription_fields` on raw JSON — no disk rewrite needed |
 | `TranscriptionConfig` migration runs at load time on raw JSON Value | Old flat keys (`openai_api_key` etc.) are promoted to nested structure transparently; unknown fields preserved |
@@ -141,7 +144,7 @@ Stored at `%APPDATA%/VoxFlow/config.json`. Missing fields use defaults; unknown 
 All planning documents live in `.planning/`:
 - `PROJECT.md` — product definition, constraints, key decisions
 - `REQUIREMENTS.md` — 68 v1 requirements with requirement IDs (e.g. `HOTK-01`, `INJC-07`)
-- `ROADMAP.md` — 10 phases with success criteria
+- `ROADMAP.md` — 10 phases with success criteria (all complete as of 2026-03-30)
 - `STATE.md` — current phase, progress, blockers
 - `PRD.md` — original product requirements document
 - `research/` — stack, architecture, features, and pitfalls research

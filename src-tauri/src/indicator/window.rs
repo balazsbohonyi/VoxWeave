@@ -84,17 +84,6 @@ pub fn compute_toast_direction(indicator_y: i32, monitor: MonitorRect) -> &'stat
     }
 }
 
-/// Resize a potentially non-resizable window by temporarily enabling resizability.
-/// Direct `set_size` calls silently fail on `resizable: false` windows in Tauri v2 on Windows.
-pub fn resize_window<R: Runtime>(window: &WebviewWindow<R>, width: f64, height: f64) -> Result<(), String> {
-    window.set_resizable(true).map_err(|e| e.to_string())?;
-    window
-        .set_size(tauri::LogicalSize::new(width, height))
-        .map_err(|e| e.to_string())?;
-    window.set_resizable(false).map_err(|e| e.to_string())?;
-    Ok(())
-}
-
 pub fn place_window<R: Runtime>(window: &WebviewWindow<R>, x: i32, y: i32) -> Result<(), String> {
     window
         .set_position(Position::Logical(LogicalPosition::new(

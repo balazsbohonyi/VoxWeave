@@ -1,13 +1,5 @@
 pub mod normalize;
 pub mod service;
-use tauri::{AppHandle, Runtime};
-use tauri_plugin_global_shortcut::ShortcutState;
-
-/// Handle a hotkey press by starting recording.
-/// Phase 2 replaces this with the full toggle state machine.
-pub fn handle_hotkey_pressed<R: Runtime>(app: &AppHandle<R>) {
-    service::handle_shortcut_event(app, ShortcutState::Pressed);
-}
 
 #[cfg(test)]
 mod tests {

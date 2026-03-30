@@ -12,8 +12,6 @@ pub struct ForegroundWindowInfo {
     pub handle: usize,
     /// Window class name (e.g. "CASCADIA_HOSTING_WINDOW_CLASS" for Windows Terminal).
     pub class_name: String,
-    /// Executable name without path (e.g. "code.exe").
-    pub exe_name: String,
     /// Process integrity level as a numeric IL (Windows MANDATORY_LABEL_RID).
     /// 0 on non-Windows or when unavailable.
     pub integrity_level: u32,
@@ -49,9 +47,6 @@ pub trait WindowInfo: Send + Sync {
 
 /// Process elevation / integrity level checks and relaunch helpers.
 pub trait ElevationChecker: Send + Sync {
-    /// Return `true` if VoxFlow itself is running elevated (admin).
-    fn is_elevated(&self) -> bool;
-
     /// Return the current process integrity level (Windows MANDATORY_LABEL_RID).
     /// Returns 0 on platforms where this concept does not apply.
     fn current_integrity_level(&self) -> u32;

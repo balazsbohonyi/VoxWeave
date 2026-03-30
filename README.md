@@ -113,8 +113,8 @@ All settings persist in `%APPDATA%/VoxFlow/config.json`. Changes take effect imm
 | 6 | Text Injection — FlashPaste, keystrokes, clipboard with fallback chain | Complete |
 | 7 | Pipeline Integration — end-to-end hotkey-to-text with notifications | Complete |
 | 8 | Settings UI — full settings window for all configurable parameters | Complete |
-| 9 | Setup Wizard — first-launch onboarding flow | Not started |
-| 10 | Local Transcription — whisper.cpp with on-demand model download | Not started |
+| 9 | Setup Wizard — first-launch onboarding flow | Complete |
+| 10 | Local Transcription — whisper.cpp with on-demand model download | Complete |
 
 ---
 
