@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 10-local-transcription
 source: 10-01-SUMMARY.md, 10-02-SUMMARY.md, 10-03-SUMMARY.md
 started: 2026-03-30T00:00:00Z
@@ -81,9 +81,17 @@ skipped: 0
   reason: "User reported: after deleting a model it's not possible to download it again — clicking Download shows no progress bar and nothing happens. Requires app restart to re-download. Same issue expected in the Wizard window."
   severity: major
   test: 5
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "deleteModel() in both TranscriptionSection.vue and Step2Local.vue resets modelStates[modelId] to 'idle' but never resets activeDownloadId to null. The idle card's Download button is permanently disabled by :disabled=\"activeDownloadId !== null\" because activeDownloadId is only cleared by download-done/cancelled/error event listeners, none of which fire during a delete."
+  artifacts:
+    - path: "src/windows/settings/components/TranscriptionSection.vue"
+      issue: "deleteModel() does not reset activeDownloadId to null"
+      line_range: "302-319"
+    - path: "src/windows/wizard/components/Step2Local.vue"
+      issue: "deleteModel() does not reset activeDownloadId to null"
+      line_range: "101-120"
+  missing:
+    - "Add activeDownloadId.value = null inside deleteModel() in TranscriptionSection.vue"
+    - "Add activeDownloadId.value = null inside deleteModel() in Step2Local.vue"
   debug_session: ""
 
 - truth: "Wizard Step 2 (local) has no vertical scrollbar; window height is sufficient to show all model cards without scrolling"
@@ -91,9 +99,13 @@ skipped: 0
   reason: "User reported: wizard window shows a vertical scrollbar in Step 2 for local models — window should be ~20-30px taller to eliminate it"
   severity: minor
   test: 9
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "Wizard window height is 520px in tauri.conf.json — too short to display all local model cards without scrolling in Step 2."
+  artifacts:
+    - path: "src-tauri/tauri.conf.json"
+      issue: "Wizard window height: 520 — needs ~20-30px increase"
+      line_range: "63-73"
+  missing:
+    - "Increase wizard window height from 520 to 545-550 in tauri.conf.json"
   debug_session: ""
 
 - truth: "Recycle bin (delete) icon button appears before the Set Active button on model cards, in both Settings and Wizard"
@@ -101,7 +113,15 @@ skipped: 0
   reason: "User requested: move recycle bin icon button before the Set Active button in both Settings TranscriptionSection.vue and Wizard Step2Local.vue"
   severity: minor
   test: 9
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "In both components the Set Active button is rendered before the Delete/trash button in the flex container. The order needs to be swapped."
+  artifacts:
+    - path: "src/windows/settings/components/TranscriptionSection.vue"
+      issue: "Delete button (lines 691-700) rendered after Set Active button (lines 682-689)"
+      line_range: "681-701"
+    - path: "src/windows/wizard/components/Step2Local.vue"
+      issue: "Delete button (lines 282-291) rendered after Set Active button (lines 274-281)"
+      line_range: "272-292"
+  missing:
+    - "Swap button order in TranscriptionSection.vue: Delete before Set Active"
+    - "Swap button order in Step2Local.vue: Delete before Set Active"
   debug_session: ""
