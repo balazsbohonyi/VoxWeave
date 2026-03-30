@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Rust build artifacts
+target/
+
+# Frontend build output
+dist/
+
+# IDE configurations
+.idea/
+.vscode/
+
+# Package manager lock files
+pnpm-lock.yaml
+
+# Tauri auto-generated scaffolding
+src-tauri/gen/
+
+# Planning: historical research and completed phase plans (still readable via @, just not auto-indexed)
+.planning/research/
+.planning/phases/
+.planning/todos/done/
