@@ -5,14 +5,14 @@ milestone_name: milestone
 current_phase: 10
 current_phase_name: Local Transcription
 status: completed
-stopped_at: Completed 10-03-PLAN.md (all 8 post-UAT bugs fixed, SUMMARY.md complete)
-last_updated: "2026-03-29T12:38:28.472Z"
+stopped_at: Completed 10-04-PLAN.md (3 UAT gaps closed, phase 10 ready for completion)
+last_updated: "2026-03-30T20:06:37.599Z"
 last_activity: 2026-03-25
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 48
-  completed_plans: 48
+  total_plans: 49
+  completed_plans: 49
 ---
 
 ---
@@ -182,6 +182,7 @@ Progress: [█████████░] 90%
 | Phase 10 P01 | 9 | 2 tasks | 6 files |
 | Phase 10-local-transcription P03 | 5 | 2 tasks | 6 files |
 | Phase 10-local-transcription P03 | 40 | 3 tasks | 8 files |
+| Phase 10 P04 | 2 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -286,6 +287,7 @@ Recent decisions affecting current work:
 - [Phase 10-local-transcription]: model_missing toast follows invalid_key pattern: error type, Open Settings action, invoke open_settings_on_transcription_tab with provider local
 - [Phase 10-local-transcription]: LocalFeatureDisabledProvider stub instead of panic(): app never crashes when local-transcription feature not compiled in
 - [Phase 10-local-transcription]: Pre-recording guard uses std::path::Path::new().exists() at hotkey time to block audio capture when no local model is available
+- [Phase 10-local-transcription]: activeDownloadId.value = null added as first statement in deleteModel() — ensures Download button re-enables immediately after delete without waiting for any download lifecycle event
 
 ### Roadmap Evolution
 
@@ -304,7 +306,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-29T12:38:28.466Z
-Stopped at: Completed 10-03-PLAN.md (all 8 post-UAT bugs fixed, SUMMARY.md complete)
+Last session: 2026-03-30T20:06:37.595Z
+Stopped at: Completed 10-04-PLAN.md (3 UAT gaps closed, phase 10 ready for completion)
 Resume file: None
 
