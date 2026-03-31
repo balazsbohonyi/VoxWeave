@@ -1,8 +1,8 @@
-# PRD: VoxFlow — Voice-to-Text Dictation App
+# PRD: VoxWeave — Voice-to-Text Dictation App
 
 ## Introduction
 
-VoxFlow is a cross-platform voice-to-text dictation app that works in any application — including terminals and command-line windows. The user presses a hotkey, speaks, and the transcribed text is automatically pasted into the active window via **FlashPaste** (the default mode: saves the current clipboard, writes the transcription to the clipboard, simulates `Ctrl+V`, and restores the original clipboard after 500ms). Two alternative injection modes are also available: simulated keystrokes (character-by-character via `SendInput`) and manual clipboard (copy to clipboard, user pastes manually).
+VoxWeave is a cross-platform voice-to-text dictation app that works in any application — including terminals and command-line windows. The user presses a hotkey, speaks, and the transcribed text is automatically pasted into the active window via **FlashPaste** (the default mode: saves the current clipboard, writes the transcription to the clipboard, simulates `Ctrl+V`, and restores the original clipboard after 500ms). Two alternative injection modes are also available: simulated keystrokes (character-by-character via `SendInput`) and manual clipboard (copy to clipboard, user pastes manually).
 
 It supports multiple cloud transcription providers — **OpenAI** (default), **Groq**, and **OpenRouter** — as well as local transcription via **whisper.cpp**. OpenRouter additionally supports non-Whisper models (e.g. Qwen Audio). No account required — just a personal API key for cloud mode.
 
@@ -33,7 +33,7 @@ Built with **Tauri v2 (Rust backend) + Vue 3 + TypeScript + Tailwind CSS**.
 - [ ] If Local: wizard step 2 prompts the user to download a whisper.cpp model (with size/quality guidance)
 - [ ] API key is validated on entry: a test transcription request is sent (short silent audio clip or health-check endpoint). On success: green checkmark. On failure: inline error with actionable message (e.g. "Invalid key", "Insufficient quota")
 - [ ] Wizard step 3: confirm default hotkey (`Ctrl+Shift+Space`) with option to change
-- [ ] "Finish" saves config and minimizes to tray with a toast: "VoxFlow is ready — press [hotkey] to start dictating"
+- [ ] "Finish" saves config and minimizes to tray with a toast: "VoxWeave is ready — press [hotkey] to start dictating"
 - [ ] Setup wizard can be re-opened from Settings at any time
 - [ ] Typecheck passes
 
@@ -117,7 +117,7 @@ Built with **Tauri v2 (Rust backend) + Vue 3 + TypeScript + Tailwind CSS**.
 - [ ] Models are NOT bundled with the installer — they are downloaded on-demand from within Settings
 - [ ] Settings panel allows selecting model size: tiny (~75MB), base (~150MB), small (~500MB), medium (~1.5GB) — with quality/speed tradeoffs displayed alongside each option
 - [ ] Model download is triggered by a "Download" button next to each model variant, with a progress bar and cancel option
-- [ ] Downloaded models are stored in the app's data directory (e.g. `%APPDATA%/VoxFlow/models/`)
+- [ ] Downloaded models are stored in the app's data directory (e.g. `%APPDATA%/VoxWeave/models/`)
 - [ ] A "Delete model" option is available to free disk space
 - [ ] Transcription runs on a background thread — does not freeze the UI
 - [ ] Audio is passed as WAV/PCM to whisper.cpp (Opus is decoded first if needed)
@@ -135,7 +135,7 @@ Built with **Tauri v2 (Rust backend) + Vue 3 + TypeScript + Tailwind CSS**.
 - [ ] Works in terminal/shell windows: cmd.exe, PowerShell, Windows Terminal, Git Bash — for terminals, simulate `Ctrl+Shift+V` or `Shift+Insert` instead of `Ctrl+V` (since `Ctrl+V` has different semantics in some shells). Auto-detect if the foreground window is a terminal emulator and use the appropriate paste shortcut
 - [ ] Unicode text (accented characters, symbols) is handled correctly via clipboard
 - [ ] Multi-line text preserves newlines through the clipboard paste
-- [ ] Before pasting, the app checks if the target window is running elevated. If elevated and VoxFlow is not, show a prompt: "Target app is running as Administrator. Relaunch VoxFlow as Admin?" with "Relaunch" and "Copy to clipboard instead" buttons
+- [ ] Before pasting, the app checks if the target window is running elevated. If elevated and VoxWeave is not, show a prompt: "Target app is running as Administrator. Relaunch VoxWeave as Admin?" with "Relaunch" and "Copy to clipboard instead" buttons
 - [ ] Pressing Escape or the recording hotkey during the paste operation cancels it (relevant mainly for the 500ms restore delay — the paste itself is near-instant)
 - [ ] If clipboard save/restore fails, show a warning toast but still complete the injection
 - [ ] A brief toast notification confirms "Text pasted" with a preview
@@ -154,7 +154,7 @@ Built with **Tauri v2 (Rust backend) + Vue 3 + TypeScript + Tailwind CSS**.
 - [ ] Works in terminal/shell windows: cmd.exe, PowerShell, Windows Terminal, Git Bash
 - [ ] Unicode characters (accented letters, symbols) are injected correctly via `KEYEVENTF_UNICODE`
 - [ ] Newline characters in the transcription are injected as `VK_RETURN` keystrokes, preserving multi-line formatting
-- [ ] Before injection, the app checks if the target window is running elevated (admin) using process integrity level check. If elevated and VoxFlow is not, show a prompt to relaunch or fall back
+- [ ] Before injection, the app checks if the target window is running elevated (admin) using process integrity level check. If elevated and VoxWeave is not, show a prompt to relaunch or fall back
 - [ ] Pressing Escape or the recording hotkey during injection cancels it immediately — already-injected characters remain, remaining characters are discarded, and a toast shows "Injection cancelled — X of Y characters typed"
 - [ ] If the target window rejects simulated input, fall back to FlashPaste and notify the user
 - [ ] A brief toast notification confirms injection complete with a preview of the text
@@ -225,7 +225,7 @@ Built with **Tauri v2 (Rust backend) + Vue 3 + TypeScript + Tailwind CSS**.
 
 ### US-015: Configure Auto-Start
 
-**Description:** As a user, I want the option to have VoxFlow launch automatically when Windows starts, so it's always ready.
+**Description:** As a user, I want the option to have VoxWeave launch automatically when Windows starts, so it's always ready.
 
 **Acceptance Criteria:**
 - [ ] Settings → General section has a "Launch on Windows startup" toggle
@@ -255,7 +255,7 @@ Built with **Tauri v2 (Rust backend) + Vue 3 + TypeScript + Tailwind CSS**.
 - **FR-17:** The user must be able to choose between FlashPaste (default), Keystrokes, and Clipboard injection in settings.
 - **FR-18:** Fallback chain: if the selected injection method fails, the app must fall back automatically (Keystrokes → FlashPaste → Clipboard; FlashPaste → Clipboard).
 - **FR-19:** The app must detect the focused window before injection and restore focus if needed.
-- **FR-20:** Before injection (FlashPaste or Keystrokes), the app must check if the target window runs at a higher integrity level (elevated/admin). If so, prompt the user to relaunch VoxFlow as Administrator or fall back to clipboard.
+- **FR-20:** Before injection (FlashPaste or Keystrokes), the app must check if the target window runs at a higher integrity level (elevated/admin). If so, prompt the user to relaunch VoxWeave as Administrator or fall back to clipboard.
 - **FR-21:** Pressing Escape or the recording hotkey during active injection must cancel it immediately.
 - **FR-22:** The user's original clipboard content must be preserved and restored after FlashPaste injection (500ms delay before restore).
 - **FR-23:** A toast notification must confirm successful injection/copy or display actionable error messages.
@@ -333,7 +333,7 @@ Built with **Tauri v2 (Rust backend) + Vue 3 + TypeScript + Tailwind CSS**.
 - **FlashPaste pipeline:** After transcription → `GetForegroundWindow` to save target handle → check integrity level → read current clipboard via `arboard` and store in memory → write transcription to clipboard → detect if target is a terminal (check window class name against known terminal classes: `ConsoleWindowClass`, `CASCADIA_HOSTING_WINDOW_CLASS`, `mintty`) → simulate appropriate paste shortcut (`Ctrl+Shift+V` for terminals, `Ctrl+V` otherwise) via `SendInput` → `sleep(500ms)` → restore original clipboard content from memory
 - **Keystroke injection pipeline:** After transcription → save foreground handle → check integrity level → if elevated, prompt → inject characters via `SendInput` with `KEYEVENTF_UNICODE` → for `\n`, send `VK_RETURN` → configurable inter-key delay → if `SendInput` returns 0, fall back to FlashPaste
 - **Injection cancellation:** During keystroke injection, a background listener monitors for Escape key and the global recording hotkey. On detection, the injection loop breaks immediately. A counter tracks characters injected vs total. Already-injected text is not rolled back
-- **Admin relaunch flow:** When an elevated target is detected, Rust emits a Tauri event (`elevation-required`) to the frontend, which shows a dialog. "Relaunch" triggers `ShellExecuteW` with `runas` verb to restart VoxFlow elevated. "Copy to clipboard" falls back to clipboard mode for this transcription only (does not change the global setting)
+- **Admin relaunch flow:** When an elevated target is detected, Rust emits a Tauri event (`elevation-required`) to the frontend, which shows a dialog. "Relaunch" triggers `ShellExecuteW` with `runas` verb to restart VoxWeave elevated. "Copy to clipboard" falls back to clipboard mode for this transcription only (does not change the global setting)
 - **Focus management:** Before injection, the app checks if its own window has focus and restores focus to the previously active window via `SetForegroundWindow`
 - **Error propagation:** Rust commands return `Result<T, String>` — frontend maps error strings to user-facing messages
 
@@ -355,7 +355,7 @@ Built with **Tauri v2 (Rust backend) + Vue 3 + TypeScript + Tailwind CSS**.
 - **Terminal paste shortcut detection** may be fragile — window class name matching is heuristic-based and may miss some terminal emulators. Needs a user-configurable override in future versions
 - **FlashPaste clipboard restore race condition** — the 500ms delay should be sufficient for most apps, but very slow paste handlers (e.g. some Electron apps) could read the clipboard after restore. Monitor for user reports
 - **Keystroke injection may be blocked** by some apps: UAC-elevated windows, game anti-cheat (EAC, BattlEye), password fields, some Electron apps with custom input handling — FlashPaste or clipboard fallback mitigates this
-- **`SendInput` requires matching integrity level** — injection into admin-elevated apps will fail unless VoxFlow is also elevated. Mitigated by auto-detection + relaunch prompt
+- **`SendInput` requires matching integrity level** — injection into admin-elevated apps will fail unless VoxWeave is also elevated. Mitigated by auto-detection + relaunch prompt
 - **Injection timing sensitivity:** Some apps (e.g. VS Code with autocomplete) may interfere with rapid keystroke injection — the configurable speed setting helps users tune this
 - **OpenRouter model diversity** — non-Whisper audio models may have different API contracts, response formats, or latency characteristics. Needs per-model adapter logic
 - **Provider API changes** — endpoint URLs and model names may change. Config should allow manual override of API base URL per provider for power users

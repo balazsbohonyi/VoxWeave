@@ -65,10 +65,10 @@ Existing infrastructure covers the phase once Wave 1 adds the `src-tauri/src/hot
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Global hotkey works from another focused application | HOTK-01 | Requires Windows desktop shell and another foreground app | Launch VoxFlow on Windows, focus a different app, press `Ctrl+Shift+Space`, confirm VoxFlow transitions to recording without stealing focus |
+| Global hotkey works from another focused application | HOTK-01 | Requires Windows desktop shell and another foreground app | Launch VoxWeave on Windows, focus a different app, press `Ctrl+Shift+Space`, confirm VoxWeave transitions to recording without stealing focus |
 | Second press advances to processing placeholder and recovers to idle | HOTK-02 | Requires runtime state observation across real Tauri events | With recording active, press the hotkey again and confirm the app reaches `Transcribing` / processing briefly, then returns to `Idle` without getting stuck |
-| Custom hotkey save takes effect immediately and survives restart | HOTK-03 | Requires real runtime re-registration and app restart | Change the hotkey in Settings, save, trigger it from another app, restart VoxFlow, and confirm the same canonical hotkey still works |
-| Conflict warning focuses Settings and shows toast-like feedback | HOTK-04 | Requires real registration conflict plus desktop focus behavior | Occupy the same hotkey in another app if possible, try to save it in VoxFlow, confirm the old binding stays active, Settings is foregrounded, and the warning appears immediately |
+| Custom hotkey save takes effect immediately and survives restart | HOTK-03 | Requires real runtime re-registration and app restart | Change the hotkey in Settings, save, trigger it from another app, restart VoxWeave, and confirm the same canonical hotkey still works |
+| Conflict warning focuses Settings and shows toast-like feedback | HOTK-04 | Requires real registration conflict plus desktop focus behavior | Occupy the same hotkey in another app if possible, try to save it in VoxWeave, confirm the old binding stays active, Settings is foregrounded, and the warning appears immediately |
 
 ### Gap-closure plan reference
 

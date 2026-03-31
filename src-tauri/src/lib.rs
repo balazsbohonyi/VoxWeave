@@ -180,5 +180,5 @@ pub fn run() {
             commands::download::get_model_path,
         ])
         .run(tauri::generate_context!())
-        .expect("error while running VoxFlow");
+        .expect("error while running VoxWeave");
 }

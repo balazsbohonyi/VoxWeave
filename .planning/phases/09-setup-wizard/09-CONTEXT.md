@@ -46,7 +46,7 @@ A 3-step first-launch wizard that opens automatically when `first_launch=true`. 
 - Exact stepper dot/line styling and active step color within existing blue-accent, dark-mode palette
 - Animation/transition between steps (slide or fade)
 - Exact wording of step titles and body copy
-- "VoxFlow is ready" toast placement after Finish (indicator area or in-wizard before close)
+- "VoxWeave is ready" toast placement after Finish (indicator area or in-wizard before close)
 
 </decisions>
 

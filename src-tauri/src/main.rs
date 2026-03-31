@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    voxflow_lib::run()
+    voxweave_lib::run()
 }

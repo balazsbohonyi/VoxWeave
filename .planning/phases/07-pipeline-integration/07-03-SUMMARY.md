@@ -67,12 +67,12 @@ completed: 2026-03-22
 
 Each task was committed atomically:
 
-1. **Task 1: Add auto-dismiss timer infrastructure and update __voxflowShowToast** - `7b96c7c` (feat)
+1. **Task 1: Add auto-dismiss timer infrastructure and update __voxweaveShowToast** - `7b96c7c` (feat)
 2. **Task 2: Human-verify auto-dismiss timing and indicator visibility** - `a19b9be` (chore — checkpoint approved)
 
 ## Files Created/Modified
 
-- `src/windows/toast/App.vue` - Added `dismissTimers` Map, `scheduleAutoDismiss` helper, timer-clearing `handleDismissToast`, updated success and cancel branches in `__voxflowShowToast`
+- `src/windows/toast/App.vue` - Added `dismissTimers` Map, `scheduleAutoDismiss` helper, timer-clearing `handleDismissToast`, updated success and cancel branches in `__voxweaveShowToast`
 
 ## Decisions Made
 

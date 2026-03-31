@@ -161,7 +161,7 @@ AUDI-04 is in Phase 3. Add a minimal dropdown now and defer full UX composition 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Existing VoxFlow architecture/docs in `.planning/*`, `CLAUDE.md`, and phase context.
+- Existing VoxWeave architecture/docs in `.planning/*`, `CLAUDE.md`, and phase context.
 - Current repository code for state/hotkey/config/settings seams.
 
 ### Secondary (MEDIUM confidence)

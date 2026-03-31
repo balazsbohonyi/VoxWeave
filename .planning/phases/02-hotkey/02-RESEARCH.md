@@ -54,7 +54,7 @@
 
 ## Summary
 
-Phase 2 should use Tauri’s official `tauri-plugin-global-shortcut` rather than custom Windows APIs. The plugin supports startup registration, runtime `register` / `unregister`, and per-shortcut handlers via `GlobalShortcutExt`, which is the right fit for VoxFlow’s persisted, user-configurable binding. This keeps the implementation Tauri-v2-native and avoids leaking Windows-specific hotkey code into the repo’s platform seam.
+Phase 2 should use Tauri’s official `tauri-plugin-global-shortcut` rather than custom Windows APIs. The plugin supports startup registration, runtime `register` / `unregister`, and per-shortcut handlers via `GlobalShortcutExt`, which is the right fit for VoxWeave’s persisted, user-configurable binding. This keeps the implementation Tauri-v2-native and avoids leaking Windows-specific hotkey code into the repo’s platform seam.
 
 The key planning constraint is not registration itself, but state ownership. Hotkey presses and tray Start/Stop must call the exact same backend toggle function, and that function must remain phase-bounded: only mutate `RecordingState`, update tray/menu labels, and emit backend events. Do not mix audio startup, indicator logic, or transcription work into this phase. The “processing” transition should exist as a seam now, even if Phase 2 completes it with an immediate placeholder return to `Idle`.
 
@@ -214,7 +214,7 @@ use tauri_plugin_global_shortcut::GlobalShortcutExt;
 fn register_shortcut(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
     app.global_shortcut().on_shortcut("Ctrl+Shift+Space", |app, _shortcut, event| {
         if event.state == tauri_plugin_global_shortcut::ShortcutState::Pressed {
-            let _ = app.emit("voxflow://hotkey-pressed", ());
+            let _ = app.emit("voxweave://hotkey-pressed", ());
         }
     })?;
     Ok(())

@@ -5,7 +5,7 @@ status: human_needed
 score: 11/11 must-haves implemented
 human_verification:
   - test: "Global hotkey triggers from another focused application"
-    expected: "Pressing Ctrl+Shift+Space outside VoxFlow toggles Idle -> Recording -> Transcribing and returns to Idle."
+    expected: "Pressing Ctrl+Shift+Space outside VoxWeave toggles Idle -> Recording -> Transcribing and returns to Idle."
     why_human: "Requires OS-level global shortcut behavior in a real Windows session."
   - test: "Settings hotkey apply persists and survives restart"
     expected: "Editing hotkey in Settings and clicking Apply updates active value immediately and persists after app restart."

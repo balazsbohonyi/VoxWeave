@@ -49,7 +49,7 @@ async function onLaunchAtLoginChange(e: Event): Promise<void> {
           Launch on Windows startup
         </p>
         <p class="text-xs text-gray-400 dark:text-gray-500">
-          Start VoxFlow automatically when you log in
+          Start VoxWeave automatically when you log in
         </p>
       </div>
       <input

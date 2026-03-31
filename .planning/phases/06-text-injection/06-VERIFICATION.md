@@ -71,7 +71,7 @@ gaps:
 | `inject_text()` | AppState.cancel_flag | reset to false before injection; keystroke_inject checks it | PARTIAL | cancel_flag reset and polled in keystroke_inject; but hotkey never sets it to true during injection |
 | `hotkey/service.rs` | injection::inject_text() | tauri::async_runtime::spawn_blocking | WIRED | spawn_blocking at line 320; inject_text called at line 333 |
 | `indicator/events.rs` | StateBadge.vue | indicator-state event with state='success' | WIRED | show_success() emits Success via emit_state; StateBadge.vue handles "success" state |
-| `toast/App.vue` | __voxflowShowToast | InjectionErrorPayload.code dispatch | WIRED | isInjectionPayload() guard + code matching at lines 76-84 |
+| `toast/App.vue` | __voxweaveShowToast | InjectionErrorPayload.code dispatch | WIRED | isInjectionPayload() guard + code matching at lines 76-84 |
 
 ### Requirements Coverage
 
@@ -107,7 +107,7 @@ No blocker anti-patterns found. No TODO/FIXME/placeholder comments in injection 
 
 #### 2. Terminal FlashPaste (Ctrl+Shift+V)
 
-**Test:** Open Windows Terminal or cmd.exe, focus it, trigger VoxFlow, speak a short phrase, stop.
+**Test:** Open Windows Terminal or cmd.exe, focus it, trigger VoxWeave, speak a short phrase, stop.
 **Expected:** Text pasted via Ctrl+Shift+V (not Ctrl+V). No garbled characters.
 **Why human:** Terminal window class detection and paste shortcut routing cannot be verified without real Windows Terminal running.
 
@@ -126,7 +126,7 @@ No blocker anti-patterns found. No TODO/FIXME/placeholder comments in injection 
 
 #### 5. Elevation Prompt (INJC-07)
 
-**Test:** Open an elevated process (Task Manager, regedit). Focus it. Trigger VoxFlow, speak a phrase, stop recording.
+**Test:** Open an elevated process (Task Manager, regedit). Focus it. Trigger VoxWeave, speak a phrase, stop recording.
 **Expected:** A Windows MessageBox dialog appears with Yes/No/Cancel. Choosing "No" copies text to clipboard and shows the info toast.
 **Why human:** Requires a real elevated target window; integrity level comparison cannot be tested without actual elevated processes.
 

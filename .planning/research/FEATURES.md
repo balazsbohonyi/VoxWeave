@@ -1,4 +1,4 @@
-# Features Research: VoxFlow
+# Features Research: VoxWeave
 
 ## Competitive Landscape
 
@@ -30,9 +30,9 @@ These are features users expect from any voice-to-text dictation tool. Missing a
 
 ## Differentiators (Competitive Advantage)
 
-These separate VoxFlow from built-in OS dictation and simple Whisper wrappers.
+These separate VoxWeave from built-in OS dictation and simple Whisper wrappers.
 
-| Feature | Complexity | Dependencies | VoxFlow Advantage |
+| Feature | Complexity | Dependencies | VoxWeave Advantage |
 |---------|-----------|--------------|-------------------|
 | Terminal support | High | Window class detection, paste shortcut switching | Neither Windows Voice Typing nor Wispr Flow work in terminals |
 | Multiple cloud providers (OpenAI, Groq, OpenRouter) | Medium | Provider abstraction trait | BYOK flexibility — users choose based on cost, speed, quality |

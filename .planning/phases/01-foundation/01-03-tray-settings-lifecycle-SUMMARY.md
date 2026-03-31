@@ -65,7 +65,7 @@ completed: 2026-03-14
 - **Files modified:** 4
 
 ## Accomplishments
-- Tray menu matches spec exactly: Settings, disabled Start/Stop Recording, separator, Quit VoxFlow
+- Tray menu matches spec exactly: Settings, disabled Start/Stop Recording, separator, Quit VoxWeave
 - Settings window close intercept wired — titlebar X hides the window instead of destroying it
 - Tray Quit hard-exits via `app.exit(0)`, cleanly bypassing the prevent-close intercept
 - Double-click tray event calls `show_settings_window` — focuses existing window, never duplicates

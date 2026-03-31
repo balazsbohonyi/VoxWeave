@@ -25,7 +25,7 @@ pub fn setup_tray(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
 
     let _tray = TrayIconBuilder::with_id(TRAY_ID)
         .icon(icon)
-        .tooltip("VoxFlow - Voice to text dictation")
+        .tooltip("VoxWeave - Voice to text dictation")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(handle_menu_event)
@@ -96,7 +96,7 @@ fn build_tray_menu<R: Runtime, M: Manager<R>>(
     )?;
 
     let sep1 = PredefinedMenuItem::separator(manager)?;
-    let quit = MenuItem::with_id(manager, "quit", "Quit VoxFlow", true, None::<&str>)?;
+    let quit = MenuItem::with_id(manager, "quit", "Quit VoxWeave", true, None::<&str>)?;
 
     let menu = Menu::with_items(manager, &[&open_settings, &start_stop, &sep1, &quit])?;
     Ok(menu)

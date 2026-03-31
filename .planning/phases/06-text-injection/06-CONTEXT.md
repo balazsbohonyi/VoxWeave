@@ -68,7 +68,7 @@ Text returned from transcription is injected into the previously-focused window 
 
 ### Reusable Assets
 - `platform/mod.rs` — InputSimulator, ClipboardAccess, WindowInfo, ElevationChecker traits fully defined; Windows stubs ready to implement
-- `src/windows/toast/App.vue` — existing toast window receives payloads via `window.__voxflowShowToast(payload)`; add InjectionErrorPayload type alongside TranscriptionErrorPayload
+- `src/windows/toast/App.vue` — existing toast window receives payloads via `window.__voxweaveShowToast(payload)`; add InjectionErrorPayload type alongside TranscriptionErrorPayload
 - `state.rs` — `cancel_flag: Arc<Mutex<bool>>` already exists; reuse for keystroke cancellation
 - `config/mod.rs` — InjectionMode enum already defined (FlashPaste/Keystroke/Clipboard); extend InjectionConfig with `keystroke_speed`, `auto_fallback`, `paste_delay_ms`
 

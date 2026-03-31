@@ -1,4 +1,4 @@
-# VoxFlow — Dev Environment Setup
+# VoxWeave — Dev Environment Setup
 
 > Setup guide for Tauri v2 + Rust + Vue 3 + TypeScript development.
 

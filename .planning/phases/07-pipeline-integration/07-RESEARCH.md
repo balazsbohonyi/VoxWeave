@@ -380,7 +380,7 @@ function scheduleAutoDismiss(id: number, ms: number): void {
 }
 ```
 
-In the `__voxflowShowToast` handler, after `showToast()` for success/cancel paths:
+In the `__voxweaveShowToast` handler, after `showToast()` for success/cancel paths:
 ```typescript
 // After showToast for plain toasts that are success/info type:
 const toastId = /* capture id returned from showToast — requires showToast to return id */

@@ -6,7 +6,7 @@
 <domain>
 ## Phase Boundary
 
-Deliver global hotkey registration and a toggle-mode recording trigger that changes VoxFlow’s recording state machine from any focused application. This includes conflict detection and immediate application of config hotkey changes. Audio capture, indicator UI, transcription, and injection remain out of scope.
+Deliver global hotkey registration and a toggle-mode recording trigger that changes VoxWeave’s recording state machine from any focused application. This includes conflict detection and immediate application of config hotkey changes. Audio capture, indicator UI, transcription, and injection remain out of scope.
 
 </domain>
 

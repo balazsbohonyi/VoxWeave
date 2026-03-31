@@ -15,7 +15,7 @@ updated: 2026-03-21T20:30:00Z
 ## Tests
 
 ### 1. End-to-End FlashPaste Injection
-expected: Open any text editor (Notepad, VS Code, etc.) and focus it. Press the VoxFlow hotkey, speak a sentence, press hotkey again to stop. The transcribed text appears in the editor. No extra clipboard artifacts (clipboard is restored to whatever was in it before).
+expected: Open any text editor (Notepad, VS Code, etc.) and focus it. Press the VoxWeave hotkey, speak a sentence, press hotkey again to stop. The transcribed text appears in the editor. No extra clipboard artifacts (clipboard is restored to whatever was in it before).
 result: pass
 
 ### 2. Indicator Shows Success State
@@ -23,11 +23,11 @@ expected: After injection completes, the floating indicator briefly shows a gree
 result: pass
 
 ### 3. Terminal FlashPaste (Ctrl+Shift+V)
-expected: Open Windows Terminal, cmd.exe, or PowerShell. Focus it. Trigger VoxFlow, speak a short phrase, stop. Text is pasted using Ctrl+Shift+V (not Ctrl+V). No garbled characters, text appears correctly.
+expected: Open Windows Terminal, cmd.exe, or PowerShell. Focus it. Trigger VoxWeave, speak a short phrase, stop. Text is pasted using Ctrl+Shift+V (not Ctrl+V). No garbled characters, text appears correctly.
 result: pass
 
 ### 4. Keystroke Injection Mode
-expected: In Settings, change Injection Mode to "Keystroke" with Slow speed. Focus a text editor. Trigger VoxFlow, speak a sentence, stop. Watch the text appear character by character in the editor (visibly slower than FlashPaste).
+expected: In Settings, change Injection Mode to "Keystroke" with Slow speed. Focus a text editor. Trigger VoxWeave, speak a sentence, stop. Watch the text appear character by character in the editor (visibly slower than FlashPaste).
 result: [pending]
 
 ### 5. Escape Cancel During Keystroke Injection
@@ -41,7 +41,7 @@ reported: "I pressed Ctrl+Shift+Space during the injection, and it just kept add
 severity: major
 
 ### 7. Clipboard-Only Mode
-expected: In Settings, change Injection Mode to "Clipboard" (copy only). Trigger VoxFlow, speak a phrase, stop. The text is copied to clipboard but NOT pasted — focus doesn't shift, nothing appears in any window. You can then manually paste (Ctrl+V) to confirm the text is there.
+expected: In Settings, change Injection Mode to "Clipboard" (copy only). Trigger VoxWeave, speak a phrase, stop. The text is copied to clipboard but NOT pasted — focus doesn't shift, nothing appears in any window. You can then manually paste (Ctrl+V) to confirm the text is there.
 result: pass
 
 ### 8. Injection Error Toast
@@ -51,7 +51,7 @@ reported: "I closed the target window before hitting the hotkey, and I did not s
 severity: major
 
 ### 9. Elevation Prompt
-expected: Open an elevated process (Task Manager, regedit). Focus it. Trigger VoxFlow, speak a phrase, stop. A Windows MessageBox dialog appears with options (Yes/No/Cancel or similar). Choosing "No" copies the text to clipboard and shows an info toast (not a green success flash).
+expected: Open an elevated process (Task Manager, regedit). Focus it. Trigger VoxWeave, speak a phrase, stop. A Windows MessageBox dialog appears with options (Yes/No/Cancel or similar). Choosing "No" copies the text to clipboard and shows an info toast (not a green success flash).
 result: pass
 
 ## Summary

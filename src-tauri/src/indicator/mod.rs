@@ -111,7 +111,7 @@ pub fn show_toast_window<R: Runtime, S: serde::Serialize>(
 
     let json = serde_json::to_string(payload).map_err(|e| e.to_string())?;
     let eval_script = format!(
-        "window.__voxflowShowToast && window.__voxflowShowToast({})",
+        "window.__voxweaveShowToast && window.__voxweaveShowToast({})",
         json
     );
 
@@ -167,7 +167,7 @@ pub fn show_toast_window_keep_indicator<R: Runtime, S: serde::Serialize>(
 
     let json = serde_json::to_string(payload).map_err(|e| e.to_string())?;
     let eval_script = format!(
-        "window.__voxflowShowToast && window.__voxflowShowToast({})",
+        "window.__voxweaveShowToast && window.__voxweaveShowToast({})",
         json
     );
 

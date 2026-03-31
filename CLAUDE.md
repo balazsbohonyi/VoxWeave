@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-VoxFlow is a Windows voice-to-text dictation app built with Tauri v2 (Rust backend) + Vue 3 + TypeScript + Tailwind CSS. The user presses a global hotkey, speaks, and transcribed text is injected into the active window — including terminals. It is BYOK (bring your own key) with no telemetry, no accounts, and no subscriptions.
+VoxWeave is a Windows voice-to-text dictation app built with Tauri v2 (Rust backend) + Vue 3 + TypeScript + Tailwind CSS. The user presses a global hotkey, speaks, and transcribed text is injected into the active window — including terminals. It is BYOK (bring your own key) with no telemetry, no accounts, and no subscriptions.
 
 ## Commands
 
@@ -69,7 +69,7 @@ src-tauri/src/
 ├── indicator/               # Indicator window show/hide, position, visual state enum
 ├── platform/                # Platform abstraction traits + Windows implementations
 │   └── windows/             # GetForegroundWindow, SendInput, integrity checks, ShellExecuteW
-├── config/                  # AppConfig serde struct, load/save to %APPDATA%/VoxFlow/config.json
+├── config/                  # AppConfig serde struct, load/save to %APPDATA%/VoxWeave/config.json
 ├── tray.rs                  # System tray setup and menu event handling
 └── state.rs                 # Tauri AppState (config, recording state, cancel flag)
 ```
@@ -137,7 +137,7 @@ Terminal window classes for FlashPaste paste shortcut switching: `ConsoleWindowC
 
 ## Config
 
-Stored at `%APPDATA%/VoxFlow/config.json`. Missing fields use defaults; unknown fields are preserved (forward/backward compatible). All settings persist immediately — no save button.
+Stored at `%APPDATA%/VoxWeave/config.json`. Missing fields use defaults; unknown fields are preserved (forward/backward compatible). All settings persist immediately — no save button.
 
 ## Planning
 

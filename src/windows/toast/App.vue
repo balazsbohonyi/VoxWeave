@@ -89,7 +89,7 @@ onMounted(() => {
 
   // Rust delivers toast payloads via eval() instead of Tauri events because
   // WebView2 may not deliver events to hidden windows before they are shown.
-  (window as unknown as Record<string, unknown>).__voxflowShowToast = (
+  (window as unknown as Record<string, unknown>).__voxweaveShowToast = (
     payload: TranscriptionErrorPayload | InjectionErrorPayload | PlainToastPayload,
   ) => {
     // Handle plain {type, message} toasts (e.g. "Copied to clipboard — paste manually")
@@ -192,7 +192,7 @@ onMounted(() => {
         :class="`indicator-toast--${toast.type}`"
       >
         <div class="indicator-toast-header">
-          <span class="indicator-toast-title">VoxFlow</span>
+          <span class="indicator-toast-title">VoxWeave</span>
           <button
             class="indicator-toast-dismiss"
             type="button"

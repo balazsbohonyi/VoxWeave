@@ -1,8 +1,8 @@
-# VoxFlow
+# VoxWeave
 
 A Windows voice-to-text dictation tool that works in any application — including terminals and command-line windows. Press a hotkey, speak, and the transcribed text is automatically injected into the active window. Cross-platform support (macOS, Android) is planned for future releases.
 
-VoxFlow is a **BYOK (bring your own key)** alternative to Wispr Flow, built for power users who want full control over their transcription providers without subscriptions, accounts, or telemetry.
+VoxWeave is a **BYOK (bring your own key)** alternative to Wispr Flow, built for power users who want full control over their transcription providers without subscriptions, accounts, or telemetry.
 
 Audio is transcribed via cloud providers (OpenAI, Groq) using your own API keys, or entirely offline using a local whisper.cpp model — no data ever leaves your machine unless you choose a cloud provider. Text is injected directly into the focused window using clipboard-based paste, simulated keystrokes, or a clipboard-only fallback, with automatic terminal detection to use the correct paste shortcut.
 
@@ -71,13 +71,13 @@ Audio is transcribed via cloud providers (OpenAI, Groq) using your own API keys,
 | small | ~500 MB | Higher accuracy |
 | medium | ~1.5 GB | Best accuracy |
 
-Models are downloaded on-demand and stored in `%APPDATA%/VoxFlow/models/`.
+Models are downloaded on-demand and stored in `%APPDATA%/VoxWeave/models/`.
 
 ---
 
 ## Text Injection
 
-VoxFlow supports three injection methods, automatically falling back if the primary method fails:
+VoxWeave supports three injection methods, automatically falling back if the primary method fails:
 
 1. **FlashPaste** *(default)* — saves clipboard → pastes text → restores clipboard; uses terminal-aware shortcuts (`Ctrl+Shift+V` / `Shift+Insert` for detected terminal windows)
 2. **Simulated Keystrokes** — character-by-character via `SendInput` with `KEYEVENTF_UNICODE`; configurable speed (slow/normal/fast)
@@ -89,7 +89,7 @@ Fallback chain: **Keystrokes → FlashPaste → Clipboard** (configurable).
 
 ## Configuration
 
-All settings persist in `%APPDATA%/VoxFlow/config.json`. Changes take effect immediately — no save button required.
+All settings persist in `%APPDATA%/VoxWeave/config.json`. Changes take effect immediately — no save button required.
 
 **Configurable options:**
 - Global hotkey binding

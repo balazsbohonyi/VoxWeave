@@ -51,7 +51,7 @@ pub trait ElevationChecker: Send + Sync {
     /// Returns 0 on platforms where this concept does not apply.
     fn current_integrity_level(&self) -> u32;
 
-    /// Relaunch VoxFlow with elevated privileges (ShellExecuteW "runas" on Windows).
+    /// Relaunch VoxWeave with elevated privileges (ShellExecuteW "runas" on Windows).
     fn relaunch_elevated(&self) -> Result<(), String>;
 }
 

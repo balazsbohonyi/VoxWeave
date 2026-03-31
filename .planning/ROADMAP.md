@@ -1,8 +1,8 @@
-# Roadmap: VoxFlow
+# Roadmap: VoxWeave
 
 ## Overview
 
-VoxFlow is built in 10 phases that follow the natural dependency order of the pipeline: foundation first, then the hotkey trigger, then audio capture, then the visual indicator, then transcription (cloud), then injection — finally integrating all pieces end-to-end before layering on settings UI, first-launch onboarding, and the optional local transcription path. Every phase delivers a coherent, independently testable capability. The result is a working dictation tool that places text into any window, including terminals, using the user's own API keys.
+VoxWeave is built in 10 phases that follow the natural dependency order of the pipeline: foundation first, then the hotkey trigger, then audio capture, then the visual indicator, then transcription (cloud), then injection — finally integrating all pieces end-to-end before layering on settings UI, first-launch onboarding, and the optional local transcription path. Every phase delivers a coherent, independently testable capability. The result is a working dictation tool that places text into any window, including terminals, using the user's own API keys.
 
 ## Phases
 
@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Right-clicking the tray shows a context menu with Settings, Start/Stop Recording, and Quit
   3. Double-clicking the tray icon opens the settings window
   4. Closing the settings window minimizes to tray rather than quitting
-  5. Config is read from and written to `%APPDATA%/VoxFlow/config.json`; missing fields use defaults and unknown fields are preserved
+  5. Config is read from and written to `%APPDATA%/VoxWeave/config.json`; missing fields use defaults and unknown fields are preserved
 **Plans**: 5 plans
 Plans:
 - [x] 04-01-indicator-window-runtime-PLAN.md - indicator window runtime + lifecycle wiring
@@ -48,7 +48,7 @@ Plans:
 **Depends on**: Phase 1
 **Requirements**: HOTK-01, HOTK-02, HOTK-03, HOTK-04
 **Success Criteria** (what must be TRUE):
-  1. Pressing the default hotkey (`Ctrl+Shift+Space`) from any focused application triggers a state change in VoxFlow
+  1. Pressing the default hotkey (`Ctrl+Shift+Space`) from any focused application triggers a state change in VoxWeave
   2. A second hotkey press advances state from recording to processing (toggle mode)
   3. A custom hotkey set in settings takes effect immediately and survives app restart
   4. If the chosen hotkey conflicts with an existing binding, the app warns the user
@@ -153,7 +153,7 @@ Plans:
 - [x] 07-04-PLAN.md — gap closure: fix cancel message guard + reset state/flag before toast sleeps (NOTF-03, NOTF-04)
 
 ### Phase 8: Settings UI
-**Goal**: A full settings window lets the user configure every aspect of VoxFlow, with changes taking effect immediately and persisting across restarts
+**Goal**: A full settings window lets the user configure every aspect of VoxWeave, with changes taking effect immediately and persisting across restarts
 **Depends on**: Phase 7
 **Requirements**: SETT-01, SETT-02, SETT-03, SETT-04, SETT-05, SETT-06, SETT-07
 **Note from Phase 3 context**: Audio settings must expose an `Auto-stop on silence` toggle and silence-duration control; defaults remain backend-managed until this phase.
@@ -182,7 +182,7 @@ Plans:
   2. Step 1 lets the user choose Cloud or Local transcription engine
   3. Step 2 lets the user configure their API key with inline validation (Cloud) or download a model (Local)
   4. Step 3 lets the user confirm or change the default hotkey
-  5. Clicking "Finish" saves config and shows "VoxFlow is ready" toast, after which the app behaves normally (tray-only)
+  5. Clicking "Finish" saves config and shows "VoxWeave is ready" toast, after which the app behaves normally (tray-only)
   6. The wizard can be re-opened from Settings at any time
 **Plans**: 3 plans
 Plans:
@@ -197,7 +197,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Selecting "Local" engine in settings and triggering a recording produces a transcription without any network call
   2. Models (tiny/base/small/medium) can be downloaded on-demand from the settings panel with a live progress bar and a cancel option
-  3. Downloaded models are stored in `%APPDATA%/VoxFlow/models/` and can be deleted from within settings to free disk space
+  3. Downloaded models are stored in `%APPDATA%/VoxWeave/models/` and can be deleted from within settings to free disk space
   4. Local transcription runs on a background thread and does not freeze the UI during processing
   5. If a model file is missing or corrupt, an error notification prompts the user to re-download
 **Plans**: 4 plans

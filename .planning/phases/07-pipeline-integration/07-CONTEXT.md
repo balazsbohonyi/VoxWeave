@@ -76,20 +76,20 @@ Connect the existing hotkey → audio → transcription → injection pipeline i
 
 ### Reusable Assets
 - `useToast.ts` — `ShowToastOptions` and `Toast` interfaces need `autoDismissMs?: number` added; otherwise reusable as-is
-- `src/windows/toast/App.vue` — `handleDismissToast` + `__voxflowShowToast` already handles all payload types; add auto-dismiss timer here
+- `src/windows/toast/App.vue` — `handleDismissToast` + `__voxweaveShowToast` already handles all payload types; add auto-dismiss timer here
 - `indicator/mod.rs:show_success()` — green flash already implemented; keep it, just don't call `hide()` immediately after for success path
 - `indicator/mod.rs:show_toast_window()` — reused for success toast; currently always hides indicator before showing (need to separate these)
 - `src-tauri/src/config/mod.rs:202` — `show_on_startup: bool` exists with default `true`; already wired in `indicator/mod.rs:75`
 
 ### Established Patterns
-- Toast payloads delivered via `window.__voxflowShowToast(payload)` eval from Rust — established in Phase 5, continue
+- Toast payloads delivered via `window.__voxweaveShowToast(payload)` eval from Rust — established in Phase 5, continue
 - `tauri::async_runtime::spawn` for the injection task in `hotkey/service.rs` — success/cancel post-processing runs inside this spawn
 - `indicator::hide()` called explicitly by Rust after each outcome — need to conditionally skip for success/cancel paths
 
 ### Integration Points
 - `hotkey/service.rs:364–420` — the match on `InjectionResult` variants is where success/cancel toast calls go; currently `Ok` has no toast
 - `hotkey/service.rs:274–290` — transcription error path already hides indicator, keep unchanged
-- `src/windows/toast/App.vue:__voxflowShowToast` — entry point for all toast payloads; auto-dismiss logic goes here
+- `src/windows/toast/App.vue:__voxweaveShowToast` — entry point for all toast payloads; auto-dismiss logic goes here
 - `src/types/index.ts` — may need a success toast payload type or reuse the existing PlainToastPayload `{type, message}` pattern
 
 ### Key gap identified

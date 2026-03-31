@@ -64,7 +64,7 @@
 
 ## Summary
 
-Phase 6 completes the core VoxFlow pipeline: transcribed text lands in the previously-focused window. All three injection modes (FlashPaste, Keystroke, Clipboard) must be implemented behind the platform trait layer that was scaffolded in Phase 1.
+Phase 6 completes the core VoxWeave pipeline: transcribed text lands in the previously-focused window. All three injection modes (FlashPaste, Keystroke, Clipboard) must be implemented behind the platform trait layer that was scaffolded in Phase 1.
 
 The Windows-specific implementations are all stubs in `platform/windows/mod.rs` waiting to be filled. The traits, config enums, and state fields are mostly in place — this phase is about converting those stubs into real Windows API calls using the `windows` crate, implementing the injection orchestration layer in a new `injection/` module, and wiring it into the hotkey pipeline at the "Phase 6 will handle injection here" comment.
 
@@ -197,7 +197,7 @@ fn get_foreground_window(&self) -> Option<ForegroundWindowInfo> {
 
 **What:** Query `TokenIntegrityLevel` from the process token.
 
-**When to use:** Inside `get_foreground_window()` for the target process; inside `current_integrity_level()` for VoxFlow's own token.
+**When to use:** Inside `get_foreground_window()` for the target process; inside `current_integrity_level()` for VoxWeave's own token.
 
 **Example:**
 ```rust
@@ -393,8 +393,8 @@ fn show_elevation_dialog() -> ElevationDialogResult {
     unsafe {
         let result = MessageBoxW(
             None,
-            w!("The target window requires elevated privileges.\n\nRelaunch VoxFlow as Administrator, or copy the text to clipboard for manual paste."),
-            w!("VoxFlow — Elevation Required"),
+            w!("The target window requires elevated privileges.\n\nRelaunch VoxWeave as Administrator, or copy the text to clipboard for manual paste."),
+            w!("VoxWeave — Elevation Required"),
             MB_ICONWARNING | MB_YESNOCANCEL,  // Yes=Relaunch, No=Copy, Cancel=Abort
         );
         match result {
@@ -461,10 +461,10 @@ pub async fn inject_text<R: Runtime>(app: &AppHandle<R>, text: &str) {
 ## Common Pitfalls
 
 ### Pitfall 1: SetForegroundWindow Silently Fails
-**What goes wrong:** `SetForegroundWindow` returns `FALSE` without error when VoxFlow is not the foreground process (Windows restricts which processes can steal focus).
+**What goes wrong:** `SetForegroundWindow` returns `FALSE` without error when VoxWeave is not the foreground process (Windows restricts which processes can steal focus).
 **Why it happens:** Windows Vista+ added restrictions: only a foreground process can call `SetForegroundWindow` successfully without `AllowSetForegroundWindow`.
-**How to avoid:** Call `AllowSetForegroundWindow(ASFW_ANY)` at recording START (when VoxFlow is focused) so the later restore succeeds. Alternatively, use `AttachThreadInput` pattern. A 50ms sleep after the call lets the OS process the change.
-**Warning signs:** SendInput keystrokes land in VoxFlow's indicator window instead of the target.
+**How to avoid:** Call `AllowSetForegroundWindow(ASFW_ANY)` at recording START (when VoxWeave is focused) so the later restore succeeds. Alternatively, use `AttachThreadInput` pattern. A 50ms sleep after the call lets the OS process the change.
+**Warning signs:** SendInput keystrokes land in VoxWeave's indicator window instead of the target.
 
 ### Pitfall 2: FlashPaste Clipboard Race Condition
 **What goes wrong:** The target app hasn't rendered the pasted text before clipboard is restored, resulting in empty paste.
@@ -479,9 +479,9 @@ pub async fn inject_text<R: Runtime>(app: &AppHandle<R>, text: &str) {
 **Warning signs:** Emoji appear as replacement characters (�) in target apps.
 
 ### Pitfall 4: Integrity Level Comparison Logic
-**What goes wrong:** Elevation check triggers even when target and VoxFlow are at the same level.
+**What goes wrong:** Elevation check triggers even when target and VoxWeave are at the same level.
 **Why it happens:** Comparison must be `target_il > self_il` not `target_il != self_il`. Medium IL (0x2000) processes can inject into other Medium IL processes.
-**How to avoid:** Only show the elevation dialog when `target_integrity_level > voxflow_integrity_level`.
+**How to avoid:** Only show the elevation dialog when `target_integrity_level > voxweave_integrity_level`.
 **Warning signs:** Spurious elevation dialogs for every injection.
 
 ### Pitfall 5: Cancel Flag Not Reset Before Injection

@@ -13,7 +13,7 @@ updated: 2026-03-25T21:30:00Z
 ## Tests
 
 ### 1. Cold Start — First-Launch Wizard Opens
-expected: Delete %APPDATA%\VoxFlow\config.json (or rename it), then run `cargo tauri dev` (or launch the built app). The wizard window should appear automatically — not the settings window, not just a tray icon. App boots without errors or crashes.
+expected: Delete %APPDATA%\VoxWeave\config.json (or rename it), then run `cargo tauri dev` (or launch the built app). The wizard window should appear automatically — not the settings window, not just a tray icon. App boots without errors or crashes.
 result: pass
 
 ### 2. WizardStepper Progress Dots
@@ -33,15 +33,15 @@ expected: Step 3 shows the HotkeyCapture widget (same as in Settings). Clicking 
 result: pass
 
 ### 6. Finish Sequence — Success Banner + Settings Opens
-expected: On Step 3, click Finish. A green success banner appears inside the wizard: "VoxFlow is ready! Opening Settings..." (or similar text). The bottom button bar disappears during this 1.2s window. After ~1.2 seconds, the Settings window opens and the wizard closes/hides.
+expected: On Step 3, click Finish. A green success banner appears inside the wizard: "VoxWeave is ready! Opening Settings..." (or similar text). The bottom button bar disappears during this 1.2s window. After ~1.2 seconds, the Settings window opens and the wizard closes/hides.
 result: pass
 
 ### 7. first_launch=false Written to Config
-expected: After clicking Finish, open %APPDATA%\VoxFlow\config.json. The file should contain `"first_launch": false`.
+expected: After clicking Finish, open %APPDATA%\VoxWeave\config.json. The file should contain `"first_launch": false`.
 result: pass
 
 ### 8. Restart After Finish — Wizard Does Not Re-open
-expected: After completing the wizard (Finish clicked), quit VoxFlow completely and relaunch it. Only the tray icon should appear — the wizard must NOT open again automatically.
+expected: After completing the wizard (Finish clicked), quit VoxWeave completely and relaunch it. Only the tray icon should appear — the wizard must NOT open again automatically.
 result: pass
 
 ### 9. Close With X — Wizard Re-opens on Next Launch

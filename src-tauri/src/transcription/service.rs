@@ -153,7 +153,7 @@ where
 
 /// Shows the toast window and delivers the payload via eval (not Tauri events).
 /// WebView2 may not deliver events to hidden windows, so the payload is pushed
-/// via `window.__voxflowShowToast` after the window is made visible.
+/// via `window.__voxweaveShowToast` after the window is made visible.
 fn emit_transcription_error<R: tauri::Runtime>(
     app: &tauri::AppHandle<R>,
     payload: TranscriptionErrorPayload,

@@ -1,4 +1,4 @@
-# Requirements: VoxFlow
+# Requirements: VoxWeave
 
 **Defined:** 2026-03-14
 **Core Value:** Text lands in any window — terminals, editors, browsers — without friction
@@ -50,7 +50,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 - [x] **LOCL-01**: App supports local transcription via whisper.cpp (whisper-rs)
 - [x] **LOCL-02**: Models are NOT bundled — downloaded on-demand from settings with progress bar and cancel option
 - [x] **LOCL-03**: Available models: tiny (~75MB), base (~150MB), small (~500MB), medium (~1.5GB) with quality/speed descriptions
-- [x] **LOCL-04**: Downloaded models stored in `%APPDATA%/VoxFlow/models/`; user can delete models to free space
+- [x] **LOCL-04**: Downloaded models stored in `%APPDATA%/VoxWeave/models/`; user can delete models to free space
 - [x] **LOCL-05**: Local transcription runs on a background thread without freezing the UI
 - [x] **LOCL-06**: Audio is passed as WAV/PCM float32 to whisper.cpp
 - [x] **LOCL-07**: If the model file is missing or corrupt, show an error with a prompt to re-download
@@ -66,7 +66,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 - [x] **INJC-07**: Before injection, app checks if the target process runs at higher integrity level; if so, shows dialog with "Relaunch as Admin" and "Copy to clipboard" options
 - [x] **INJC-08**: Pressing Escape or the hotkey during keystroke injection cancels immediately; toast shows "X of Y characters typed"
 - [x] **INJC-09**: Automatic fallback chain when selected method fails: Keystrokes → FlashPaste → Clipboard; FlashPaste → Clipboard (configurable toggle)
-- [x] **INJC-10**: Focus is restored to the target window before injection if VoxFlow's window gained focus
+- [x] **INJC-10**: Focus is restored to the target window before injection if VoxWeave's window gained focus
 - [x] **INJC-11**: Unicode text (accented characters, symbols) is handled correctly in all injection modes
 
 ### System Tray
@@ -92,7 +92,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 - [x] **WIZR-02**: Step 1: choose engine (Cloud or Local)
 - [x] **WIZR-03**: Step 2: configure provider/API key with inline validation (Cloud) or download model (Local)
 - [x] **WIZR-04**: Step 3: confirm default hotkey with option to change
-- [x] **WIZR-05**: "Finish" saves config and shows "VoxFlow is ready" ~~toast~~ success banner
+- [x] **WIZR-05**: "Finish" saves config and shows "VoxWeave is ready" ~~toast~~ success banner
 - [x] **WIZR-06**: Wizard can be re-opened from Settings at any time
 
 ### Notifications
@@ -104,7 +104,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### Config
 
-- [x] **CONF-01**: All settings persist in JSON at `%APPDATA%/VoxFlow/config.json`
+- [x] **CONF-01**: All settings persist in JSON at `%APPDATA%/VoxWeave/config.json`
 - [x] **CONF-02**: Config includes: engine, active provider, per-provider API key and model under `transcription.providers`, global language hint, hotkey, mic device, local model path, injection method/speed, auto-fallback, autostart, indicator position, first-launch flag
 - [x] **CONF-03**: Missing fields use defaults; unknown fields are ignored (forward/backward compatible)
 
