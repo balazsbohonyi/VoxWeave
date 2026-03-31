@@ -1,8 +1,8 @@
-# VoxFlow
+# VoxWeave
 
 ## What This Is
 
-VoxFlow is a cross-platform voice-to-text dictation tool that works in any application — including terminals and command-line windows. The user presses a hotkey, speaks, and the transcribed text is automatically injected into the active window. It's a BYOK (bring your own key) alternative to Wispr Flow, targeting power users who want full control over their transcription providers without subscriptions, accounts, or telemetry.
+VoxWeave is a cross-platform voice-to-text dictation tool that works in any application — including terminals and command-line windows. The user presses a hotkey, speaks, and the transcribed text is automatically injected into the active window. It's a BYOK (bring your own key) alternative to Wispr Flow, targeting power users who want full control over their transcription providers without subscriptions, accounts, or telemetry.
 
 ## Core Value
 
@@ -49,7 +49,7 @@ Text lands in any window — terminals, editors, browsers — without friction. 
 
 ## Context
 
-- **Competitive context**: Wispr Flow is the commercial incumbent. VoxFlow differentiates on BYOK model, zero cost (beyond API usage), privacy (audio never touches third-party servers beyond the user's chosen provider), and terminal support.
+- **Competitive context**: Wispr Flow is the commercial incumbent. VoxWeave differentiates on BYOK model, zero cost (beyond API usage), privacy (audio never touches third-party servers beyond the user's chosen provider), and terminal support.
 - **Distribution**: Pre-built Windows installer via GitHub Releases. Open source.
 - **Cross-platform intent**: Windows is the MVP, but macOS is the next planned platform. The architecture must use proper abstractions for platform-specific code (audio capture, text injection, clipboard operations, hotkey registration, elevation checks) so adding macOS requires implementing platform traits — not rewriting core logic.
 - **Provider model lists**: Hardcoded model lists for all providers. OpenAI: whisper-1, gpt-4o-transcribe, gpt-4o-mini-transcribe. Groq: whisper-large-v3-turbo (default), whisper-large-v3, distil-whisper-large-v3-en.

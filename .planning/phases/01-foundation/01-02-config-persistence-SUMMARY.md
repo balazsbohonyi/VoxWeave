@@ -49,7 +49,7 @@ requirements_satisfied:
 
 # Phase 1 Plan 02: Config Persistence Summary
 
-**One-liner:** Full v1 AppConfig with nested sections persisted to `%APPDATA%/VoxFlow/config.json` via raw-JSON round-trip preserving unknown future fields.
+**One-liner:** Full v1 AppConfig with nested sections persisted to `%APPDATA%/VoxWeave/config.json` via raw-JSON round-trip preserving unknown future fields.
 
 ## What Was Built
 
@@ -65,7 +65,7 @@ requirements_satisfied:
 All fields carry `#[serde(default)]` for forward-compatible schema evolution.
 
 **`config/persistence.rs`** — Load/save with unknown-field preservation:
-- `config_path()` resolves to `%APPDATA%/VoxFlow/config.json` via `dirs-next`
+- `config_path()` resolves to `%APPDATA%/VoxWeave/config.json` via `dirs-next`
 - `load()`: no file → defaults; malformed → rename to `.corrupt.{ts}`, return defaults; partial → serde fills missing fields
 - `save(config, raw)`: serializes typed config → merges INTO raw via `merge_into()` → writes pretty JSON
 - `merge_into()`: recursive deep merge; dst keys not in src are preserved
@@ -94,7 +94,7 @@ All fields carry `#[serde(default)]` for forward-compatible schema evolution.
 | `test_merge_into_nested_objects` | Nested object unknown key survival |
 | `test_malformed_json_parse_produces_default_value` | Corrupt file detection |
 | `test_save_and_load_round_trip` | Typed save + unknown field preservation |
-| `test_config_dir_returns_path` | Path ends with "VoxFlow" |
+| `test_config_dir_returns_path` | Path ends with "VoxWeave" |
 
 All 9 pass. `cargo test` clean. `npx vue-tsc --noEmit` clean.
 

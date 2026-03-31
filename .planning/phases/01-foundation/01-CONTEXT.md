@@ -6,7 +6,7 @@
 <domain>
 ## Phase Boundary
 
-Deliver the initial Windows Tauri application scaffold for VoxFlow: tray-first app startup, a single reusable settings window that hides to tray on close, config persistence in `%APPDATA%/VoxFlow/config.json`, and the platform abstraction seam that later phases will build on. Recording, the floating indicator, transcription, and injection behavior remain outside this phase.
+Deliver the initial Windows Tauri application scaffold for VoxWeave: tray-first app startup, a single reusable settings window that hides to tray on close, config persistence in `%APPDATA%/VoxWeave/config.json`, and the platform abstraction seam that later phases will build on. Recording, the floating indicator, transcription, and injection behavior remain outside this phase.
 
 </domain>
 
@@ -23,7 +23,7 @@ Deliver the initial Windows Tauri application scaffold for VoxFlow: tray-first a
 - Define the full v1 `AppConfig` schema in Phase 1 instead of a temporary phase-only subset.
 - Future-phase settings should receive concrete default values now so later code can rely on stable reads.
 - Unknown JSON fields must survive load/save round-trips to preserve forward/backward compatibility.
-- Persist configuration as a single file at `%APPDATA%/VoxFlow/config.json`; do not split config into multiple files yet.
+- Persist configuration as a single file at `%APPDATA%/VoxWeave/config.json`; do not split config into multiple files yet.
 
 ### Tray behavior
 - The tray menu should already expose the final Phase 1 menu shape: `Settings`, `Start/Stop Recording`, separator, `Quit`.

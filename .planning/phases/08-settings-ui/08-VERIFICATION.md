@@ -8,7 +8,7 @@ re_verification: false
 
 # Phase 8: Settings UI Verification Report
 
-**Phase Goal:** A full settings window lets the user configure every aspect of VoxFlow, with changes taking effect immediately and persisting across restarts
+**Phase Goal:** A full settings window lets the user configure every aspect of VoxWeave, with changes taking effect immediately and persisting across restarts
 **Verified:** 2026-03-22T20:30:00Z
 **Status:** passed
 **Re-verification:** No — initial verification
@@ -102,7 +102,7 @@ No TODO/FIXME/placeholder comments found in phase-modified files. No empty retur
 
 #### 4. Launch at Login Toggle
 
-**Test:** Enable "Launch on Windows startup", restart Windows, verify VoxFlow starts in tray.
+**Test:** Enable "Launch on Windows startup", restart Windows, verify VoxWeave starts in tray.
 **Expected:** App appears in tray on next Windows login without manual launch.
 **Why human:** Requires OS-level registry/startup folder verification across a real reboot.
 

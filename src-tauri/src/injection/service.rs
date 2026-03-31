@@ -112,7 +112,7 @@ fn show_elevation_dialog() -> ElevationDialogResult {
         let result = MessageBoxW(
             None,
             w!("The target window requires elevated privileges.\n\nYes = Relaunch as Administrator\nNo = Copy text to clipboard\nCancel = Abort"),
-            w!("VoxFlow \u{2014} Elevation Required"),
+            w!("VoxWeave \u{2014} Elevation Required"),
             MB_ICONWARNING | MB_YESNOCANCEL,
         );
         return match result {

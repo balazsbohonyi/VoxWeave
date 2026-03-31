@@ -2,7 +2,7 @@
 
 ## Objective
 
-Plan Phase 1 so it establishes the permanent app skeleton for VoxFlow without pulling future pipeline work forward. This phase should end with a tray-first Windows Tauri app, a single reusable settings window, config persistence at `%APPDATA%/VoxFlow/config.json`, and the platform abstraction seam that later phases build on.
+Plan Phase 1 so it establishes the permanent app skeleton for VoxWeave without pulling future pipeline work forward. This phase should end with a tray-first Windows Tauri app, a single reusable settings window, config persistence at `%APPDATA%/VoxWeave/config.json`, and the platform abstraction seam that later phases build on.
 
 ## Scope Lock
 
@@ -24,7 +24,7 @@ Do not implement now:
 ## Requirements Translation
 
 Phase 1 covers:
-- `CONF-01`: persist config in JSON at `%APPDATA%/VoxFlow/config.json`
+- `CONF-01`: persist config in JSON at `%APPDATA%/VoxWeave/config.json`
 - `CONF-02`: define the full v1 config schema now, not a temporary subset
 - `CONF-03`: missing fields default; unknown fields survive round-trip
 - `TRAY-01`: tray icon exists on launch
@@ -176,7 +176,7 @@ Treat it as a disabled placeholder in Phase 1. Do not wire fake recording toggle
 
 Normal startup should be tray-only with no visible window. Since the first-launch wizard is Phase 9, do not add wizard branching now.
 
-## Don’t Hand-Roll
+## Donï¿½t Hand-Roll
 
 - Do not hand-roll tray behavior in the frontend. Keep tray/menu logic in Rust with Tauri APIs.
 - Do not invent a custom config DSL or split config into multiple files.

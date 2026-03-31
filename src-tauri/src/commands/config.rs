@@ -130,7 +130,7 @@ pub async fn test_connection(
 // Launch at login (autostart)
 // ---------------------------------------------------------------------------
 
-/// Enable or disable launching VoxFlow at Windows login via the autostart plugin.
+/// Enable or disable launching VoxWeave at Windows login via the autostart plugin.
 /// Wraps HKCU\Software\Microsoft\Windows\CurrentVersion\Run registry key.
 #[tauri::command]
 pub fn set_launch_at_login(app: AppHandle, enabled: bool) -> Result<(), String> {

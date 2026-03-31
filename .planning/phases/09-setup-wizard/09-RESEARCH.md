@@ -42,7 +42,7 @@
 - Exact stepper dot/line styling and active step color within existing blue-accent, dark-mode palette
 - Animation/transition between steps (slide or fade)
 - Exact wording of step titles and body copy
-- "VoxFlow is ready" toast placement after Finish (indicator area or in-wizard before close)
+- "VoxWeave is ready" toast placement after Finish (indicator area or in-wizard before close)
 
 ### Deferred Ideas (OUT OF SCOPE)
 - None — discussion stayed within phase scope
@@ -57,7 +57,7 @@
 | WIZR-02 | Step 1: choose engine (Cloud or Local) | New `EngineCard.vue` radio card component; saves `transcription.provider` via `saveConfig` |
 | WIZR-03 | Step 2: configure provider/API key with inline validation (Cloud) or placeholder (Local) | Slim API key form reusing `test_connection` Rust command; Local path is a static placeholder |
 | WIZR-04 | Step 3: confirm default hotkey with option to change | Reuse `HotkeyCapture.vue` directly from settings window |
-| WIZR-05 | "Finish" saves config and shows "VoxFlow is ready" toast | `saveConfig({ first_launch: false })` then open settings + show toast |
+| WIZR-05 | "Finish" saves config and shows "VoxWeave is ready" toast | `saveConfig({ first_launch: false })` then open settings + show toast |
 | WIZR-06 | Wizard can be re-opened from Settings at any time | "Setup Wizard..." button in GeneralSection invokes new `open_wizard_window` Rust command |
 </phase_requirements>
 
@@ -152,7 +152,7 @@ async function finish() {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VoxFlow Setup</title>
+    <title>VoxWeave Setup</title>
   </head>
   <body>
     <div id="app"></div>
@@ -168,7 +168,7 @@ async function finish() {
 ```json
 {
   "label": "wizard",
-  "title": "VoxFlow Setup",
+  "title": "VoxWeave Setup",
   "url": "wizard.html",
   "width": 560,
   "height": 450,
@@ -399,7 +399,7 @@ Note: `getCurrentWindow().close()` triggers the `CloseRequested` event which cal
    - What's unclear: Is there already a `show_settings_window` Tauri command registered, or does one need to be added for the wizard's finish action?
    - Recommendation: Check `lib.rs` invoke_handler — if `open_settings_on_transcription_tab` is already registered, a simpler `open_settings_window` command can be added alongside it. This is a 3-line addition to `commands/` and `lib.rs`.
 
-2. **"VoxFlow is ready" toast placement**
+2. **"VoxWeave is ready" toast placement**
    - What we know: Context leaves this to Claude's discretion. The existing toast system is the `toast` window (indicator-adjacent, shown by Rust). Showing it from the wizard's `finish()` would require the wizard window to emit a Rust event or the Rust command to emit one.
    - What's unclear: Simplest path is an in-wizard CSS toast (a brief success banner inside the wizard before it closes) rather than triggering the OS-level toast window.
    - Recommendation: In-wizard `<div>` success message that appears for ~1.5 seconds before the finish sequence closes the wizard. Avoids adding an `emit` path for a one-off UX moment.

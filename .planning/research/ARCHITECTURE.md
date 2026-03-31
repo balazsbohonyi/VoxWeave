@@ -1,8 +1,8 @@
-# Architecture Research: VoxFlow
+# Architecture Research: VoxWeave
 
 ## System Overview
 
-VoxFlow is a Tauri v2 desktop app with two windows (settings + floating indicator), a Rust backend handling audio/transcription/injection, and a Vue 3 frontend for UI. The Rust backend does the heavy lifting; the frontend is thin.
+VoxWeave is a Tauri v2 desktop app with two windows (settings + floating indicator), a Rust backend handling audio/transcription/injection, and a Vue 3 frontend for UI. The Rust backend does the heavy lifting; the frontend is thin.
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -106,7 +106,7 @@ pub trait WindowInfo {
 
 pub trait ElevationChecker {
     fn get_integrity_level(&self, handle: &WindowHandle) -> Result<IntegrityLevel>;
-    fn is_elevated(&self) -> bool;  // Is VoxFlow itself elevated?
+    fn is_elevated(&self) -> bool;  // Is VoxWeave itself elevated?
     fn relaunch_elevated(&self) -> Result<()>;
 }
 

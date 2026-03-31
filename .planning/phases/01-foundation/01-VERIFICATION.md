@@ -8,7 +8,7 @@ human_verification:
     expected: "Tray icon visible in the notification area; no settings window, no taskbar entry"
     why_human: "Requires native Windows runtime; visual inspection of desktop shell"
   - test: "Right-click tray icon — verify context menu shape"
-    expected: "Menu contains: 'Settings' (enabled), 'Start / Stop Recording' (greyed/disabled), a separator, 'Quit VoxFlow' (enabled)"
+    expected: "Menu contains: 'Settings' (enabled), 'Start / Stop Recording' (greyed/disabled), a separator, 'Quit VoxWeave' (enabled)"
     why_human: "Native context menu cannot be inspected without running the app"
   - test: "Double-click tray icon opens settings window"
     expected: "Settings window appears and gains focus; repeated double-clicks focus the same window rather than creating a second"
@@ -16,8 +16,8 @@ human_verification:
   - test: "Closing the settings window hides it to tray rather than quitting"
     expected: "Clicking the X button on the settings window causes it to disappear; app continues running (tray icon still present); tray menu still works"
     why_human: "Window close lifecycle requires native Windows runtime"
-  - test: "Config persists to and loads from %APPDATA%/VoxFlow/config.json"
-    expected: "After first launch, %APPDATA%/VoxFlow/config.json exists and contains valid JSON; restarting the app reads the same values"
+  - test: "Config persists to and loads from %APPDATA%/VoxWeave/config.json"
+    expected: "After first launch, %APPDATA%/VoxWeave/config.json exists and contains valid JSON; restarting the app reads the same values"
     why_human: "File-system side effect requires running the app on a real Windows machine or inspecting the APPDATA path"
 ---
 
@@ -40,7 +40,7 @@ human_verification:
 | 2 | Right-clicking the tray shows a context menu with Settings, Start/Stop Recording, and Quit | ? HUMAN | `tray.rs:12-26` builds menu with `open_settings` (enabled), `start_stop_recording` (disabled), `PredefinedMenuItem::separator`, `quit`; matches spec exactly |
 | 3 | Double-clicking the tray icon opens the settings window | ? HUMAN | `tray.rs:55-64` handles `TrayIconEvent::DoubleClick { button: MouseButton::Left }` and calls `show_settings_window(tray.app_handle())` |
 | 4 | Closing the settings window minimizes to tray rather than quitting | ? HUMAN | `lib.rs:26-33` intercepts `WindowEvent::CloseRequested`, calls `api.prevent_close()` then `win_clone.hide()`; `tray.rs:47-49` quit path calls `app.exit(0)` directly |
-| 5 | Config is read from and written to `%APPDATA%/VoxFlow/config.json`; missing fields use defaults and unknown fields are preserved | ✓ VERIFIED | `persistence.rs` uses `dirs_next::config_dir().join("VoxFlow").join("config.json")`; 9 unit tests cover no-file, partial, unknown-field, malformed, and round-trip cases; all pass |
+| 5 | Config is read from and written to `%APPDATA%/VoxWeave/config.json`; missing fields use defaults and unknown fields are preserved | ✓ VERIFIED | `persistence.rs` uses `dirs_next::config_dir().join("VoxWeave").join("config.json")`; 9 unit tests cover no-file, partial, unknown-field, malformed, and round-trip cases; all pass |
 
 **Score:** 1/5 truths fully automated-verified, 4/5 require human runtime validation (tray behaviors are structurally complete and correctly coded — cannot be confirmed without a running Windows session)
 
@@ -52,7 +52,7 @@ human_verification:
 
 | Artifact | Expected | Status | Details |
 |----------|----------|--------|---------|
-| `src-tauri/src/main.rs` | Entry point calling `voxflow_lib::run()` | ✓ VERIFIED | 6 lines; delegates to lib |
+| `src-tauri/src/main.rs` | Entry point calling `voxweave_lib::run()` | ✓ VERIFIED | 6 lines; delegates to lib |
 | `src-tauri/src/lib.rs` | Module registration, AppState, tray setup, close-to-hide | ✓ VERIFIED | All 4 responsibilities present and wired |
 | `src-tauri/src/state.rs` | AppState with config/recording_state/cancel_flag | ✓ VERIFIED | All three fields as `Arc<Mutex<T>>`; `AppState::load()` present |
 | `src-tauri/src/tray.rs` | Tray setup, menu, double-click, menu event handlers | ✓ VERIFIED | Menu matches spec; event handlers delegate to `show_settings_window` |
@@ -100,7 +100,7 @@ All lifecycle code is in files verified above (`lib.rs`, `tray.rs`, `App.vue`). 
 
 | Requirement | Source Plan | Description | Status | Evidence |
 |-------------|-------------|-------------|--------|----------|
-| CONF-01 | 01-02 | All settings persist in JSON at `%APPDATA%/VoxFlow/config.json` | ✓ SATISFIED | `persistence::config_path()` resolves via `dirs_next::config_dir().join("VoxFlow").join("config.json")`; save writes to that path |
+| CONF-01 | 01-02 | All settings persist in JSON at `%APPDATA%/VoxWeave/config.json` | ✓ SATISFIED | `persistence::config_path()` resolves via `dirs_next::config_dir().join("VoxWeave").join("config.json")`; save writes to that path |
 | CONF-02 | 01-02 | Config includes engine, active provider, API keys, models, language hints, hotkey, mic device, local model, injection method/speed, auto-fallback, autostart, indicator position, first-launch flag | ✓ SATISFIED | `AppConfig` has hotkey, audio (device), transcription (provider, api keys, models, language, local_model_path), injection (mode), indicator (show, position_x/y), launch_at_login, first_launch; TypeScript mirror exact |
 | CONF-03 | 01-02 | Missing fields use defaults; unknown fields are ignored (forward/backward compatible) | ✓ SATISFIED | All fields have `#[serde(default)]`; `merge_into()` preserves unknown raw JSON keys on save; 3 dedicated tests verify this contract |
 | TRAY-01 | 01-03 | App shows a tray icon on launch; icon changes appearance when recording is active | ? HUMAN | Tray icon built with 32x32 PNG; recording-state icon switching intentionally deferred to Phase 3 per plan (current phase only covers tray presence) |
@@ -132,19 +132,19 @@ The following behaviors are structurally complete in code but require a running 
 ### 1. Tray-only startup
 
 **Test:** Run `cargo tauri dev` on Windows. Observe the desktop after launch.
-**Expected:** A VoxFlow tray icon appears in the notification area. No window opens. No taskbar entry (settings window has `skipTaskbar: false` but `visible: false` — it should not appear since the window is hidden).
+**Expected:** A VoxWeave tray icon appears in the notification area. No window opens. No taskbar entry (settings window has `skipTaskbar: false` but `visible: false` — it should not appear since the window is hidden).
 **Why human:** Visual desktop shell inspection required.
 
 ### 2. Tray context menu shape
 
-**Test:** Right-click the VoxFlow tray icon.
-**Expected:** Context menu shows exactly: "Settings" (clickable), "Start / Stop Recording" (greyed out / non-interactive), a visual separator line, "Quit VoxFlow" (clickable).
+**Test:** Right-click the VoxWeave tray icon.
+**Expected:** Context menu shows exactly: "Settings" (clickable), "Start / Stop Recording" (greyed out / non-interactive), a visual separator line, "Quit VoxWeave" (clickable).
 **Why human:** Native Win32 context menu cannot be inspected programmatically without running the app.
 
 ### 3. Double-click tray opens/focuses settings window
 
-**Test:** Double-click the VoxFlow tray icon. Then double-click again.
-**Expected:** First double-click: settings window appears and has focus. Second double-click: the same window is focused (not a second window). The window title should be "VoxFlow Settings".
+**Test:** Double-click the VoxWeave tray icon. Then double-click again.
+**Expected:** First double-click: settings window appears and has focus. Second double-click: the same window is focused (not a second window). The window title should be "VoxWeave Settings".
 **Why human:** Tray icon event processing requires the running desktop compositor.
 
 ### 4. Close-to-hide (not quit)
@@ -155,7 +155,7 @@ The following behaviors are structurally complete in code but require a running 
 
 ### 5. Config file creation and persistence
 
-**Test:** Launch the app once, then inspect `%APPDATA%\VoxFlow\config.json`.
+**Test:** Launch the app once, then inspect `%APPDATA%\VoxWeave\config.json`.
 **Expected:** File exists with valid pretty-printed JSON containing all expected fields (hotkey, audio, transcription, injection, indicator, launch_at_login, first_launch). Modifying a setting (once Settings UI exists in Phase 8) and restarting should show the persisted value.
 **Why human:** File system side effect; no integration test writes to the real APPDATA path.
 

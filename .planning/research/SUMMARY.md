@@ -1,4 +1,4 @@
-# Research Summary: VoxFlow
+# Research Summary: VoxWeave
 
 ## Stack Recommendation
 

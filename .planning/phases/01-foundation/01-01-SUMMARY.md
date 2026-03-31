@@ -112,7 +112,7 @@ Tasks 01-01-01 (layout + frontend) and 01-01-02 through 01-01-05 (Rust backend +
 - `src-tauri/src/tray.rs` - Tray setup, menu (Open Settings, Quit), double-click handler
 - `src-tauri/src/platform/mod.rs` - Four platform traits + TERMINAL_CLASSES + PlatformProvider type alias
 - `src-tauri/src/platform/windows/mod.rs` - WindowsProvider stub implementing all four traits
-- `src-tauri/tauri.conf.json` - Settings window label, visible:false, VoxFlow branding
+- `src-tauri/tauri.conf.json` - Settings window label, visible:false, VoxWeave branding
 - `src-tauri/capabilities/default.json` - Window label updated to "settings"
 - `src-tauri/Cargo.toml` - Added tray-icon/image-png features, log dep, local-transcription feature gate
 - `src/types/index.ts` - AppConfig, RecordingState, IPC event payload types mirroring Rust

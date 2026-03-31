@@ -13,7 +13,7 @@ updated: 2026-03-15T21:21:17.2779425Z
 ## Tests
 
 ### 1. Cold Start Smoke Test
-expected: Kill any running VoxFlow process. Start the app from scratch. The settings window and backend boot without startup errors, the indicator window remains hidden at idle, and hotkey recording can be started successfully.
+expected: Kill any running VoxWeave process. Start the app from scratch. The settings window and backend boot without startup errors, the indicator window remains hidden at idle, and hotkey recording can be started successfully.
 result: pass
 
 ### 2. Indicator Shows on Recording Start

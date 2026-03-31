@@ -1,4 +1,4 @@
-# Stack Research: VoxFlow
+# Stack Research: VoxWeave
 
 ## Core Framework
 

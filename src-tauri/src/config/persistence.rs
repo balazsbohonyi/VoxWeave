@@ -1,4 +1,4 @@
-// config::persistence — Load/save AppConfig to %APPDATA%/VoxFlow/config.json.
+// config::persistence — Load/save AppConfig to %APPDATA%/VoxWeave/config.json.
 //
 // Unknown-field preservation strategy:
 //   On load  : deserialize into AppConfig (for typed access) AND keep a raw
@@ -18,12 +18,12 @@ use std::path::PathBuf;
 // Path helpers
 // ---------------------------------------------------------------------------
 
-/// Returns the path to the VoxFlow config directory:
-/// `%APPDATA%\VoxFlow` on Windows, `~/.config/VoxFlow` elsewhere.
+/// Returns the path to the VoxWeave config directory:
+/// `%APPDATA%\VoxWeave` on Windows, `~/.config/VoxWeave` elsewhere.
 pub fn config_dir() -> Result<PathBuf, String> {
     let base = dirs_next::config_dir()
         .ok_or_else(|| "Cannot determine user config directory".to_string())?;
-    Ok(base.join("VoxFlow"))
+    Ok(base.join("VoxWeave"))
 }
 
 /// Returns the full path to the config file.
@@ -281,7 +281,7 @@ mod tests {
         // Should succeed in a normal user environment.
         // In CI without a home dir this would fail — skip gracefully.
         match config_dir() {
-            Ok(p) => assert!(p.ends_with("VoxFlow")),
+            Ok(p) => assert!(p.ends_with("VoxWeave")),
             Err(e) => eprintln!("config_dir() skipped in this env: {e}"),
         }
     }

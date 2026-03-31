@@ -159,7 +159,7 @@ async function onNext() {
         class="mt-8 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 p-6 text-center"
       >
         <p class="text-base font-medium text-green-700 dark:text-green-400">
-          VoxFlow is ready! Opening Settings…
+          VoxWeave is ready! Opening Settings…
         </p>
       </div>
 

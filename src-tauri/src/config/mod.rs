@@ -1,5 +1,5 @@
 // AppConfig — persisted application settings.
-// Stored at %APPDATA%/VoxFlow/config.json.
+// Stored at %APPDATA%/VoxWeave/config.json.
 // Missing fields use serde defaults. Unknown fields are preserved via
 // raw JSON round-trip: load merges typed deserialization back into the raw
 // Value so unknown keys survive save/load cycles.
@@ -288,7 +288,7 @@ pub struct AppConfig {
     #[serde(default)]
     pub indicator: IndicatorConfig,
 
-    /// Launch VoxFlow automatically when Windows starts.
+    /// Launch VoxWeave automatically when Windows starts.
     #[serde(default)]
     pub launch_at_login: bool,
 

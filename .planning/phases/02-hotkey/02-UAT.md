@@ -13,7 +13,7 @@ updated: 2026-03-15T12:38:10+02:00
 ## Tests
 
 ### 1. Configured Hotkey Works After Startup
-expected: Launch VoxFlow. Use the hotkey currently shown in Settings. Press it once to enter recording mode (indicator appears / state changes). Press it again to stop (indicator hides / state returns to idle).
+expected: Launch VoxWeave. Use the hotkey currently shown in Settings. Press it once to enter recording mode (indicator appears / state changes). Press it again to stop (indicator hides / state returns to idle).
 result: skipped
 reason: Deferred to Phase 4 (Floating Indicator). Hotkey state transitions verified in Phase 2, indicator visibility is out of scope for HOTK requirements.
 reported: "Indicator does not appeared, but state changed (can see that in the Start Recording context menu item being changed to Stop Recording). Pressed it again, state changed, context menu item changed back to Start Recording"
@@ -41,7 +41,7 @@ expected: If Apply fails for a new hotkey, the previously working hotkey still t
 result: pass
 
 ### 7. Hotkey Persists Across Restart
-expected: After successfully applying a new hotkey, close and relaunch VoxFlow. The same hotkey remains configured and works.
+expected: After successfully applying a new hotkey, close and relaunch VoxWeave. The same hotkey remains configured and works.
 result: pass
 
 ## Summary

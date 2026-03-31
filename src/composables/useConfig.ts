@@ -65,7 +65,7 @@ async function loadAudioInputDevices(): Promise<void> {
       if (warnedUnavailableDevice !== selectedDevice) {
         audioWarning.value = {
           code: "selected_device_unavailable",
-          message: `Selected microphone '${selectedDevice}' is unavailable. VoxFlow will use system default until a device is selected.`,
+          message: `Selected microphone '${selectedDevice}' is unavailable. VoxWeave will use system default until a device is selected.`,
           requested_device: selectedDevice,
           active_device: null,
         };

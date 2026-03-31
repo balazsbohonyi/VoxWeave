@@ -48,11 +48,11 @@ pub struct DownloadEventPayload {
 // Path helpers
 // ---------------------------------------------------------------------------
 
-/// Returns the models directory: `%APPDATA%/VoxFlow/models/`.
+/// Returns the models directory: `%APPDATA%/VoxWeave/models/`.
 pub fn models_dir() -> Result<std::path::PathBuf, String> {
     let base = dirs_next::config_dir()
         .ok_or_else(|| "Cannot determine user config directory".to_string())?;
-    Ok(base.join("VoxFlow").join("models"))
+    Ok(base.join("VoxWeave").join("models"))
 }
 
 /// Returns the file path for a specific model ID.
@@ -238,11 +238,11 @@ mod tests {
     }
 
     #[test]
-    fn models_dir_ends_with_voxflow_models() {
+    fn models_dir_ends_with_voxweave_models() {
         let dir = models_dir().expect("models_dir should succeed");
         assert!(
-            dir.ends_with("VoxFlow/models") || dir.ends_with("VoxFlow\\models"),
-            "Expected path to end with VoxFlow/models, got: {:?}",
+            dir.ends_with("VoxWeave/models") || dir.ends_with("VoxWeave\\models"),
+            "Expected path to end with VoxWeave/models, got: {:?}",
             dir
         );
     }

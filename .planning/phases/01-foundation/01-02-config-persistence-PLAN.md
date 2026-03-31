@@ -19,14 +19,14 @@ requirements:
 
 <plan>
 <goal>
-Implement the full v1 config model and persistence layer at `%APPDATA%/VoxFlow/config.json` with stable defaults and unknown-field preservation.
+Implement the full v1 config model and persistence layer at `%APPDATA%/VoxWeave/config.json` with stable defaults and unknown-field preservation.
 </goal>
 
 <must_haves>
 - Full v1 `AppConfig` schema exists now, including future-phase fields.
 - Missing fields default from Rust-owned defaults.
 - Unknown JSON fields survive load/save round-trips.
-- Config path is `%APPDATA%/VoxFlow/config.json`.
+- Config path is `%APPDATA%/VoxWeave/config.json`.
 </must_haves>
 
 <tasks>

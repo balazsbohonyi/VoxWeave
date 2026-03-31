@@ -65,7 +65,7 @@ The three primary tasks are: (1) add `whisper-rs` behind the feature flag and im
 | LOCL-01 | App supports local transcription via whisper.cpp (whisper-rs) | whisper-rs crate behind `local-transcription` feature; `LocalProvider` implementing `TranscriptionProviderTrait` |
 | LOCL-02 | Models downloaded on-demand from settings with progress bar and cancel option | Rust `start_model_download` command; reqwest streaming with `Content-Length` for progress; `emit()` for events; `AtomicBool` cancel flag |
 | LOCL-03 | Available models: tiny (~75MB), base (~150MB), small (~500MB), medium (~1.5GB) | Already in `LOCAL_MODELS` array in TranscriptionSection.vue; HF URLs are `ggml-{tiny,base,small,medium}.bin` |
-| LOCL-04 | Downloaded models stored in `%APPDATA%/VoxFlow/models/`; user can delete models | `dirs_next::data_dir()` or `dirs_next::config_dir()` for path resolution; add `delete_model` command |
+| LOCL-04 | Downloaded models stored in `%APPDATA%/VoxWeave/models/`; user can delete models | `dirs_next::data_dir()` or `dirs_next::config_dir()` for path resolution; add `delete_model` command |
 | LOCL-05 | Local transcription runs on a background thread without freezing the UI | `std::thread::spawn` for whisper-rs inference (already a locked decision in CLAUDE.md) |
 | LOCL-06 | Audio is passed as WAV/PCM float32 to whisper.cpp | `format_for_provider` already routes `Local` to `EncodedFormat::Wav`; whisper-rs `WhisperContext::new()` + `FullParams` + `pcm_to_mel` + `full()` |
 | LOCL-07 | If model file is missing or corrupt, show error with prompt to re-download | Add `TranscriptionError::ModelMissing` and `ModelLoadFailed` variants; emit via existing toast pattern; "Open Settings" action button |
@@ -87,7 +87,7 @@ The three primary tasks are: (1) add `whisper-rs` behind the feature flag and im
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
 | std::sync::atomic::AtomicBool | stdlib | Download cancel signal | Preferred over channel when cancel is fire-and-forget; no message payload needed |
-| std::fs | stdlib | Model directory creation, file write, file delete | Creating `%APPDATA%/VoxFlow/models/`, writing downloaded bytes, deleting models |
+| std::fs | stdlib | Model directory creation, file write, file delete | Creating `%APPDATA%/VoxWeave/models/`, writing downloaded bytes, deleting models |
 | futures-util | (pulled by reqwest) | `StreamExt::next()` for byte stream | If `bytes_stream()` needs iteration |
 
 ### Alternatives Considered
@@ -211,7 +211,7 @@ pub fn cancel_model_download(app: AppHandle<impl Runtime>) -> Result<(), String>
 
 #[tauri::command]
 pub fn get_downloaded_models(app: AppHandle<impl Runtime>) -> Result<Vec<String>, String> {
-    // Scan %APPDATA%/VoxFlow/models/ for ggml-*.bin files
+    // Scan %APPDATA%/VoxWeave/models/ for ggml-*.bin files
     // Return vec of model IDs ("tiny", "base", etc.)
 }
 
@@ -220,7 +220,7 @@ pub fn delete_model(
     app: AppHandle<impl Runtime>,
     model_id: String,
 ) -> Result<(), String> {
-    // Delete %APPDATA%/VoxFlow/models/ggml-{model_id}.bin
+    // Delete %APPDATA%/VoxWeave/models/ggml-{model_id}.bin
     // If it's the active model, clear config.transcription.providers.local.model_path
 }
 ```
@@ -278,7 +278,7 @@ const activeDownloadId = ref<string | null>(null);
 
 - **Blocking Tokio with whisper-rs:** Never call `ctx.full()` inside a `tauri::async_runtime::spawn` closure — use `std::thread::spawn` or `tokio::task::spawn_blocking`. CPU work on the async executor freezes the UI.
 - **Holding MutexGuard across await:** Same rule as cloud providers — clone config before any `.await` point. The download cancel flag access must release the guard before awaiting.
-- **Writing to a non-existent directory:** Always `std::fs::create_dir_all` on `%APPDATA%/VoxFlow/models/` before writing the model file. `dirs_next::config_dir()` returns `%APPDATA%` on Windows.
+- **Writing to a non-existent directory:** Always `std::fs::create_dir_all` on `%APPDATA%/VoxWeave/models/` before writing the model file. `dirs_next::config_dir()` returns `%APPDATA%` on Windows.
 - **Partial file left on error:** The download task must delete partial files on any non-success exit path (cancel, network error, disk error). Use a `drop` guard or explicit cleanup in all branches.
 - **Missing feature gate on local.rs import:** `use crate::transcription::local::LocalProvider;` in `service.rs` must be inside `#[cfg(feature = "local-transcription")]` — otherwise the non-feature build fails.
 - **Event listeners not unlistened in Vue:** `listen()` from `@tauri-apps/api/event` returns an unlisten function. Call it in `onUnmounted` to avoid leaked listeners between Settings re-opens.
@@ -291,7 +291,7 @@ const activeDownloadId = ref<string | null>(null);
 |---------|-------------|-------------|-----|
 | WAV decoding for whisper-rs | Custom WAV parser | whisper-rs `convert_integer_to_float_audio` + pass raw f32 from existing encode.rs output | The WAV encoder in `encode.rs` already produces PCM int16; whisper-rs's helper converts to f32 OR use the f32 directly from `pcm_buffer` before encoding |
 | Progress percentage without Content-Length | Estimate from model sizes | Use `Content-Length` response header from Hugging Face — it's always present for .bin files | HF always returns Content-Length for direct file downloads |
-| Model directory path | Hardcode `C:\Users\...` | `dirs_next::config_dir().unwrap().join("VoxFlow").join("models")` | `dirs_next` already in Cargo.toml; handles all Windows user profile layouts |
+| Model directory path | Hardcode `C:\Users\...` | `dirs_next::config_dir().unwrap().join("VoxWeave").join("models")` | `dirs_next` already in Cargo.toml; handles all Windows user profile layouts |
 | Download cancellation | SIGKILL thread | `AtomicBool` checked in the streaming loop every chunk | Clean, cooperative cancellation with cleanup |
 
 **Key insight:** The WAV bytes stored in `EncodedAudio` are 16-bit PCM. whisper-rs expects `f32` samples. The `pcm_buffer` in `AudioSessionState` already holds f32 samples at 16kHz — passing those directly to whisper-rs (bypassing the WAV encode step) is more efficient, but requires access to the pcm_buffer before encoding. Since the existing pipeline encodes to WAV and passes `EncodedAudio`, the simpler approach is to decode the WAV header (skip 44 bytes) and reinterpret as i16 → f32. This is 5 lines of code, not a "hand-roll" concern.

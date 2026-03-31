@@ -1,4 +1,4 @@
-# Pitfalls Research: VoxFlow
+# Pitfalls Research: VoxWeave
 
 ## Critical Pitfalls
 
@@ -43,7 +43,7 @@
 
 ### P3: SendInput Fails Silently Against Elevated Processes
 
-**Problem:** `SendInput` returns 0 (no events inserted) when the target window belongs to a process running at a higher integrity level than VoxFlow. There's no error — it just silently does nothing. Users see "nothing happened" with no feedback.
+**Problem:** `SendInput` returns 0 (no events inserted) when the target window belongs to a process running at a higher integrity level than VoxWeave. There's no error — it just silently does nothing. Users see "nothing happened" with no feedback.
 
 **Warning signs:**
 - Text injection works in Notepad but not in Task Manager or admin Command Prompt
@@ -150,9 +150,9 @@
 **Problem:** When the floating indicator appears/disappears, or when the settings window gains focus, the foreground window (where text should be injected) may change. Tauri window focus events can be unpredictable.
 
 **Warning signs:**
-- Text injected into VoxFlow's own window instead of the target app
+- Text injected into VoxWeave's own window instead of the target app
 - Floating indicator steals focus momentarily, causing the wrong window to be targeted
-- `GetForegroundWindow` returns VoxFlow's HWND after indicator show
+- `GetForegroundWindow` returns VoxWeave's HWND after indicator show
 
 **Prevention:**
 - Save the target window handle (`HWND`) at recording START, not at injection time
