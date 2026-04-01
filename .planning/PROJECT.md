@@ -12,28 +12,29 @@ Text lands in any window — terminals, editors, browsers — without friction. 
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Global hotkey (default `Ctrl+Shift+Space`) triggers toggle-mode recording from any application
+- [x] Audio captured from selected microphone at 16kHz mono, encoded as Opus (cloud) or WAV (local)
+- [x] Floating always-on-top indicator with real-time waveform during recording
+- [x] Cloud transcription via OpenAI and Groq with per-provider API key and model config
+- [x] Local transcription via whisper.cpp with on-demand model download (tiny/base/small/medium)
+- [x] FlashPaste injection (default): clipboard save → paste → restore, with terminal-aware shortcuts
+- [x] Simulated keystroke injection via SendInput with KEYEVENTF_UNICODE and configurable speed
+- [x] Manual clipboard mode (copy without auto-paste)
+- [x] Terminal detection by window class for appropriate paste shortcut selection
+- [x] Elevation detection with relaunch prompt or clipboard fallback
+- [x] Injection cancellation via Escape or hotkey during active injection
+- [x] Automatic fallback chain: Keystrokes → FlashPaste → Clipboard
+- [x] System tray icon with context menu, recording state indicator, minimize-to-tray
+- [x] First-launch setup wizard (engine → provider/key → hotkey)
+- [x] Settings UI: General, Audio, Transcription (Cloud/Local), Injection sections
+- [x] Config persistence to JSON in app data directory
+- [x] Auto-start on Windows startup (opt-in)
+- [x] Toast notifications for status, errors, and actionable prompts
+- [x] Language selection with Auto-detect option in Settings (Transcription section)
 
 ### Active
 
-- [ ] Global hotkey (default `Ctrl+Shift+Space`) triggers toggle-mode recording from any application
-- [ ] Audio captured from selected microphone at 16kHz mono, encoded as Opus (cloud) or WAV (local)
-- [ ] Floating always-on-top indicator with real-time waveform during recording
-- [ ] Cloud transcription via OpenAI and Groq with per-provider API key and model config
-- [ ] Local transcription via whisper.cpp with on-demand model download (tiny/base/small/medium)
-- [ ] FlashPaste injection (default): clipboard save → paste → restore, with terminal-aware shortcuts
-- [ ] Simulated keystroke injection via SendInput with KEYEVENTF_UNICODE and configurable speed
-- [ ] Manual clipboard mode (copy without auto-paste)
-- [ ] Terminal detection by window class for appropriate paste shortcut selection
-- [ ] Elevation detection with relaunch prompt or clipboard fallback
-- [ ] Injection cancellation via Escape or hotkey during active injection
-- [ ] Automatic fallback chain: Keystrokes → FlashPaste → Clipboard
-- [ ] System tray icon with context menu, recording state indicator, minimize-to-tray
-- [ ] First-launch setup wizard (engine → provider/key → hotkey)
-- [ ] Settings UI: General, Audio, Transcription (Cloud/Local), Injection sections
-- [ ] Config persistence to JSON in app data directory
-- [ ] Auto-start on Windows startup (opt-in)
-- [ ] Toast notifications for status, errors, and actionable prompts
+(None — all v1 requirements implemented)
 
 ### Out of Scope
 
@@ -41,7 +42,8 @@ Text lands in any window — terminals, editors, browsers — without friction. 
 - Streaming/real-time transcription display — batch mode only for v1
 - Personal dictionary or custom vocabulary — v2+
 - Per-app tone adaptation — v2+
-- Multi-language auto-detection — user sets language (auto-detect as single option is fine)
+- ~~Multi-language auto-detection — user sets language (auto-detect as single option is fine)~~
+  - **Implemented:** language dropdown in Settings with Auto-detect option
 - Usage tracking, analytics, or telemetry — never
 - User accounts, subscription, or cloud sync — never (BYOK philosophy)
 - Android support — Phase 2 (future milestone)
@@ -68,12 +70,12 @@ Text lands in any window — terminals, editors, browsers — without friction. 
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Tauri v2 over Electron | Smaller binary, Rust backend for performance-critical audio/injection code, native Windows API access | — Pending |
-| FlashPaste as default injection | Most universally compatible method; clipboard-based avoids integrity level issues | — Pending |
-| Hardcoded model lists (not dynamic) | Simpler, more reliable; avoids API calls just to populate dropdowns | — Pending |
-| OpenRouter via chat completions (not Whisper endpoint) | OpenRouter has no Whisper-style STT endpoint; all audio goes through chat completions with input_audio | — Pending |
-| Platform abstraction from day one | macOS is next target; invest in trait-based platform layer now to avoid rewrite later | — Pending |
-| std::thread for whisper.cpp (not Tokio) | whisper.cpp is CPU-bound; blocking a Tokio thread starves the async runtime | — Pending |
+| Tauri v2 over Electron | Smaller binary, Rust backend for performance-critical audio/injection code, native Windows API access | Shipped — Windows installer under 50MB |
+| FlashPaste as default injection | Most universally compatible method; clipboard-based avoids integrity level issues | Shipped — default injection mode |
+| Hardcoded model lists (not dynamic) | Simpler, more reliable; avoids API calls just to populate dropdowns | Shipped — via `get_provider_models` command |
+| OpenRouter dropped (never re-add) | No Whisper-style STT endpoint; chat completions with base64 audio produced inconsistent results | Confirmed by user testing — removed in v1 |
+| Platform abstraction from day one | macOS is next target; invest in trait-based platform layer now to avoid rewrite later | Shipped — all platform code behind traits in `platform/` |
+| `spawn_blocking` for whisper.cpp (not Tokio thread) | whisper.cpp is CPU-bound; blocking a Tokio thread starves the async runtime | Shipped — CPU inference on blocking thread pool |
 
 ---
-*Last updated: 2026-03-14 after initialization*
+*Last updated: 2026-04-01 — all v1 requirements implemented across 10 phases*
