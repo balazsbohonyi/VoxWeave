@@ -49,7 +49,7 @@ const animatedLevel = computed(() => {
 const waveCanvas = ref<HTMLCanvasElement | null>(null);
 let rafId: number | null = null;
 
-const BAR_COUNT = 15;
+const BAR_COUNT = 20;
 const BAR_WIDTH = 3;
 const BAR_GAP = 2;
 const MIN_HEIGHT = 2;
@@ -57,6 +57,7 @@ const MAX_HEIGHT = 18;
 const LERP_SPEED = 0.18;
 
 const barHeights = new Float32Array(BAR_COUNT).fill(MIN_HEIGHT);
+const idleJitter = Float32Array.from({ length: BAR_COUNT }, () => (Math.random() - 0.5) * 0.4);
 let t1 = 0;
 let t2 = 0;
 
@@ -83,27 +84,28 @@ function drawFrame() {
   for (let i = 0; i < BAR_COUNT; i++) {
     let target: number;
 
-    if (recording && lvl > 0) {
-      const t = (i + 1) / BAR_COUNT;
-      const centerProfile = 1 - Math.abs(t - 0.5);
-      target = MIN_HEIGHT + lvl * (centerProfile * 0.75 + 0.25) * MAX_HEIGHT;
-    } else if (recording) {
-      const sim = Math.abs(
+    if (recording) {
+      const sim = Math.max(0, Math.abs(
         Math.sin(t1 * 1.3 + i * 0.55) * 0.5 + Math.sin(t2 * 2.1 + i * 0.38) * 0.3,
-      );
-      target = MIN_HEIGHT + sim * MAX_HEIGHT * 0.5;
+      ) + idleJitter[i]);
+      const scale = 0.3 + Math.pow(lvl, 0.3) * 0.7;
+      target = MIN_HEIGHT + sim * MAX_HEIGHT * scale;
     } else if (processing) {
       const breath = (Math.sin(t1 * 0.9) + 1) / 2;
-      target = MIN_HEIGHT + breath * MAX_HEIGHT * 0.25;
+      const phase = (i / (BAR_COUNT - 1)) * Math.PI * 2;
+      const sineVal = Math.max(0, (Math.sin(phase) + 1) / 2 + idleJitter[i]);
+      target = MIN_HEIGHT + sineVal * MAX_HEIGHT * 0.28 * (0.4 + breath * 0.6);
     } else {
-      target = MIN_HEIGHT;
+      const phase = (i / (BAR_COUNT - 1)) * Math.PI * 2;
+      const sineVal = Math.max(0, (Math.sin(phase) + 1) / 2 + idleJitter[i]);
+      target = MIN_HEIGHT + sineVal * MAX_HEIGHT * 0.28;
     }
 
     barHeights[i] += (target - barHeights[i]) * LERP_SPEED;
   }
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "rgba(255,255,255,0.9)";
+  ctx.fillStyle = (recording || processing) ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.25)";
 
   const totalWidth = BAR_COUNT * (BAR_WIDTH + BAR_GAP) - BAR_GAP;
   const xOffset = (canvas.width - totalWidth) / 2;
@@ -115,11 +117,7 @@ function drawFrame() {
     const x = xOffset + i * (BAR_WIDTH + BAR_GAP);
 
     ctx.beginPath();
-    ctx.roundRect(x, centerY - h, BAR_WIDTH, h, radius);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.roundRect(x, centerY, BAR_WIDTH, h, radius);
+    ctx.roundRect(x, centerY - h, BAR_WIDTH, h * 2, radius);
     ctx.fill();
   }
 
@@ -181,10 +179,10 @@ onMounted(async () => {
     appEl.style.flexDirection = "column";
   }
 
-  // Set canvas physical size
+  // Set canvas physical size — derived from bar constants so all bars always fit
   const canvas = waveCanvas.value;
   if (canvas) {
-    canvas.width = 76;
+    canvas.width = BAR_COUNT * (BAR_WIDTH + BAR_GAP) - BAR_GAP;
     canvas.height = 22;
   }
 

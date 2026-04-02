@@ -12,6 +12,8 @@ Each item follows the format: `[status] ID | Priority: Description`
 ## Bugs
 
 - [ ] B001 | P1: When doing a recording with silence (no talk at all), the app will inject: `[BLANK_AUDIO]`
+  - sometimes for really long pauses it will inject in those parts of the text something like:
+    - `[Pause]` or even multiple ones like `[Pause][Pause][Pause]`
 
 ## Changes
 
@@ -21,7 +23,8 @@ Each item follows the format: `[status] ID | Priority: Description`
 - [ ] C004 | P1: Create and change the logo
 - [ ] C005 | P1: Replace the ellipsis for the processing state with an animated spinner
 - [ ] C006 | P1: Display a typing cue while injecting the text
-- [ ] C007 | P1: Simplify the waveforms - rounded rectangles instead of squares. Also smooth the animation.
+- [x] C007 | P1: Simplify the waveforms - rounded rectangles instead of squares
+  - also use natural smoothened animation and syne waveforms
 - [ ] C008 | P1: simplify the indicator
   - make it smaller
   - display the indicator only when recording and remove the setting that forces to show it on app start
