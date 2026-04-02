@@ -27,9 +27,9 @@ Each item follows the format: `[status] ID | Priority: Description`
 
 ## Removals
 
-- [ ] R001 | P1: Remove support for starting/stopping recording on the REC indicator
+- [x] R001 | P1: Remove support for starting/stopping recording on the REC indicator
 - [ ] R002 | P2: Remove the success state visualization (green border + green REC indicator)
-- [ ] R004 | P1: Remove the "Start Recording" / "Stop Recording" tray options
+- [x] R004 | P1: Remove the "Start Recording" / "Stop Recording" tray options
 - [ ] R005 | P1: Remove injection cancellation (and the toast displayed after)
 
 ## Testing
