@@ -302,6 +302,7 @@ Recent decisions affecting current work:
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 1 | Remove click from record circle / remove Start Recording + Stop Recording from the tray menu | 2026-04-02 | 8fe54fe | [1-remove-click-from-record-circle-remove-s](./quick/1-remove-click-from-record-circle-remove-s/) |
+| 2 | remove injection cancellation support | 2026-04-02 | 739110e | [2-remove-injection-cancellation-support](./quick/2-remove-injection-cancellation-support/) |
 
 ### Blockers/Concerns
 
@@ -313,6 +314,6 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-04-02
-Stopped at: Completed quick task 1: Remove click from record circle / remove Start Recording + Stop Recording from the tray menu
+Stopped at: Completed quick task 2: remove injection cancellation support
 Resume file: None
 
