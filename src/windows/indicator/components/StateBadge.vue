@@ -11,11 +11,8 @@ const icon = computed(() => {
   if (props.state === "recording") return "REC";
   if (props.state === "processing") return "...";
   if (props.state === "injecting") return "INJ";
-  if (props.state === "success") return "DONE";
   return "IDLE";
 });
-
-const isSuccess = computed(() => props.state === "success");
 
 const methodHint = computed(() => {
   if (props.state !== "injecting") return "";
@@ -26,7 +23,7 @@ const methodHint = computed(() => {
 </script>
 
 <template>
-  <div class="indicator-badge" :class="{ 'indicator-badge--success': isSuccess }">
+  <div class="indicator-badge">
     <span class="indicator-badge-icon">{{ icon }}</span>
     <span v-if="methodHint" class="indicator-badge-hint">{{ methodHint }}</span>
   </div>

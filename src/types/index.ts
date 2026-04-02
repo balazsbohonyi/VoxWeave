@@ -107,7 +107,6 @@ export type IndicatorVisualState =
   | "recording"
   | "processing"
   | "injecting"
-  | "success"
   | "hidden";
 
 export interface IndicatorStatePayload {

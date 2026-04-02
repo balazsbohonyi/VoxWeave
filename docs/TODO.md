@@ -2,11 +2,16 @@
 
 Each item follows the format: `[status] ID | Priority: Description`
 
-- **ID** — unique identifier prefixed by section (`C` = Change, `R` = Removal, `F` = Feature, `T` = Testing)
+- **ID** — unique identifier prefixed by section
+  - `B` = Bug, `C` = Change, `R` = Removal, `F` = Feature, `T` = Testing
 - **Priority** — `P1` (must do), `P2` (should do), `P3` (nice to have)
 - **Status** — `[ ]` open, `[x]` completed
 
 ---
+
+## Bugs
+
+- [ ] B001 | P1: When doing a recording with silence (no talk at all), the app will inject: `[BLANK_AUDIO]`
 
 ## Changes
 
@@ -28,7 +33,7 @@ Each item follows the format: `[status] ID | Priority: Description`
 ## Removals
 
 - [x] R001 | P1: Remove support for starting/stopping recording on the REC indicator
-- [ ] R002 | P2: Remove the success state visualization (green border + green REC indicator)
+- [x] R002 | P2: Remove the success state visualization (green border + green REC indicator)
 - [x] R004 | P1: Remove the "Start Recording" / "Stop Recording" tray options
 - [x] R005 | P1: Remove support for injection cancellation with ESC, and the toast displayed after
 
@@ -41,7 +46,6 @@ Each item follows the format: `[status] ID | Priority: Description`
 - [ ] T003 | P3: Test the warning toasts inside the Settings window
 - [ ] T004 | P2: Test hotkey assignment for registered hotkey combinations (registered by other apps)
 - [ ] T005 | P1: Test the "Auto-start on Windows start" option
-
 
 ## New features
 
