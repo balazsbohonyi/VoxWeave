@@ -100,10 +100,6 @@ function queuePersistPosition(): void {
   }, 180);
 }
 
-async function onRecordButtonClick(): Promise<void> {
-  await invoke("toggle_recording_from_indicator");
-}
-
 onMounted(async () => {
   document.documentElement.style.overflow = "hidden";
   document.documentElement.style.height = "100%";
@@ -181,9 +177,9 @@ onBeforeUnmount(() => {
   >
     <section class="indicator-pill" :data-state="state">
       <div class="indicator-left">
-        <button class="indicator-record-button" type="button" @click.stop="onRecordButtonClick">
+        <span class="indicator-record-button">
           <span class="indicator-record-dot" :class="{ 'indicator-record-dot-active': isRecording }" />
-        </button>
+        </span>
         <StateBadge :state="state" :injection-mode="injectionMode" />
       </div>
       <div class="indicator-waveform">

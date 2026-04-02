@@ -1,4 +1,3 @@
-use crate::hotkey::service;
 use crate::indicator;
 use crate::indicator::events::{IndicatorStatePayload, IndicatorVisualState};
 use crate::state::{AppState, RecordingState};
@@ -46,12 +45,6 @@ pub fn get_recording_state(state: State<AppState>) -> Result<RecordingState, Str
         .map_err(|e| e.to_string())?
         .clone();
     Ok(current)
-}
-
-#[tauri::command]
-pub fn toggle_recording_from_indicator(app: AppHandle) -> Result<(), String> {
-    service::toggle_recording_state(&app);
-    Ok(())
 }
 
 #[tauri::command]

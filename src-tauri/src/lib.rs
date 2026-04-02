@@ -163,7 +163,6 @@ pub fn run() {
             commands::indicator::persist_indicator_position,
             commands::indicator::get_indicator_state,
             commands::indicator::get_recording_state,
-            commands::indicator::toggle_recording_from_indicator,
             commands::indicator::hide_indicator,
             commands::transcription::retry_transcription,
             commands::transcription::retry_transcription_with_fallback,
