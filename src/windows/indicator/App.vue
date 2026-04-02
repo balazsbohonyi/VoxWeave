@@ -15,7 +15,6 @@ import type {
 
 const state = ref<IndicatorVisualState>("hidden");
 const level = ref(0);
-const WAVE_BAR_COUNT = 15;
 const injectionMode = ref<InjectionMode>("flash_paste");
 const win = getCurrentWindow();
 
@@ -26,7 +25,7 @@ let unlistenMoved: UnlistenFn | null = null;
 let persistTimer: ReturnType<typeof setTimeout> | null = null;
 
 const isRecording = computed(() => state.value === "recording");
-const WAVE_SEGMENTS = 7;
+const isProcessing = computed(() => state.value === "processing");
 const RECORDING_STALE_MS = 260;
 const RECORDING_SMOOTHING = 0.75;
 const RECORDING_NOISE_GATE = 0.001;
@@ -46,18 +45,86 @@ const animatedLevel = computed(() => {
   return Math.min(1, Math.sqrt(gated * RECORDING_GAIN));
 });
 
-const bars = computed(() => {
-  const clamped = Math.max(0, Math.min(1, animatedLevel.value));
-  return Array.from({ length: WAVE_BAR_COUNT }, (_, index) => {
-    const t = (index + 1) / WAVE_BAR_COUNT;
-    const centerProfile = 1 - Math.abs(t - 0.5);
-    const envelope = 0.35 + centerProfile * 0.65;
-    const value = clamped * envelope;
-    const activeSegments =
-      value <= 0 ? 0 : Math.max(1, Math.min(WAVE_SEGMENTS, Math.ceil(value * WAVE_SEGMENTS)));
-    return activeSegments;
-  });
-});
+// Canvas waveform
+const waveCanvas = ref<HTMLCanvasElement | null>(null);
+let rafId: number | null = null;
+
+const BAR_COUNT = 15;
+const BAR_WIDTH = 3;
+const BAR_GAP = 2;
+const MIN_HEIGHT = 2;
+const MAX_HEIGHT = 18;
+const LERP_SPEED = 0.18;
+
+const barHeights = new Float32Array(BAR_COUNT).fill(MIN_HEIGHT);
+let t1 = 0;
+let t2 = 0;
+
+function drawFrame() {
+  const canvas = waveCanvas.value;
+  if (!canvas) {
+    rafId = requestAnimationFrame(drawFrame);
+    return;
+  }
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    rafId = requestAnimationFrame(drawFrame);
+    return;
+  }
+
+  t1 += 0.04;
+  t2 += 0.027;
+
+  const recording = isRecording.value;
+  const processing = isProcessing.value;
+  const lvl = animatedLevel.value;
+
+  for (let i = 0; i < BAR_COUNT; i++) {
+    let target: number;
+
+    if (recording && lvl > 0) {
+      const t = (i + 1) / BAR_COUNT;
+      const centerProfile = 1 - Math.abs(t - 0.5);
+      target = MIN_HEIGHT + lvl * (centerProfile * 0.75 + 0.25) * MAX_HEIGHT;
+    } else if (recording) {
+      const sim = Math.abs(
+        Math.sin(t1 * 1.3 + i * 0.55) * 0.5 + Math.sin(t2 * 2.1 + i * 0.38) * 0.3,
+      );
+      target = MIN_HEIGHT + sim * MAX_HEIGHT * 0.5;
+    } else if (processing) {
+      const breath = (Math.sin(t1 * 0.9) + 1) / 2;
+      target = MIN_HEIGHT + breath * MAX_HEIGHT * 0.25;
+    } else {
+      target = MIN_HEIGHT;
+    }
+
+    barHeights[i] += (target - barHeights[i]) * LERP_SPEED;
+  }
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "rgba(255,255,255,0.9)";
+
+  const totalWidth = BAR_COUNT * (BAR_WIDTH + BAR_GAP) - BAR_GAP;
+  const xOffset = (canvas.width - totalWidth) / 2;
+  const centerY = canvas.height / 2;
+  const radius = BAR_WIDTH / 2;
+
+  for (let i = 0; i < BAR_COUNT; i++) {
+    const h = barHeights[i];
+    const x = xOffset + i * (BAR_WIDTH + BAR_GAP);
+
+    ctx.beginPath();
+    ctx.roundRect(x, centerY - h, BAR_WIDTH, h, radius);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.roundRect(x, centerY, BAR_WIDTH, h, radius);
+    ctx.fill();
+  }
+
+  rafId = requestAnimationFrame(drawFrame);
+}
 
 async function loadInjectionMode(): Promise<void> {
   try {
@@ -114,6 +181,16 @@ onMounted(async () => {
     appEl.style.flexDirection = "column";
   }
 
+  // Set canvas physical size
+  const canvas = waveCanvas.value;
+  if (canvas) {
+    canvas.width = 76;
+    canvas.height = 22;
+  }
+
+  // Start animation loop
+  rafId = requestAnimationFrame(drawFrame);
+
   await loadInjectionMode();
   unlistenMoved = await win.onMoved(() => {
     queuePersistPosition();
@@ -162,6 +239,7 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  if (rafId !== null) cancelAnimationFrame(rafId);
   if (unlistenState) unlistenState();
   if (unlistenHidden) unlistenHidden();
   if (unlistenAudioLevel) unlistenAudioLevel();
@@ -183,18 +261,7 @@ onBeforeUnmount(() => {
         <StateBadge :state="state" :injection-mode="injectionMode" />
       </div>
       <div class="indicator-waveform">
-        <div
-          v-for="(activeSegments, index) in bars"
-          :key="index"
-          class="indicator-waveform-column"
-        >
-          <span
-            v-for="segment in WAVE_SEGMENTS"
-            :key="segment"
-            class="indicator-waveform-segment"
-            :class="{ 'indicator-waveform-segment-active': segment <= activeSegments }"
-          />
-        </div>
+        <canvas ref="waveCanvas" class="indicator-waveform-canvas" />
       </div>
     </section>
   </main>
