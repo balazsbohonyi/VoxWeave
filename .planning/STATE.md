@@ -297,6 +297,12 @@ Recent decisions affecting current work:
 
 - `2026-03-25-implement-wizard-step-2-local-model-configuration.md` — Wizard Step 2 local model config: replace "coming soon" placeholder with real model/device selection UI (Phase 10 scope)
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 1 | Remove click from record circle / remove Start Recording + Stop Recording from the tray menu | 2026-04-02 | 8fe54fe | [1-remove-click-from-record-circle-remove-s](./quick/1-remove-click-from-record-circle-remove-s/) |
+
 ### Blockers/Concerns
 
 - Tauri transparent/click-through window support needs early validation (Phase 4 risk)
@@ -306,7 +312,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-30T20:06:37.595Z
-Stopped at: Completed 10-04-PLAN.md (3 UAT gaps closed, phase 10 ready for completion)
+Last session: 2026-04-02
+Stopped at: Completed quick task 1: Remove click from record circle / remove Start Recording + Stop Recording from the tray menu
 Resume file: None
 
