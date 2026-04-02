@@ -9,16 +9,9 @@ use tauri::{
 };
 
 const TRAY_ID: &str = "main";
-const START_STOP_ID: &str = "start_stop_recording";
 
 pub fn setup_tray(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
-    let recording_state = app
-        .state::<crate::state::AppState>()
-        .recording_state
-        .lock()
-        .unwrap()
-        .clone();
-    let menu = build_tray_menu(app, recording_state)?;
+    let menu = build_tray_menu(app)?;
 
     // Load the tray icon from the bundled icon
     let icon = Image::from_bytes(include_bytes!("../icons/32x32.png"))?;
@@ -51,9 +44,6 @@ fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event: tauri::menu::MenuEve
                 }
             }
         }
-        START_STOP_ID => {
-            crate::hotkey::service::toggle_recording_state(app);
-        }
         _ => {}
     }
 }
@@ -83,37 +73,18 @@ pub fn show_settings_window<R: Runtime>(app: &AppHandle<R>) {
 
 fn build_tray_menu<R: Runtime, M: Manager<R>>(
     manager: &M,
-    recording_state: crate::state::RecordingState,
 ) -> Result<Menu<R>, Box<dyn std::error::Error>> {
     let open_settings = MenuItem::with_id(manager, "open_settings", "Settings", true, None::<&str>)?;
-
-    let start_stop = MenuItem::with_id(
-        manager,
-        START_STOP_ID,
-        recording_menu_label(&recording_state),
-        true,
-        None::<&str>,
-    )?;
-
     let sep1 = PredefinedMenuItem::separator(manager)?;
     let quit = MenuItem::with_id(manager, "quit", "Quit VoxWeave", true, None::<&str>)?;
 
-    let menu = Menu::with_items(manager, &[&open_settings, &start_stop, &sep1, &quit])?;
+    let menu = Menu::with_items(manager, &[&open_settings, &sep1, &quit])?;
     Ok(menu)
 }
 
-fn recording_menu_label(state: &crate::state::RecordingState) -> &'static str {
-    match state {
-        crate::state::RecordingState::Idle => "Start Recording",
-        crate::state::RecordingState::Recording | crate::state::RecordingState::Transcribing => {
-            "Stop Recording"
-        }
-    }
-}
-
-pub fn update_recording_menu<R: Runtime>(app: &AppHandle<R>, state: crate::state::RecordingState) {
+pub fn update_recording_menu<R: Runtime>(app: &AppHandle<R>) {
     if let Some(tray) = app.tray_by_id(TRAY_ID) {
-        if let Ok(menu) = build_tray_menu(app, state) {
+        if let Ok(menu) = build_tray_menu(app) {
             let _ = tray.set_menu(Some(menu));
         }
     }

@@ -241,8 +241,7 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
         previous
     };
 
-    let next_state = state.recording_state.lock().unwrap().clone();
-    tray::update_recording_menu(app, next_state.clone());
+    tray::update_recording_menu(app);
 
     if previous_state == RecordingState::Idle {
         // Pre-recording guard: if Local provider is selected but no model is
@@ -271,7 +270,7 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                     drop(cfg);
                     // Reset state back to Idle (it was advanced to Recording above)
                     *state.recording_state.lock().unwrap() = RecordingState::Idle;
-                    tray::update_recording_menu(app, RecordingState::Idle);
+                    tray::update_recording_menu(app);
                     let payload = TranscriptionErrorPayload {
                         code: TranscriptionErrorCode::ModelMissing,
                         message: "No local model downloaded.".to_string(),
@@ -304,7 +303,7 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
         if let Err(err) = audio::start_recording(app) {
             log::warn!("Failed to start recording: {err}");
             *state.recording_state.lock().unwrap() = RecordingState::Idle;
-            tray::update_recording_menu(app, RecordingState::Idle);
+            tray::update_recording_menu(app);
             indicator::hide(app);
             return;
         }
@@ -317,7 +316,7 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                 log::warn!("Failed to finalize recording: {err}");
                 let state = app.state::<AppState>();
                 *state.recording_state.lock().unwrap() = RecordingState::Idle;
-                tray::update_recording_menu(app, RecordingState::Idle);
+                tray::update_recording_menu(app);
                 // Show the error as a toast in the indicator overlay.
                 // show_toast_window positions, shows, and hides the indicator itself.
                 // Use TranscriptionErrorPayload because that is what the toast JS expects.
@@ -411,7 +410,7 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                 if let Some(st) = app_for_inject.try_state::<AppState>() {
                                     *st.recording_state.lock().unwrap() = RecordingState::Idle;
                                 }
-                                tray::update_recording_menu(&app_for_inject, RecordingState::Idle);
+                                tray::update_recording_menu(&app_for_inject);
 
                                 match result {
                                     Ok(crate::injection::InjectionResult::Ok) => {
@@ -568,7 +567,7 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                     if let Some(state) = app_clone.try_state::<AppState>() {
                         *state.recording_state.lock().unwrap() = RecordingState::Idle;
                     }
-                    tray::update_recording_menu(&app_clone, RecordingState::Idle);
+                    tray::update_recording_menu(&app_clone);
                 });
             }
         }
