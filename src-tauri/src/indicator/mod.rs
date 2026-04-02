@@ -64,10 +64,6 @@ pub fn show_injecting<R: Runtime>(app: &AppHandle<R>) {
     emit_state(app, IndicatorVisualState::Injecting);
 }
 
-pub fn show_success<R: Runtime>(app: &AppHandle<R>) {
-    emit_state(app, IndicatorVisualState::Success);
-}
-
 pub fn hide<R: Runtime>(app: &AppHandle<R>) {
     let keep_visible = {
         let app_state = app.state::<AppState>();
@@ -144,61 +140,6 @@ pub fn show_toast_window<R: Runtime, S: serde::Serialize>(
     toast_win.show().map_err(|e| e.to_string())?;
     let _ = toast_win.eval(&eval_script);
     hide_indicator_window(app);
-
-    Ok(())
-}
-
-/// Shows the toast window adjacent to the indicator, delivers the payload via eval,
-/// WITHOUT hiding the indicator. Use this for success and cancel outcomes where
-/// the indicator should remain visible during the toast display period.
-pub fn show_toast_window_keep_indicator<R: Runtime, S: serde::Serialize>(
-    app: &AppHandle<R>,
-    payload: &S,
-) -> Result<(), String> {
-    let toast_win = app
-        .get_webview_window(TOAST_LABEL)
-        .ok_or_else(|| "Toast window not available".to_string())?;
-
-    let json = serde_json::to_string(payload).map_err(|e| e.to_string())?;
-    let eval_script = format!(
-        "window.__voxweaveShowToast && window.__voxweaveShowToast({})",
-        json
-    );
-
-    // Already visible — deliver payload directly without repositioning.
-    if toast_win.is_visible().map_err(|e| e.to_string())? {
-        let _ = toast_win.eval(&eval_script);
-        return Ok(());
-    }
-
-    let state = app.state::<AppState>();
-    let (position_x, position_y) = {
-        let config = state.config.lock().map_err(|e| e.to_string())?;
-        (config.indicator.position_x, config.indicator.position_y)
-    };
-
-    let Some(monitor) = app.primary_monitor().map_err(|e| e.to_string())? else {
-        // No monitor info — show at fallback position WITHOUT hiding indicator.
-        window::apply_window_policy(&toast_win)?;
-        toast_win.show().map_err(|e| e.to_string())?;
-        let _ = toast_win.eval(&eval_script);
-        return Ok(());
-    };
-
-    let rect = window::monitor_rect(&monitor);
-    let (indicator_x, indicator_y) = window::resolve_position(rect, position_x, position_y);
-    let direction = window::compute_toast_direction(indicator_y, rect);
-    let toast_y = if direction == "above" {
-        indicator_y - window::TOAST_GAP - window::TOAST_HEIGHT
-    } else {
-        indicator_y + window::INDICATOR_HEIGHT + window::TOAST_GAP
-    };
-
-    window::apply_window_policy(&toast_win)?;
-    window::place_window(&toast_win, indicator_x, toast_y)?;
-    toast_win.show().map_err(|e| e.to_string())?;
-    let _ = toast_win.eval(&eval_script);
-    // NOTE: intentionally no hide_indicator_window() call here.
 
     Ok(())
 }

@@ -9,8 +9,6 @@ pub enum IndicatorVisualState {
     Recording,
     Processing,
     Injecting,
-    /// Brief green flash displayed for ~1 second after successful injection.
-    Success,
     Hidden,
 }
 

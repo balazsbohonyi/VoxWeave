@@ -1,5 +1,5 @@
 use crate::indicator;
-use crate::indicator::events::{IndicatorStatePayload, IndicatorVisualState};
+use crate::indicator::events::IndicatorStatePayload;
 use crate::state::{AppState, RecordingState};
 use serde::Serialize;
 use tauri::AppHandle;
@@ -26,15 +26,7 @@ pub fn get_indicator_state(state: State<AppState>) -> Result<IndicatorStatePaylo
         .indicator_visual_state
         .lock()
         .map_err(|e| e.to_string())?;
-    Ok(IndicatorStatePayload {
-        state: match current {
-            IndicatorVisualState::Recording => IndicatorVisualState::Recording,
-            IndicatorVisualState::Processing => IndicatorVisualState::Processing,
-            IndicatorVisualState::Injecting => IndicatorVisualState::Injecting,
-            IndicatorVisualState::Success => IndicatorVisualState::Success,
-            IndicatorVisualState::Hidden => IndicatorVisualState::Hidden,
-        },
-    })
+    Ok(IndicatorStatePayload { state: current })
 }
 
 #[tauri::command]

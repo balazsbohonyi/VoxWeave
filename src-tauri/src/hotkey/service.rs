@@ -406,20 +406,12 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
 
                                 match result {
                                     Ok(crate::injection::InjectionResult::Ok) => {
-                                        // Green success flash for ~1 second, transition to idle,
-                                        // then show toast without hiding indicator (INJC-08, NOTF-01).
-                                        indicator::show_success(&app_for_inject);
-                                        tokio::time::sleep(
-                                            std::time::Duration::from_millis(1000),
-                                        )
-                                        .await;
-                                        let _ = indicator::show_idle(&app_for_inject);
                                         let label = injection_success_label(&injection_config.mode);
                                         let payload = serde_json::json!({
                                             "type": "success",
                                             "message": label
                                         });
-                                        if let Err(e) = indicator::show_toast_window_keep_indicator(
+                                        if let Err(e) = indicator::show_toast_window(
                                             &app_for_inject,
                                             &payload,
                                         ) {
@@ -429,7 +421,6 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                             std::time::Duration::from_millis(10000),
                                         )
                                         .await;
-                                        // Only hide if a new recording has not started.
                                         let is_idle = app_for_inject
                                             .try_state::<AppState>()
                                             .map(|s| {
@@ -438,28 +429,20 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                             })
                                             .unwrap_or(true);
                                         if is_idle {
-                                            indicator::hide(&app_for_inject);
-                                        }
-                                        if let Some(tw) =
-                                            app_for_inject.get_webview_window("toast")
-                                        {
-                                            let _ = tw.hide();
+                                            if let Some(tw) =
+                                                app_for_inject.get_webview_window("toast")
+                                            {
+                                                let _ = tw.hide();
+                                            }
                                         }
                                     }
                                     Ok(crate::injection::InjectionResult::CopiedToClipboard) => {
                                         // Elevation dialog: user chose "Copy to clipboard".
-                                        // Show success toast without hiding indicator (NOTF-02).
-                                        indicator::show_success(&app_for_inject);
-                                        tokio::time::sleep(
-                                            std::time::Duration::from_millis(1000),
-                                        )
-                                        .await;
-                                        let _ = indicator::show_idle(&app_for_inject);
                                         let payload = serde_json::json!({
                                             "type": "success",
                                             "message": "Copied to clipboard"
                                         });
-                                        if let Err(e) = indicator::show_toast_window_keep_indicator(
+                                        if let Err(e) = indicator::show_toast_window(
                                             &app_for_inject,
                                             &payload,
                                         ) {
@@ -477,12 +460,11 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                             })
                                             .unwrap_or(true);
                                         if is_idle {
-                                            indicator::hide(&app_for_inject);
-                                        }
-                                        if let Some(tw) =
-                                            app_for_inject.get_webview_window("toast")
-                                        {
-                                            let _ = tw.hide();
+                                            if let Some(tw) =
+                                                app_for_inject.get_webview_window("toast")
+                                            {
+                                                let _ = tw.hide();
+                                            }
                                         }
                                     }
                                     Ok(crate::injection::InjectionResult::Err(msg)) => {
