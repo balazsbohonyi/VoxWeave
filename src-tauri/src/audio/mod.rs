@@ -6,7 +6,9 @@ use crate::config::TranscriptionProvider;
 use crate::state::{AppState, RecordingState};
 use capture::{resolve_input_device, DeviceSnapshot};
 use encode::{DefaultEncoderBackend, EncodedAudio, EncoderBackend};
-use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::atomic::Ordering;
+#[cfg(not(test))]
+use std::sync::atomic::AtomicU32;
 use std::sync::{Arc, Mutex};
 #[cfg(not(test))]
 use std::sync::mpsc;
@@ -20,6 +22,7 @@ use tauri::{AppHandle, Emitter, Manager, Runtime};
 
 const AUDIO_WARNING_EVENT: &str = "audio-warning";
 const AUDIO_ERROR_EVENT: &str = "audio-error";
+#[cfg(not(test))]
 const AUDIO_LEVEL_EVENT: &str = "audio-level";
 const AUDIO_LEVEL_EMIT_INTERVAL_MS: u64 = 34;
 
@@ -50,6 +53,7 @@ pub struct AudioErrorPayload {
     pub message: String,
 }
 
+#[cfg(not(test))]
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq)]
 pub struct AudioLevelPayload {
     pub rms: f32,
@@ -516,6 +520,7 @@ fn stop_realtime_level_capture(session: &mut crate::state::AudioSessionState) {
     }
 }
 
+#[cfg(not(test))]
 fn update_latest_rms(samples: &[f32], latest_rms: &AtomicU32) {
     let rms = compute_normalized_rms(samples);
     latest_rms.store(rms.to_bits(), Ordering::Relaxed);

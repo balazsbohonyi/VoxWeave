@@ -32,6 +32,7 @@ pub struct InjectionErrorPayload {
 }
 
 #[derive(Debug)]
+#[cfg_attr(test, allow(dead_code))]
 enum ElevationDialogResult {
     Relaunch,
     CopyToClipboard,
@@ -62,7 +63,6 @@ fn is_window_open(_handle: usize) -> bool {
 #[cfg(test)]
 #[derive(Clone)]
 enum ElevationDialogResultMock {
-    Relaunch,
     CopyToClipboard,
     Cancel,
 }
@@ -79,7 +79,6 @@ fn show_elevation_dialog() -> ElevationDialogResult {
     #[cfg(test)]
     return MOCK_ELEVATION_DIALOG_RESULT.with(|cell| {
         match cell.borrow().as_ref() {
-            Some(ElevationDialogResultMock::Relaunch) => ElevationDialogResult::Relaunch,
             Some(ElevationDialogResultMock::CopyToClipboard) => ElevationDialogResult::CopyToClipboard,
             _ => ElevationDialogResult::Cancel,
         }
@@ -315,7 +314,6 @@ mod tests {
     struct MockClipboard {
         content: Mutex<String>,
         write_count: Mutex<usize>,
-        send_paste_called: Mutex<bool>,
     }
 
     impl ClipboardAccess for MockClipboard {
@@ -326,16 +324,6 @@ mod tests {
             *self.content.lock().unwrap() = text.to_string();
             *self.write_count.lock().unwrap() += 1;
             std::result::Result::Ok(())
-        }
-    }
-
-    struct MockClipboardFailing;
-    impl ClipboardAccess for MockClipboardFailing {
-        fn read_text(&self) -> Result<String, String> {
-            std::result::Result::Ok(String::new())
-        }
-        fn write_text(&self, _text: &str) -> Result<(), String> {
-            Err("write failed".to_string())
         }
     }
 
