@@ -128,13 +128,10 @@ export interface StateChangedPayload {
 // ---------------------------------------------------------------------------
 
 export type InjectionErrorCode =
-  | "cancelled"
   | "all_methods_failed"
   | "elevation_required";
 
 export interface InjectionErrorPayload {
   code: InjectionErrorCode;
   message: string;
-  typed_chars: number | null;
-  total_chars: number | null;
 }

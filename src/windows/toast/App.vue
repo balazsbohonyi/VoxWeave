@@ -13,10 +13,8 @@ interface TranscriptionErrorPayload {
 }
 
 interface InjectionErrorPayload {
-  code: "cancelled" | "all_methods_failed" | "elevation_required";
+  code: "all_methods_failed" | "elevation_required";
   message: string;
-  typed_chars: number | null;
-  total_chars: number | null;
 }
 
 interface PlainToastPayload {
@@ -67,12 +65,7 @@ function showTranscriptionErrorToast(opts: ShowToastOptions): void {
 function isInjectionPayload(payload: unknown): payload is InjectionErrorPayload {
   if (typeof payload !== "object" || payload === null) return false;
   const p = payload as Record<string, unknown>;
-  // Injection payloads have typed_chars/total_chars fields (even if null),
-  // or have injection-specific codes that transcription never uses.
-  if (p.code === "all_methods_failed" || p.code === "elevation_required") return true;
-  // Injection cancelled has typed_chars field present (transcription cancelled does not)
-  if (p.code === "cancelled" && "typed_chars" in p) return true;
-  return false;
+  return p.code === "all_methods_failed" || p.code === "elevation_required";
 }
 
 function isPlainToast(payload: unknown): payload is PlainToastPayload {
@@ -106,12 +99,7 @@ onMounted(() => {
 
     // Handle injection error payloads
     if (isInjectionPayload(payload)) {
-      if (payload.code === "cancelled") {
-        // message is already formatted as "Cancelled — N of M chars typed" by Rust
-        dismissTransientToasts();
-        const toastId = showToast({ message: payload.message, type: "info", autoDismissMs: 10000 });
-        scheduleAutoDismiss(toastId, 10000);
-      } else if (payload.code === "all_methods_failed") {
+      if (payload.code === "all_methods_failed") {
         showToast({ message: payload.message, type: "error" });
       } else if (payload.code === "elevation_required") {
         showToast({ message: payload.message, type: "warning" });

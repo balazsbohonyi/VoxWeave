@@ -1,10 +1,9 @@
 // Injection service — implements the three injection modes (FlashPaste, Keystroke, Clipboard),
-// the fallback chain, elevation check dialog, cancel-on-Escape loop, and result types.
+// the fallback chain, elevation check dialog, and result types.
 // All functions are blocking (no async/Tokio). Called via spawn_blocking from the hotkey service.
 
 use crate::config::{InjectionConfig, InjectionMode};
 use crate::platform::{ClipboardAccess, ElevationChecker, ForegroundWindowInfo, InputSimulator, WindowInfo};
-use std::sync::{Arc, Mutex};
 
 // ---------------------------------------------------------------------------
 // Result types
@@ -13,7 +12,6 @@ use std::sync::{Arc, Mutex};
 #[derive(Debug, Clone)]
 pub enum InjectionResult {
     Ok,
-    Cancelled { typed: usize, total: usize },
     /// Elevation dialog: user chose "Copy to clipboard". Text is already in clipboard.
     /// Plan 04 matches this variant to show "Copied to clipboard — paste manually" toast.
     CopiedToClipboard,
@@ -23,7 +21,6 @@ pub enum InjectionResult {
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum InjectionErrorCode {
-    Cancelled,
     AllMethodsFailed,
     ElevationRequired,
 }
@@ -32,8 +29,6 @@ pub enum InjectionErrorCode {
 pub struct InjectionErrorPayload {
     pub code: InjectionErrorCode,
     pub message: String,
-    pub typed_chars: Option<usize>,
-    pub total_chars: Option<usize>,
 }
 
 #[derive(Debug)]
@@ -61,19 +56,6 @@ fn is_window_open(handle: usize) -> bool {
 #[cfg(any(not(target_os = "windows"), test))]
 fn is_window_open(_handle: usize) -> bool {
     true
-}
-
-#[cfg(target_os = "windows")]
-fn is_escape_pressed() -> bool {
-    unsafe {
-        use windows::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState, VK_ESCAPE};
-        GetAsyncKeyState(VK_ESCAPE.0 as i32) & (u16::MAX as i16) < 0
-    }
-}
-
-#[cfg(not(target_os = "windows"))]
-fn is_escape_pressed() -> bool {
-    false
 }
 
 /// In test builds, a thread-local can be set to control the elevation dialog result.
@@ -152,22 +134,14 @@ pub fn flashpaste(
     InjectionResult::Ok
 }
 
-/// Keystroke injection: send each char via InputSimulator, '\n'/'\r' via send_return(),
-/// poll Escape between chars, return Cancelled with correct counts if cancelled.
+/// Keystroke injection: send each char via InputSimulator, '\n'/'\r' via send_return().
 pub fn keystroke_inject(
     input: &dyn InputSimulator,
     text: &str,
     delay_ms: u64,
-    cancel_flag: Arc<Mutex<bool>>,
 ) -> InjectionResult {
-    // Reset cancel flag before starting
-    *cancel_flag.lock().unwrap() = false;
     let chars: Vec<char> = text.chars().collect();
-    let total = chars.len();
-    for (i, ch) in chars.iter().enumerate() {
-        if *cancel_flag.lock().unwrap() {
-            return InjectionResult::Cancelled { typed: i, total };
-        }
+    for ch in &chars {
         let result = if *ch == '\n' || *ch == '\r' {
             input.send_return()
         } else {
@@ -175,10 +149,6 @@ pub fn keystroke_inject(
         };
         if let Err(e) = result {
             return InjectionResult::Err(e);
-        }
-        // Poll Escape (GetAsyncKeyState) between chars
-        if is_escape_pressed() {
-            return InjectionResult::Cancelled { typed: i + 1, total };
         }
         if delay_ms > 0 {
             std::thread::sleep(std::time::Duration::from_millis(delay_ms));
@@ -207,14 +177,13 @@ fn run_method(
     class_name: &str,
     text: &str,
     config: &InjectionConfig,
-    cancel_flag: Arc<Mutex<bool>>,
 ) -> InjectionResult {
     match mode {
         InjectionMode::FlashPaste => {
             flashpaste(clipboard, input, window_info, class_name, text, config.paste_delay_ms)
         }
         InjectionMode::Keystroke => {
-            keystroke_inject(input, text, config.keystroke_speed.delay_ms(), cancel_flag)
+            keystroke_inject(input, text, config.keystroke_speed.delay_ms())
         }
         InjectionMode::Clipboard => clipboard_only(clipboard, text),
     }
@@ -231,7 +200,6 @@ pub fn inject_text(
     fw_info: Option<&ForegroundWindowInfo>,
     text: &str,
     config: &InjectionConfig,
-    cancel_flag: Arc<Mutex<bool>>,
 ) -> Result<InjectionResult, InjectionErrorPayload> {
     // 1. Verify target window still exists, then restore focus (INJC-10)
     if let Some(fw) = fw_info {
@@ -239,8 +207,6 @@ pub fn inject_text(
             return Err(InjectionErrorPayload {
                 code: InjectionErrorCode::AllMethodsFailed,
                 message: "Target window was closed before injection could complete.".to_string(),
-                typed_chars: None,
-                total_chars: None,
             });
         }
         let _ = window.restore_focus(fw);
@@ -257,8 +223,6 @@ pub fn inject_text(
                     return Err(InjectionErrorPayload {
                         code: InjectionErrorCode::ElevationRequired,
                         message: "Relaunching as Administrator...".to_string(),
-                        typed_chars: None,
-                        total_chars: None,
                     });
                 }
                 ElevationDialogResult::CopyToClipboard => {
@@ -271,8 +235,6 @@ pub fn inject_text(
                     return Err(InjectionErrorPayload {
                         code: InjectionErrorCode::ElevationRequired,
                         message: "Injection cancelled — elevation required.".to_string(),
-                        typed_chars: None,
-                        total_chars: None,
                     });
                 }
             }
@@ -289,13 +251,11 @@ pub fn inject_text(
         class_name,
         text,
         config,
-        cancel_flag.clone(),
     );
 
     // 4. Handle primary result
     match &primary_result {
         InjectionResult::Ok => return Result::Ok(primary_result),
-        InjectionResult::Cancelled { .. } => return Result::Ok(primary_result),
         InjectionResult::CopiedToClipboard => return Result::Ok(primary_result),
         InjectionResult::Err(_) => { /* fall through to fallback */ }
     }
@@ -305,8 +265,6 @@ pub fn inject_text(
         return Err(InjectionErrorPayload {
             code: InjectionErrorCode::AllMethodsFailed,
             message: "Injection failed. Auto-fallback is disabled.".to_string(),
-            typed_chars: None,
-            total_chars: None,
         });
     }
 
@@ -326,11 +284,9 @@ pub fn inject_text(
             class_name,
             text,
             config,
-            cancel_flag.clone(),
         );
         match result {
             InjectionResult::Ok => return Result::Ok(InjectionResult::Ok),
-            InjectionResult::Cancelled { .. } => return Result::Ok(result),
             InjectionResult::CopiedToClipboard => return Result::Ok(result),
             InjectionResult::Err(_) => continue,
         }
@@ -339,8 +295,6 @@ pub fn inject_text(
     Err(InjectionErrorPayload {
         code: InjectionErrorCode::AllMethodsFailed,
         message: "All injection methods failed. Text copied to clipboard.".to_string(),
-        typed_chars: None,
-        total_chars: None,
     })
 }
 
@@ -574,12 +528,12 @@ mod tests {
         assert_eq!(paste_calls[0], "Notepad");
     }
 
+
     #[test]
     fn keystroke_inject_sends_all_chars() {
         let input = MockInput::new();
-        let cancel_flag = Arc::new(Mutex::new(false));
 
-        let result = keystroke_inject(&input, "abc", 0, cancel_flag);
+        let result = keystroke_inject(&input, "abc", 0);
         assert!(matches!(result, InjectionResult::Ok));
 
         let unicode_calls = input.unicode_calls.lock().unwrap();
@@ -590,72 +544,13 @@ mod tests {
     #[test]
     fn keystroke_inject_sends_return_for_newline() {
         let input = MockInput::new();
-        let cancel_flag = Arc::new(Mutex::new(false));
 
-        let result = keystroke_inject(&input, "a\nb", 0, cancel_flag);
+        let result = keystroke_inject(&input, "a\nb", 0);
         assert!(matches!(result, InjectionResult::Ok));
 
         let unicode_calls = input.unicode_calls.lock().unwrap();
         assert_eq!(*unicode_calls, vec!["a".to_string(), "b".to_string()]);
         assert_eq!(*input.return_count.lock().unwrap(), 1);
-    }
-
-    #[test]
-    fn keystroke_inject_cancel_returns_correct_counts() {
-        let input = MockInput::new();
-        let cancel_flag = Arc::new(Mutex::new(false));
-        let cancel_flag_clone = cancel_flag.clone();
-
-        // We'll inject "abcde" but set cancel_flag after the first iteration
-        // The cancel check happens BEFORE each char, so cancelling before iteration i
-        // returns typed: i.
-        // To test: set the flag to true before starting -> typed=0, total=5
-        *cancel_flag.lock().unwrap() = true; // set to cancel before reset
-        // But keystroke_inject RESETS the flag first, so we need a different approach.
-        // We need to set the flag mid-way. We'll test by using a custom mock that sets
-        // the flag after first char is typed.
-
-        // Reset and test normal path first to verify counts
-        let cancel_flag2 = Arc::new(Mutex::new(false));
-        let result = keystroke_inject(&input, "hello", 0, cancel_flag2);
-        assert!(matches!(result, InjectionResult::Ok));
-
-        // Now test cancellation: set cancel_flag to true right after inject starts
-        // Since inject resets it, we simulate by having it already false, then
-        // after first char is sent we set it. Since delay_ms=0, timing is tricky.
-        // Instead, let's verify the reset behavior:
-        let cancel_flag3 = Arc::new(Mutex::new(true)); // pre-set to true
-        let cancel_flag3_clone = cancel_flag3.clone();
-        // After inject resets it to false, it should proceed normally
-        // Unless we can set it during the loop...
-        // The simpler test: use a single-char string and verify ok
-        let input2 = MockInput::new();
-        let result2 = keystroke_inject(&input2, "x", 0, cancel_flag3_clone);
-        assert!(matches!(result2, InjectionResult::Ok));
-
-        // The actual cancel test: inject enough chars and set flag between chars.
-        // We verify this by checking: if cancel_flag starts false, all chars typed = Ok.
-        // The cancel_flag path is covered: after reset, if flag set externally, returns Cancelled.
-        // We'll do a manual verification by directly calling with flag that gets set:
-        // Use a wrapper that sets the flag after the first char in a separate thread.
-        let input3 = MockInput::new();
-        let cancel_flag4 = Arc::new(Mutex::new(false));
-        let cancel_flag4_clone = cancel_flag4.clone();
-        // Spawn a thread that sets the flag after a tiny delay
-        std::thread::spawn(move || {
-            std::thread::sleep(std::time::Duration::from_micros(1));
-            *cancel_flag4_clone.lock().unwrap() = true;
-        });
-        // Use a longer string so cancellation mid-way is likely
-        // (but this is inherently racy — use a simpler approach)
-        let _ = keystroke_inject(&input3, "abcde", 0, cancel_flag4);
-        // We can't assert exact counts due to timing, but it should compile and not panic.
-
-        // Definitive test: verify Cancelled{typed, total} structure is correct
-        // by using cancel_flag that's set to true AFTER the reset happens via second check.
-        // The only reliable way is to pre-set it and test that inject resets it first.
-        // Covered by the Ok result above (flag was true but got reset).
-        let _ = cancel_flag_clone; // suppress unused warning
     }
 
     #[test]
@@ -683,11 +578,10 @@ mod tests {
         let clipboard = MockClipboard::default();
         clipboard.write_text("original").unwrap();
         let config = make_injection_config(InjectionMode::Keystroke, false);
-        let cancel_flag = Arc::new(Mutex::new(false));
 
         let result = inject_text(
             &window, &elevation, &input, &clipboard,
-            Some(&fw_same_il), "hello", &config, cancel_flag,
+            Some(&fw_same_il), "hello", &config,
         );
         assert!(result.is_ok(), "same IL should not trigger elevation dialog");
         assert!(matches!(result.unwrap(), InjectionResult::Ok));
@@ -700,11 +594,10 @@ mod tests {
         let input2 = MockInput::new();
         let clipboard2 = MockClipboard::default();
         let config2 = make_injection_config(InjectionMode::Keystroke, false);
-        let cancel_flag2 = Arc::new(Mutex::new(false));
 
         let result2 = inject_text(
             &window2, &elevation2, &input2, &clipboard2,
-            Some(&fw_higher_il), "hello", &config2, cancel_flag2,
+            Some(&fw_higher_il), "hello", &config2,
         );
         assert!(result2.is_err(), "higher target IL should trigger elevation dialog (Cancel -> Err)");
         let err = result2.unwrap_err();
@@ -724,11 +617,10 @@ mod tests {
         let input = MockInput::new();
         let clipboard = MockClipboard::default();
         let config = make_injection_config(InjectionMode::Keystroke, false);
-        let cancel_flag = Arc::new(Mutex::new(false));
 
         let result = inject_text(
             &window, &elevation, &input, &clipboard,
-            Some(&fw_higher_il), "my text", &config, cancel_flag,
+            Some(&fw_higher_il), "my text", &config,
         );
 
         assert!(result.is_ok(), "CopyToClipboard elevation path should return Ok");
@@ -751,11 +643,10 @@ mod tests {
         let clipboard = MockClipboard::default();
         clipboard.write_text("original").unwrap();
         let config = make_injection_config(InjectionMode::FlashPaste, true);
-        let cancel_flag = Arc::new(Mutex::new(false));
 
         let result = inject_text(
             &window, &elevation, &input, &clipboard,
-            Some(&fw), "hello world", &config, cancel_flag,
+            Some(&fw), "hello world", &config,
         );
 
         // Should succeed via clipboard fallback
@@ -788,11 +679,10 @@ mod tests {
         let input = FullyFailingInput;
         let clipboard = MockClipboard::default();
         let config = make_injection_config(InjectionMode::Keystroke, true);
-        let cancel_flag = Arc::new(Mutex::new(false));
 
         let result = inject_text(
             &window, &elevation, &input, &clipboard,
-            Some(&fw), "test", &config, cancel_flag,
+            Some(&fw), "test", &config,
         );
 
         // Should succeed via clipboard fallback (last in chain)
@@ -811,11 +701,10 @@ mod tests {
         let clipboard = MockClipboard::default();
         clipboard.write_text("original").unwrap();
         let config = make_injection_config(InjectionMode::FlashPaste, false);
-        let cancel_flag = Arc::new(Mutex::new(false));
 
         let result = inject_text(
             &window, &elevation, &input, &clipboard,
-            Some(&fw), "hello", &config, cancel_flag,
+            Some(&fw), "hello", &config,
         );
 
         assert!(result.is_err());
@@ -834,11 +723,10 @@ mod tests {
         let clipboard = MockClipboard::default();
         clipboard.write_text("original").unwrap();
         let config = make_injection_config(InjectionMode::FlashPaste, false);
-        let cancel_flag = Arc::new(Mutex::new(false));
 
         let result = inject_text(
             &window, &elevation, &input, &clipboard,
-            Some(&fw), "hello", &config, cancel_flag,
+            Some(&fw), "hello", &config,
         );
 
         assert!(result.is_ok());

@@ -363,10 +363,6 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                 .unwrap()
                                 .injection
                                 .clone();
-                            let cancel_flag = app_clone
-                                .state::<crate::state::AppState>()
-                                .cancel_flag
-                                .clone();
                             let app_for_inject = app_clone.clone();
 
                             tauri::async_runtime::spawn(async move {
@@ -377,7 +373,6 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                     let text_clone = text.clone();
                                     let fw_clone = fw_info.clone();
                                     let cfg_clone = injection_config.clone();
-                                    let cancel_clone = cancel_flag.clone();
                                     move || {
                                         // Retrieve PlatformProvider from Tauri managed state
                                         // inside the closure. AppHandle is Clone + Send + 'static.
@@ -393,7 +388,6 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                             fw_clone.as_ref(),
                                             &text_clone,
                                             &cfg_clone,
-                                            cancel_clone,
                                         )
                                     }
                                 })
@@ -401,8 +395,6 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                 .unwrap_or(Err(crate::injection::InjectionErrorPayload {
                                     code: crate::injection::InjectionErrorCode::AllMethodsFailed,
                                     message: "Injection task panicked".to_string(),
-                                    typed_chars: None,
-                                    total_chars: None,
                                 }));
 
                                 // Reset to Idle immediately after injection so the hotkey handler
@@ -493,44 +485,6 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                             let _ = tw.hide();
                                         }
                                     }
-                                    Ok(crate::injection::InjectionResult::Cancelled {
-                                        typed,
-                                        total,
-                                    }) => {
-                                        // Keep indicator visible — show info toast (NOTF-03).
-                                        let message = injection_cancel_message(typed, total);
-                                        let payload = serde_json::json!({
-                                            "type": "info",
-                                            "message": message
-                                        });
-                                        if let Err(e) = indicator::show_toast_window_keep_indicator(
-                                            &app_for_inject,
-                                            &payload,
-                                        ) {
-                                            log::warn!("Failed to show cancel toast: {e}");
-                                        }
-                                        // Return indicator to neutral state — clears the Injecting visual.
-                                        indicator::show_idle_visual(&app_for_inject);
-                                        tokio::time::sleep(
-                                            std::time::Duration::from_millis(10000),
-                                        )
-                                        .await;
-                                        let is_idle = app_for_inject
-                                            .try_state::<AppState>()
-                                            .map(|s| {
-                                                *s.recording_state.lock().unwrap()
-                                                    == RecordingState::Idle
-                                            })
-                                            .unwrap_or(true);
-                                        if is_idle {
-                                            indicator::hide(&app_for_inject);
-                                        }
-                                        if let Some(tw) =
-                                            app_for_inject.get_webview_window("toast")
-                                        {
-                                            let _ = tw.hide();
-                                        }
-                                    }
                                     Ok(crate::injection::InjectionResult::Err(msg)) => {
                                         log::warn!("Injection error (non-payload): {msg}");
                                         indicator::hide(&app_for_inject);
@@ -583,15 +537,6 @@ pub(crate) fn injection_success_label(mode: &crate::config::InjectionMode) -> &'
     }
 }
 
-/// Formats the cancel toast message based on how many chars were typed.
-pub(crate) fn injection_cancel_message(typed: usize, total: usize) -> String {
-    if typed == 0 {
-        "Paste cancelled".to_string()
-    } else {
-        format!("Cancelled \u{2014} {typed} of {total} chars typed")
-    }
-}
-
 fn emit_hotkey_warning<R: Runtime>(
     app: &AppHandle<R>,
     warning: &HotkeyWarning,
@@ -630,19 +575,4 @@ mod tests {
         assert_eq!(injection_success_label(&InjectionMode::Clipboard), "Copied to clipboard");
     }
 
-    #[test]
-    fn cancel_toast_message() {
-        // typed == 0, total == 0 → generic message
-        assert_eq!(injection_cancel_message(0, 0), "Paste cancelled");
-        // typed > 0 → detailed message with em-dash
-        assert_eq!(
-            injection_cancel_message(5, 20),
-            "Cancelled \u{2014} 5 of 20 chars typed"
-        );
-        // typed == 0 but total > 0 → "Paste cancelled" (guard is typed == 0, not total == 0)
-        assert_eq!(
-            injection_cancel_message(0, 10),
-            "Paste cancelled"
-        );
-    }
 }
