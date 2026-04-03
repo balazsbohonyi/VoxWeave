@@ -406,34 +406,40 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
 
                                 match result {
                                     Ok(crate::injection::InjectionResult::Ok) => {
-                                        let label = injection_success_label(&injection_config.mode);
-                                        let payload = serde_json::json!({
-                                            "type": "success",
-                                            "message": label
-                                        });
-                                        if let Err(e) = indicator::show_toast_window(
-                                            &app_for_inject,
-                                            &payload,
-                                        ) {
-                                            log::warn!("Failed to show success toast: {e}");
-                                        }
-                                        tokio::time::sleep(
-                                            std::time::Duration::from_millis(10000),
-                                        )
-                                        .await;
-                                        let is_idle = app_for_inject
-                                            .try_state::<AppState>()
-                                            .map(|s| {
-                                                *s.recording_state.lock().unwrap()
-                                                    == RecordingState::Idle
-                                            })
-                                            .unwrap_or(true);
-                                        if is_idle {
-                                            if let Some(tw) =
-                                                app_for_inject.get_webview_window("toast")
-                                            {
-                                                let _ = tw.hide();
+                                        if injection_config.mode == crate::config::InjectionMode::Clipboard {
+                                            let label = injection_success_label(&injection_config.mode);
+                                            let payload = serde_json::json!({
+                                                "type": "success",
+                                                "message": label
+                                            });
+                                            if let Err(e) = indicator::show_toast_window(
+                                                &app_for_inject,
+                                                &payload,
+                                            ) {
+                                                log::warn!("Failed to show success toast: {e}");
                                             }
+                                            tokio::time::sleep(
+                                                std::time::Duration::from_millis(10000),
+                                            )
+                                            .await;
+                                            let is_idle = app_for_inject
+                                                .try_state::<AppState>()
+                                                .map(|s| {
+                                                    *s.recording_state.lock().unwrap()
+                                                        == RecordingState::Idle
+                                                })
+                                                .unwrap_or(true);
+                                            if is_idle {
+                                                if let Some(tw) =
+                                                    app_for_inject.get_webview_window("toast")
+                                                {
+                                                    let _ = tw.hide();
+                                                }
+                                            }
+                                        } else {
+                                            // FlashPaste / Keystroke: text already landed in the target window.
+                                            // Just hide the indicator — no toast needed.
+                                            indicator::hide(&app_for_inject);
                                         }
                                     }
                                     Ok(crate::injection::InjectionResult::CopiedToClipboard) => {
