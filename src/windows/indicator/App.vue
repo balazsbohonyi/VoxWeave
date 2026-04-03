@@ -22,6 +22,8 @@ let unlistenState: UnlistenFn | null = null;
 let unlistenHidden: UnlistenFn | null = null;
 let unlistenAudioLevel: UnlistenFn | null = null;
 let unlistenVadSilenceStop: UnlistenFn | null = null;
+let unlistenNearLimit: UnlistenFn | null = null;
+let unlistenLimitStop: UnlistenFn | null = null;
 let unlistenMoved: UnlistenFn | null = null;
 let persistTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -219,6 +221,14 @@ onMounted(async () => {
     void invoke("trigger_stop_recording");
   });
 
+  unlistenNearLimit = await listen("recording-near-limit", () => {
+    void invoke("show_plain_toast", { toastType: "warning", message: "Recording will stop in 30 seconds (5-minute limit reached)." });
+  });
+
+  unlistenLimitStop = await listen("recording-limit-stop", () => {
+    void invoke("trigger_stop_recording");
+  });
+
   const syncState = async () => {
     try {
       const snapshot = await invoke<IndicatorStatePayload>("get_indicator_state");
@@ -247,6 +257,8 @@ onBeforeUnmount(() => {
   if (unlistenHidden) unlistenHidden();
   if (unlistenAudioLevel) unlistenAudioLevel();
   if (unlistenVadSilenceStop) unlistenVadSilenceStop();
+  if (unlistenNearLimit) unlistenNearLimit();
+  if (unlistenLimitStop) unlistenLimitStop();
   if (unlistenMoved) unlistenMoved();
   if (persistTimer) clearTimeout(persistTimer);
 });
