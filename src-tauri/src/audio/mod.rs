@@ -118,8 +118,14 @@ pub fn start_recording_with_snapshot<R: Runtime>(
     let pcm_buffer: Arc<Mutex<Vec<f32>>> = Arc::new(Mutex::new(Vec::new()));
 
     #[cfg(not(test))]
+    let (vad_threshold, vad_silence_ms) = {
+        let cfg = state.config.lock().map_err(|e| e.to_string())?;
+        (cfg.audio.vad_threshold, cfg.audio.vad_silence_ms)
+    };
+
+    #[cfg(not(test))]
     let (level_emitter_stop, level_emitter_thread) =
-        start_realtime_level_capture(app, &resolved.active_device, Arc::clone(&pcm_buffer))?;
+        start_realtime_level_capture(app, &resolved.active_device, Arc::clone(&pcm_buffer), vad_threshold, vad_silence_ms)?;
 
     #[cfg(not(test))]
     let session = session::new_session(
@@ -304,6 +310,8 @@ fn start_realtime_level_capture<R: Runtime>(
     app: &AppHandle<R>,
     active_device: &str,
     pcm_buffer: Arc<Mutex<Vec<f32>>>,
+    vad_threshold: f32,
+    vad_silence_ms: u32,
 ) -> Result<(Arc<AtomicBool>, std::thread::JoinHandle<()>), String> {
     use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 
@@ -487,9 +495,25 @@ fn start_realtime_level_capture<R: Runtime>(
 
         let _ = setup_tx.send(Ok(()));
 
+        let mut silence_elapsed_ms: u64 = 0;
         while !stop_for_thread.load(Ordering::Relaxed) {
             let rms = f32::from_bits(latest_rms.load(Ordering::Relaxed));
             let _ = app_for_thread.emit(AUDIO_LEVEL_EVENT, AudioLevelPayload { rms });
+
+            // VAD silence detection: track consecutive silence and auto-stop.
+            if vad_silence_ms > 0 {
+                if rms < vad_threshold {
+                    silence_elapsed_ms += AUDIO_LEVEL_EMIT_INTERVAL_MS;
+                } else {
+                    silence_elapsed_ms = 0;
+                }
+                if silence_elapsed_ms >= vad_silence_ms as u64 {
+                    let _ = app_for_thread.emit("vad-silence-stop", ());
+                    stop_for_thread.store(true, Ordering::Relaxed);
+                    break;
+                }
+            }
+
             thread::sleep(Duration::from_millis(AUDIO_LEVEL_EMIT_INTERVAL_MS));
         }
 
