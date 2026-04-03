@@ -305,6 +305,7 @@ Recent decisions affecting current work:
 | 2 | remove injection cancellation support | 2026-04-02 | 739110e | [2-remove-injection-cancellation-support](./quick/2-remove-injection-cancellation-support/) |
 | 3 | Remove success state visualization (green border + DONE badge + 1s delay) | 2026-04-02 | 4f5ae90 | [3-remove-success-state-visualization](./quick/3-remove-success-state-visualization/) |
 | 5 | Show success toast after injection only for Clipboard mode | 2026-04-03 | 91099fb | [5-success-toast-after-injection](./quick/5-success-toast-after-injection/) |
+| 6 | Implement VAD auto-stop on silence | 2026-04-03 | 941b4ee | [6-auto-stop-on-silence](./quick/6-auto-stop-on-silence/) |
 
 ### Blockers/Concerns
 
@@ -316,6 +317,6 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-04-03
-Stopped at: Completed quick task 5: success toast after injection
+Stopped at: Completed quick task 6: VAD auto-stop on silence
 Resume file: None
 
