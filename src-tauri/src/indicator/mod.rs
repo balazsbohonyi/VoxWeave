@@ -88,12 +88,16 @@ pub fn hide<R: Runtime>(app: &AppHandle<R>) {
     let _ = app.emit(INDICATOR_HIDDEN_EVENT, ());
 }
 
-/// Shows the toast window adjacent to the indicator, delivers the payload via eval,
-/// and hides the indicator. Uses eval (not Tauri events) because WebView2 may not
-/// deliver events to hidden windows before they are made visible.
+/// Shows the toast window adjacent to the indicator, delivers the payload via eval.
+/// When `keep_indicator` is false, the indicator window is hidden (normal case).
+/// When `keep_indicator` is true, the indicator remains visible alongside the toast
+/// (used for mid-recording warnings where recording continues).
+/// Uses eval (not Tauri events) because WebView2 may not deliver events to hidden
+/// windows before they are made visible.
 pub fn show_toast_window<R: Runtime, S: serde::Serialize>(
     app: &AppHandle<R>,
     payload: &S,
+    keep_indicator: bool,
 ) -> Result<(), String> {
     let toast_win = app
         .get_webview_window(TOAST_LABEL)
@@ -122,7 +126,9 @@ pub fn show_toast_window<R: Runtime, S: serde::Serialize>(
         window::apply_window_policy(&toast_win)?;
         toast_win.show().map_err(|e| e.to_string())?;
         let _ = toast_win.eval(&eval_script);
-        hide_indicator_window(app);
+        if !keep_indicator {
+            hide_indicator_window(app);
+        }
         return Ok(());
     };
 
@@ -139,7 +145,9 @@ pub fn show_toast_window<R: Runtime, S: serde::Serialize>(
     window::place_window(&toast_win, indicator_x, toast_y)?;
     toast_win.show().map_err(|e| e.to_string())?;
     let _ = toast_win.eval(&eval_script);
-    hide_indicator_window(app);
+    if !keep_indicator {
+        hide_indicator_window(app);
+    }
 
     Ok(())
 }

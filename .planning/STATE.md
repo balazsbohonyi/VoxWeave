@@ -299,14 +299,14 @@ Recent decisions affecting current work:
 
 ### Quick Tasks Completed
 
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 1 | Remove click from record circle / remove Start Recording + Stop Recording from the tray menu | 2026-04-02 | 8fe54fe | [1-remove-click-from-record-circle-remove-s](./quick/1-remove-click-from-record-circle-remove-s/) |
+| # | Description | Date | Commit | Directory                                                                                   |
+|---|-------------|------|--------|---------------------------------------------------------------------------------------------|
+| 1 | Remove click from record circle / remove Start Recording + Stop Recording from the tray menu | 2026-04-02 | 8fe54fe | [1-remove-click-from-record-indicator](./quick/1-remove-click-from-record-indicator/)       |
 | 2 | remove injection cancellation support | 2026-04-02 | 739110e | [2-remove-injection-cancellation-support](./quick/2-remove-injection-cancellation-support/) |
-| 3 | Remove success state visualization (green border + DONE badge + 1s delay) | 2026-04-02 | 4f5ae90 | [3-remove-success-state-visualization](./quick/3-remove-success-state-visualization/) |
-| 5 | Show success toast after injection only for Clipboard mode | 2026-04-03 | 91099fb | [5-success-toast-after-injection](./quick/5-success-toast-after-injection/) |
-| 6 | Implement VAD auto-stop on silence | 2026-04-03 | 941b4ee | [6-auto-stop-on-silence](./quick/6-auto-stop-on-silence/) |
-| 7 | Wire 5-minute recording hard cap end-to-end (warning toast + auto-stop) | 2026-04-03 | 6748e5c | [7-max-5-minute-recordings](./quick/7-max-5-minute-recordings/) |
+| 3 | Remove success state visualization (green border + DONE badge + 1s delay) | 2026-04-02 | 4f5ae90 | [3-remove-success-state-visualization](./quick/3-remove-success-state-visualization/)       |
+| 5 | Show success toast after injection only for Clipboard mode | 2026-04-03 | 91099fb | [5-success-toast-after-injection](./quick/5-success-toast-after-injection/)                 |
+| 6 | Implement VAD auto-stop on silence | 2026-04-03 | 941b4ee | [6-auto-stop-on-silence](./quick/6-auto-stop-on-silence/)                                   |
+| 7 | Wire 5-minute recording hard cap end-to-end (warning toast + auto-stop) | 2026-04-03 | 6748e5c | [7-max-5-minute-recordings](./quick/7-max-5-minute-recordings/)                             |
 
 ### Blockers/Concerns
 

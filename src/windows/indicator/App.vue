@@ -222,11 +222,12 @@ onMounted(async () => {
   });
 
   unlistenNearLimit = await listen("recording-near-limit", () => {
-    void invoke("show_plain_toast", { toastType: "warning", message: "Recording will stop in 30 seconds (5-minute limit reached)." });
+    void invoke("show_plain_toast", { toastType: "warning", message: "Recording will stop in 30 seconds.", keepIndicator: true });
   });
 
   unlistenLimitStop = await listen("recording-limit-stop", () => {
     void invoke("trigger_stop_recording");
+    void invoke("show_plain_toast", { toastType: "info", message: "5-minute recording limit reached — transcribing and injecting." });
   });
 
   const syncState = async () => {

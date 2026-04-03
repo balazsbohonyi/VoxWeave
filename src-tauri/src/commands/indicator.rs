@@ -53,7 +53,7 @@ pub fn hide_toast_window(app: AppHandle) -> Result<(), String> {
 /// Shows a plain informational / warning toast in the toast window.
 /// `toast_type` must be one of: "info" | "warning" | "error" | "success"
 #[tauri::command]
-pub fn show_plain_toast(app: AppHandle, toast_type: String, message: String) -> Result<(), String> {
+pub fn show_plain_toast(app: AppHandle, toast_type: String, message: String, keep_indicator: Option<bool>) -> Result<(), String> {
     #[derive(Serialize)]
     struct PlainToastPayload {
         #[serde(rename = "type")]
@@ -61,5 +61,5 @@ pub fn show_plain_toast(app: AppHandle, toast_type: String, message: String) -> 
         message: String,
     }
     let payload = PlainToastPayload { toast_type, message };
-    indicator::show_toast_window(&app, &payload)
+    indicator::show_toast_window(&app, &payload, keep_indicator.unwrap_or(false))
 }

@@ -158,7 +158,7 @@ fn emit_transcription_error<R: tauri::Runtime>(
     app: &tauri::AppHandle<R>,
     payload: TranscriptionErrorPayload,
 ) {
-    let _ = indicator::show_toast_window(app, &payload);
+    let _ = indicator::show_toast_window(app, &payload, false);
 }
 
 // ---------------------------------------------------------------------------

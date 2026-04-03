@@ -43,19 +43,21 @@ Each item follows the format: `[status] ID | Priority: Description`
 
 ## Testing
 
-- [ ] T001 | P1: Test and fix auto-stop for recording after 5 minutes
+- [x] T001 | P1: Test and fix auto-stop for recording after 5 minutes
   - user should be informed when recording is close to 5 minutes
   - recording should stop after 5 minutes and text should be injected
-- [ ] T002 | P2: Test and fix auto-stop on silence
+- [x] T002 | P2: Test and fix auto-stop on silence
 - [ ] T003 | P3: Test the warning toasts inside the Settings window
 - [ ] T004 | P2: Test hotkey assignment for registered hotkey combinations (registered by other apps)
-- [ ] T005 | P1: Test the "Auto-start on Windows start" option
+- [ ] T005 | P1: Test the "Auto-start on Windows startup" option
 
 ## New features
 
-- [ ] F001: Add support for push-to-talk - separate hotkey
-- [ ] F002: Add support for pausing / resuming recordings
+- [ ] F001: Add all transcribed text to the clipboard as well
+  - in case the user changes the focus, the transcribed text is also added to the clipboard
+- [ ] F002: Add support for push-to-talk - separate hotkey
+- [ ] F003: Add support for pausing / resuming recordings
   - only for hands-free mode
-- [ ] F003: Add support for Command Mode - separate hotkey
+- [ ] F004: Add support for Command Mode - separate hotkey
   - use with selected text to trigger voice edits like "make bullets" or "summarize"
   - investigate how would this work with local models

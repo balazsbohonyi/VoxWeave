@@ -278,7 +278,7 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                         fallback_provider: None,
                         retryable: false,
                     };
-                    if let Err(e) = indicator::show_toast_window(app, &payload) {
+                    if let Err(e) = indicator::show_toast_window(app, &payload, false) {
                         log::warn!("Failed to show model-missing toast: {e}");
                     }
                     return;
@@ -327,7 +327,7 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                     fallback_provider: None,
                     retryable: false,
                 };
-                if let Err(toast_err) = indicator::show_toast_window(app, &payload) {
+                if let Err(toast_err) = indicator::show_toast_window(app, &payload, false) {
                     log::warn!("Failed to show error toast: {toast_err}");
                     // Fallback: hide the indicator so it is not left dangling.
                     indicator::hide(app);
@@ -415,6 +415,7 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                             if let Err(e) = indicator::show_toast_window(
                                                 &app_for_inject,
                                                 &payload,
+                                                false,
                                             ) {
                                                 log::warn!("Failed to show success toast: {e}");
                                             }
@@ -451,6 +452,7 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                         if let Err(e) = indicator::show_toast_window(
                                             &app_for_inject,
                                             &payload,
+                                            false,
                                         ) {
                                             log::warn!("Failed to show clipboard toast: {e}");
                                         }
@@ -480,7 +482,7 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                     Err(payload) => {
                                         indicator::hide(&app_for_inject);
                                         if let Err(e) =
-                                            indicator::show_toast_window(&app_for_inject, &payload)
+                                            indicator::show_toast_window(&app_for_inject, &payload, false)
                                         {
                                             log::warn!("Failed to show injection error toast: {e}");
                                         }
