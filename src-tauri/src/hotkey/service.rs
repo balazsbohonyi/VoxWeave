@@ -438,8 +438,7 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                                             }
                                         } else {
                                             // FlashPaste / Keystroke: text already landed in the target window.
-                                            // Just hide the indicator — no toast needed.
-                                            indicator::hide(&app_for_inject);
+                                            // No toast, no hide — leave the indicator as-is.
                                         }
                                     }
                                     Ok(crate::injection::InjectionResult::CopiedToClipboard) => {
