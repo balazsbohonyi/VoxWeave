@@ -304,6 +304,7 @@ Recent decisions affecting current work:
 | 1 | Remove click from record circle / remove Start Recording + Stop Recording from the tray menu | 2026-04-02 | 8fe54fe | [1-remove-click-from-record-circle-remove-s](./quick/1-remove-click-from-record-circle-remove-s/) |
 | 2 | remove injection cancellation support | 2026-04-02 | 739110e | [2-remove-injection-cancellation-support](./quick/2-remove-injection-cancellation-support/) |
 | 3 | Remove success state visualization (green border + DONE badge + 1s delay) | 2026-04-02 | 4f5ae90 | [3-remove-success-state-visualization](./quick/3-remove-success-state-visualization/) |
+| 5 | Show success toast after injection only for Clipboard mode | 2026-04-03 | 91099fb | [5-success-toast-after-injection](./quick/5-success-toast-after-injection/) |
 
 ### Blockers/Concerns
 
@@ -314,7 +315,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-02
-Stopped at: Completed quick task 3: remove success state visualization
+Last session: 2026-04-03
+Stopped at: Completed quick task 5: success toast after injection
 Resume file: None
 
