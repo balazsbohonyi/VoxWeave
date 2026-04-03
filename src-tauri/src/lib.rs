@@ -158,6 +158,7 @@ pub fn run() {
             commands::config::test_connection,
             commands::config::set_launch_at_login,
             commands::audio::list_audio_input_devices,
+            commands::audio::trigger_stop_recording,
             commands::indicator::begin_indicator_drag,
             commands::indicator::end_indicator_drag,
             commands::indicator::persist_indicator_position,

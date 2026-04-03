@@ -21,6 +21,7 @@ const win = getCurrentWindow();
 let unlistenState: UnlistenFn | null = null;
 let unlistenHidden: UnlistenFn | null = null;
 let unlistenAudioLevel: UnlistenFn | null = null;
+let unlistenVadSilenceStop: UnlistenFn | null = null;
 let unlistenMoved: UnlistenFn | null = null;
 let persistTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -214,6 +215,10 @@ onMounted(async () => {
     lastAudioLevelAt.value = performance.now();
   });
 
+  unlistenVadSilenceStop = await listen("vad-silence-stop", () => {
+    void invoke("trigger_stop_recording");
+  });
+
   const syncState = async () => {
     try {
       const snapshot = await invoke<IndicatorStatePayload>("get_indicator_state");
@@ -241,6 +246,7 @@ onBeforeUnmount(() => {
   if (unlistenState) unlistenState();
   if (unlistenHidden) unlistenHidden();
   if (unlistenAudioLevel) unlistenAudioLevel();
+  if (unlistenVadSilenceStop) unlistenVadSilenceStop();
   if (unlistenMoved) unlistenMoved();
   if (persistTimer) clearTimeout(persistTimer);
 });

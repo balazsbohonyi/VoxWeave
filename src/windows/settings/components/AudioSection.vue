@@ -46,7 +46,7 @@ function onSilenceDurationInput(e: Event): void {
   debounceTimer = setTimeout(() => {
     const val = parseFloat((e.target as HTMLInputElement).value);
     if (isNaN(val) || !config.value) return;
-    const ms = Math.round(Math.max(500, Math.min(5000, val * 1000)));
+    const ms = Math.round(Math.max(500, Math.min(30000, val * 1000)));
     lastNonZeroVadMs.value = ms;
     void saveConfig({ audio: { ...config.value.audio, vad_silence_ms: ms } });
   }, 300);
@@ -150,7 +150,7 @@ onUnmounted(() => {
           type="number"
           :value="silenceSecs"
           min="0.5"
-          max="5.0"
+          max="30.0"
           step="0.1"
           :disabled="!silenceEnabled"
           class="w-20 rounded border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-400"
