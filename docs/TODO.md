@@ -17,7 +17,7 @@ Each item follows the format: `[status] ID | Priority: Description`
 
 ## Changes
 
-- [ ] C001 | P1: Show success toast after injection only for the clipboard injection method
+- [x] C001 | P1: Show success toast after injection only for the clipboard injection method
 - [ ] C002 | P3:  Consider adding the following to the Vue code: linter & prettier
 - [x] C003 | P1: Generate a CHANGELOGS.md document
 - [ ] C004 | P1: Create and change the logo
