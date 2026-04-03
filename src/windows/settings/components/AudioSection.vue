@@ -16,7 +16,7 @@ const {
 
 // Local refs
 const selectedDevice = ref<string>("");
-const lastNonZeroVadMs = ref(1500);
+const lastNonZeroVadMs = ref(15000);
 
 const silenceEnabled = computed({
   get: () => config.value?.audio.vad_silence_ms !== 0,
@@ -36,7 +36,7 @@ const silenceEnabled = computed({
 });
 
 const silenceSecs = computed(() =>
-  ((config.value?.audio.vad_silence_ms || 1500) / 1000).toFixed(1),
+  Math.round((config.value?.audio.vad_silence_ms || 15000) / 1000),
 );
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -44,9 +44,9 @@ let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 function onSilenceDurationInput(e: Event): void {
   if (debounceTimer) clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
-    const val = parseFloat((e.target as HTMLInputElement).value);
+    const val = parseInt((e.target as HTMLInputElement).value, 10);
     if (isNaN(val) || !config.value) return;
-    const ms = Math.round(Math.max(500, Math.min(30000, val * 1000)));
+    const ms = Math.max(1000, Math.min(30000, val * 1000));
     lastNonZeroVadMs.value = ms;
     void saveConfig({ audio: { ...config.value.audio, vad_silence_ms: ms } });
   }, 300);
@@ -149,9 +149,9 @@ onUnmounted(() => {
         <input
           type="number"
           :value="silenceSecs"
-          min="0.5"
-          max="30.0"
-          step="0.1"
+          min="1"
+          max="30"
+          step="1"
           :disabled="!silenceEnabled"
           class="w-20 rounded border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-400"
           @input="onSilenceDurationInput"

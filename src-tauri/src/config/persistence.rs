@@ -206,7 +206,7 @@ mod tests {
         assert!(config.indicator.show);
         assert!(!config.launch_at_login);
         assert!(config.first_launch);
-        assert_eq!(config.audio.vad_silence_ms, 1500);
+        assert_eq!(config.audio.vad_silence_ms, 15000);
     }
 
     // ----- partial file → defaults filled -----
@@ -232,7 +232,7 @@ mod tests {
             "audio": {
                 "device": null,
                 "vad_threshold": 0.01,
-                "vad_silence_ms": 1500
+                "vad_silence_ms": 15000
             },
             "future_top_level_field": "v2_value",
             "transcription": {

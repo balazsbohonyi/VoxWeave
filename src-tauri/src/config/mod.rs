@@ -325,7 +325,7 @@ fn default_vad_threshold() -> f32 {
     0.01
 }
 fn default_vad_silence_ms() -> u32 {
-    1500
+    15000
 }
 fn default_paste_delay_ms() -> u64 {
     500
