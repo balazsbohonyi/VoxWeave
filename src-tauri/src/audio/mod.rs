@@ -288,8 +288,10 @@ fn accumulate_pcm_chunk<R: Runtime>(
         buf.extend_from_slice(&downsampled);
         if buf.len() > HARD_CAP {
             buf.truncate(HARD_CAP);
-            // Signal the recording to stop at the hard cap.
+            // Signal the capture thread to exit.
             stop_flag.store(true, Ordering::Relaxed);
+            // Notify the frontend to trigger the full stop pipeline.
+            let _ = app.emit("recording-limit-stop", ());
         }
         buf.len()
     };
