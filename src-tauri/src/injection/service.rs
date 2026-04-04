@@ -254,7 +254,10 @@ pub fn inject_text(
 
     // 4. Handle primary result
     match &primary_result {
-        InjectionResult::Ok => return Result::Ok(primary_result),
+        InjectionResult::Ok => {
+            let _ = clipboard.write_text(text);
+            return Result::Ok(primary_result);
+        }
         InjectionResult::CopiedToClipboard => return Result::Ok(primary_result),
         InjectionResult::Err(_) => { /* fall through to fallback */ }
     }
@@ -285,7 +288,10 @@ pub fn inject_text(
             config,
         );
         match result {
-            InjectionResult::Ok => return Result::Ok(InjectionResult::Ok),
+            InjectionResult::Ok => {
+                let _ = clipboard.write_text(text);
+                return Result::Ok(InjectionResult::Ok);
+            }
             InjectionResult::CopiedToClipboard => return Result::Ok(result),
             InjectionResult::Err(_) => continue,
         }
@@ -698,6 +704,50 @@ mod tests {
         assert!(result.is_err());
         let err = result.unwrap_err();
         assert!(matches!(err.code, InjectionErrorCode::AllMethodsFailed));
+    }
+
+    #[test]
+    fn clipboard_has_text_after_flashpaste_ok() {
+        // After a successful FlashPaste injection, clipboard must contain the injected text.
+        let clipboard = MockClipboard::default();
+        clipboard.write_text("original").unwrap();
+        let fw = make_fw_info("Notepad", 0x2000);
+        let window = MockWindow::new();
+        let elevation = MockElevation::new(0x2000);
+        let input = MockInput::new();
+        let config = make_injection_config(InjectionMode::FlashPaste, false);
+
+        let result = inject_text(
+            &window, &elevation, &input, &clipboard,
+            Some(&fw), "injected text", &config,
+        );
+
+        assert!(result.is_ok());
+        assert!(matches!(result.unwrap(), InjectionResult::Ok));
+        // Clipboard must contain the injected text (not the restored "original")
+        assert_eq!(clipboard.read_text().unwrap(), "injected text");
+    }
+
+    #[test]
+    fn clipboard_has_text_after_keystroke_ok() {
+        // After a successful Keystroke injection, clipboard must contain the injected text.
+        let clipboard = MockClipboard::default();
+        clipboard.write_text("original").unwrap();
+        let fw = make_fw_info("Notepad", 0x2000);
+        let window = MockWindow::new();
+        let elevation = MockElevation::new(0x2000); // same IL, no elevation dialog
+        let input = MockInput::new();
+        let config = make_injection_config(InjectionMode::Keystroke, false);
+
+        let result = inject_text(
+            &window, &elevation, &input, &clipboard,
+            Some(&fw), "injected text", &config,
+        );
+
+        assert!(result.is_ok());
+        assert!(matches!(result.unwrap(), InjectionResult::Ok));
+        // Clipboard must contain the injected text
+        assert_eq!(clipboard.read_text().unwrap(), "injected text");
     }
 
     #[test]
