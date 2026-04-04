@@ -134,6 +134,7 @@ Terminal window classes for FlashPaste paste shortcut switching: `ConsoleWindowC
 | `transcription.provider` in config controls the active provider; `fallback_order` is the failover chain | These are separate concerns — changing fallback order does not change the active provider. |
 | `TranscriptionConfig` uses nested `providers` map (not flat fields) | Per-provider api_key/model stored under `providers.<id>`; language hint is global; migrated at load time via `migrate_transcription_fields` on raw JSON — no disk rewrite needed |
 | `TranscriptionConfig` migration runs at load time on raw JSON Value | Old flat keys (`openai_api_key` etc.) are promoted to nested structure transparently; unknown fields preserved |
+| Success toast shown only for Clipboard injection mode | Other modes (FlashPaste, Keystroke) inject inline and don't need a separate confirmation; toast was added alongside clipboard support and intentionally scoped to it |
 
 ## Config
 
