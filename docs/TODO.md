@@ -55,9 +55,10 @@ Each item follows the format: `[status] ID | Priority: Description`
 
 - [ ] F001: Add all transcribed text to the clipboard as well
   - in case the user changes the focus, the transcribed text is also added to the clipboard
-- [ ] F002: Add support for push-to-talk - separate hotkey
-- [ ] F003: Add support for pausing / resuming recordings
+- [ ] F002: If target changed after starting recording, before injecting text, switch back to the original target ?
+- [ ] F003: Add support for push-to-talk - separate hotkey
+- [ ] F004: Add support for pausing / resuming recordings
   - only for hands-free mode
-- [ ] F004: Add support for Command Mode - separate hotkey
+- [ ] F005: Add support for Command Mode - separate hotkey
   - use with selected text to trigger voice edits like "make bullets" or "summarize"
   - investigate how would this work with local models

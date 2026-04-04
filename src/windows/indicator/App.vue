@@ -227,7 +227,7 @@ onMounted(async () => {
 
   unlistenLimitStop = await listen("recording-limit-stop", () => {
     void invoke("trigger_stop_recording");
-    void invoke("show_plain_toast", { toastType: "info", message: "5-minute recording limit reached — transcribing and injecting." });
+    void invoke("show_plain_toast", { toastType: "info", message: "5-minute recording limit reached — transcribing and injecting.", keepIndicator: true });
   });
 
   const syncState = async () => {

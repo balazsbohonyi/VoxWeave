@@ -2,7 +2,7 @@ pub mod events;
 pub mod window;
 
 use crate::config::persistence;
-use crate::state::AppState;
+use crate::state::{AppState, RecordingState};
 use events::{
     IndicatorStatePayload, IndicatorVisualState, INDICATOR_HIDDEN_EVENT, INDICATOR_STATE_EVENT,
 };
@@ -152,13 +152,33 @@ pub fn show_toast_window<R: Runtime, S: serde::Serialize>(
     Ok(())
 }
 
-/// Hides the toast window and shows the indicator in idle state.
+/// Hides the toast window and restores the indicator to the correct state:
+/// - Idle       → show idle (normal post-injection toast dismissal)
+/// - Recording  → show recording (near-limit warning closed while still recording)
+/// - Transcribing → re-emit the last known visual state (processing/injecting) so
+///                  the 5-min info toast closing mid-pipeline doesn't flash idle
 pub fn hide_toast_window<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
     if let Some(toast_win) = app.get_webview_window(TOAST_LABEL) {
         let _ = toast_win.hide();
         let _ = toast_win.set_ignore_cursor_events(true);
     }
-    show_idle(app)
+    let app_state = app.try_state::<AppState>();
+    let recording_state = app_state
+        .as_ref()
+        .and_then(|s| s.recording_state.lock().ok().map(|r| r.clone()))
+        .unwrap_or(RecordingState::Idle);
+    match recording_state {
+        RecordingState::Idle => show_idle(app),
+        RecordingState::Recording => show_recording(app),
+        RecordingState::Transcribing => {
+            // Re-emit the last visual state (Processing or Injecting) so the indicator
+            // stays in the correct phase rather than briefly flashing idle.
+            let visual = app_state
+                .and_then(|s| s.indicator_visual_state.lock().ok().map(|v| *v))
+                .unwrap_or(IndicatorVisualState::Processing);
+            show_with_state(app, visual)
+        }
+    }
 }
 
 fn hide_indicator_window<R: Runtime>(app: &AppHandle<R>) {

@@ -230,6 +230,7 @@ fn accumulate_pcm_chunk<R: Runtime>(
     native_rate: u32,
     pcm_buffer: &Arc<Mutex<Vec<f32>>>,
     near_limit_emitted: &std::sync::atomic::AtomicBool,
+    hard_cap_reached: &AtomicBool,
     stop_flag: &AtomicBool,
     app: &AppHandle<R>,
 ) {
@@ -286,12 +287,12 @@ fn accumulate_pcm_chunk<R: Runtime>(
             return;
         }
         buf.extend_from_slice(&downsampled);
-        if buf.len() > HARD_CAP {
+        if buf.len() >= HARD_CAP {
             buf.truncate(HARD_CAP);
             // Signal the capture thread to exit.
             stop_flag.store(true, Ordering::Relaxed);
-            // Notify the frontend to trigger the full stop pipeline.
-            let _ = app.emit("recording-limit-stop", ());
+            // Flag so the emitter thread emits "recording-limit-stop" after it exits.
+            hard_cap_reached.store(true, Ordering::Relaxed);
         }
         buf.len()
     };
@@ -356,6 +357,9 @@ fn start_realtime_level_capture<R: Runtime>(
         let latest_rms = Arc::new(AtomicU32::new(0f32.to_bits()));
         // Tracks whether the near-limit event has been emitted for this recording.
         let near_limit_emitted = Arc::new(AtomicBool::new(false));
+        // Set by accumulate_pcm_chunk when the 5-minute hard cap is hit.
+        // The emitter thread checks this after its loop exits and emits "recording-limit-stop".
+        let hard_cap_reached = Arc::new(AtomicBool::new(false));
 
         let stream_result = match default_config.sample_format() {
             cpal::SampleFormat::F32 => {
@@ -363,6 +367,7 @@ fn start_realtime_level_capture<R: Runtime>(
                 let pcm_buf = Arc::clone(&pcm_buffer);
                 let stop_clone = Arc::clone(&stop_for_thread);
                 let near_limit = Arc::clone(&near_limit_emitted);
+                let hard_cap = Arc::clone(&hard_cap_reached);
                 let app_for_pcm = app_for_thread.clone();
                 let app_for_errors = app_for_thread.clone();
                 device.build_input_stream(
@@ -379,6 +384,7 @@ fn start_realtime_level_capture<R: Runtime>(
                             native_rate,
                             &pcm_buf,
                             &near_limit,
+                            &hard_cap,
                             &stop_clone,
                             &app_for_pcm,
                         );
@@ -400,6 +406,7 @@ fn start_realtime_level_capture<R: Runtime>(
                 let pcm_buf = Arc::clone(&pcm_buffer);
                 let stop_clone = Arc::clone(&stop_for_thread);
                 let near_limit = Arc::clone(&near_limit_emitted);
+                let hard_cap = Arc::clone(&hard_cap_reached);
                 let app_for_pcm = app_for_thread.clone();
                 let app_for_errors = app_for_thread.clone();
                 device.build_input_stream(
@@ -418,6 +425,7 @@ fn start_realtime_level_capture<R: Runtime>(
                             native_rate,
                             &pcm_buf,
                             &near_limit,
+                            &hard_cap,
                             &stop_clone,
                             &app_for_pcm,
                         );
@@ -439,6 +447,7 @@ fn start_realtime_level_capture<R: Runtime>(
                 let pcm_buf = Arc::clone(&pcm_buffer);
                 let stop_clone = Arc::clone(&stop_for_thread);
                 let near_limit = Arc::clone(&near_limit_emitted);
+                let hard_cap = Arc::clone(&hard_cap_reached);
                 let app_for_pcm = app_for_thread.clone();
                 let app_for_errors = app_for_thread.clone();
                 device.build_input_stream(
@@ -457,6 +466,7 @@ fn start_realtime_level_capture<R: Runtime>(
                             native_rate,
                             &pcm_buf,
                             &near_limit,
+                            &hard_cap,
                             &stop_clone,
                             &app_for_pcm,
                         );
@@ -520,6 +530,11 @@ fn start_realtime_level_capture<R: Runtime>(
         }
 
         drop(stream);
+        // If the 5-minute hard cap caused the stop, notify the frontend from the
+        // emitter thread (not from the cpal callback) so the event is reliably delivered.
+        if hard_cap_reached.load(Ordering::Relaxed) {
+            let _ = app_for_thread.emit("recording-limit-stop", ());
+        }
     });
 
     match setup_rx.recv_timeout(Duration::from_secs(2)) {

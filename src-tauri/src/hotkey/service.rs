@@ -311,6 +311,9 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
     }
 
     if previous_state == RecordingState::Recording {
+        // Show processing state immediately — encoding can take several seconds for long
+        // recordings and the indicator should not stay in idle/recording state during that time.
+        indicator::show_processing(app);
         match audio::stop_recording_and_encode(app) {
             Err(err) => {
                 log::warn!("Failed to finalize recording: {err}");
@@ -339,8 +342,6 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                     let state = app.state::<AppState>();
                     *state.last_encoded_audio.lock().unwrap() = Some(encoded.clone());
                 }
-                // Show processing state on indicator while transcription runs
-                indicator::show_processing(app);
                 let app_clone = app.clone();
                 tauri::async_runtime::spawn(async move {
                     match transcription::transcribe_with_retry(&app_clone, &encoded).await {
