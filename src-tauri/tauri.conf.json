@@ -14,7 +14,7 @@
       {
         "label": "settings",
         "title": "VoxWeave Settings",
-        "url": "index.html",
+        "url": "src/settings.html",
         "width": 560,
         "height": 450,
         "center": true,
@@ -26,7 +26,7 @@
       {
         "label": "indicator",
         "title": "VoxWeave Indicator",
-        "url": "indicator.html",
+        "url": "src/index.html",
         "width": 180,
         "height": 38,
         "minWidth": 180,
@@ -44,7 +44,7 @@
       {
         "label": "toast",
         "title": "VoxWeave Toast",
-        "url": "toast.html",
+        "url": "src/toast.html",
         "width": 180,
         "height": 108,
         "minWidth": 180,
@@ -62,7 +62,7 @@
       {
         "label": "wizard",
         "title": "VoxWeave Wizard",
-        "url": "wizard.html",
+        "url": "src/wizard.html",
         "width": 560,
         "height": 550,
         "center": true,
