@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import tailwindcss from "@tailwindcss/vite";
@@ -28,6 +29,16 @@ export default defineConfig(async () => ({
     watch: {
       // 3. tell Vite to ignore watching `src-tauri`
       ignored: ["**/src-tauri/**"],
+    },
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        indicator: resolve(__dirname, "src/index.html"),
+        settings: resolve(__dirname, "src/settings.html"),
+        wizard: resolve(__dirname, "src/wizard.html"),
+        toast: resolve(__dirname, "src/toast.html"),
+      },
     },
   },
 }));
