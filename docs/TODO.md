@@ -32,7 +32,6 @@ Each item follows the format: `[status] ID | Priority: Description`
 - [ ] C009 | P2: display the toasts in the bottom right corner, not relative to the indicator
   - use red / green / dark gray backgrounds with a gradient for warning / success / info toasts and white background
 - [ ] C010 | P3: reference the DEV-SETUP.md file in the README.md file
-- [ ] C011 | P2: Remove the logging of the transcribed text - not needed anymore
 
 ## Removals
 
@@ -40,6 +39,7 @@ Each item follows the format: `[status] ID | Priority: Description`
 - [x] R002 | P2: Remove the success state visualization (green border + green REC indicator)
 - [x] R004 | P1: Remove the "Start Recording" / "Stop Recording" tray options
 - [x] R005 | P1: Remove support for injection cancellation with ESC, and the toast displayed after
+- [x] R006 | P2: Remove the logging of the transcribed text - not needed anymore
 
 ## Testing
 
