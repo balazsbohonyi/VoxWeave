@@ -53,7 +53,7 @@ Each item follows the format: `[status] ID | Priority: Description`
 
 ## New features
 
-- [ ] F001: Add all transcribed text to the clipboard as well
+- [x] F001: Add all transcribed text to the clipboard as well
   - in case the user changes the focus, the transcribed text is also added to the clipboard
 - [ ] F002: If target changed after starting recording, before injecting text, switch back to the original target ?
 - [ ] F003: Add support for push-to-talk - separate hotkey
