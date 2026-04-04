@@ -11,9 +11,16 @@ Each item follows the format: `[status] ID | Priority: Description`
 
 ## Bugs
 
-- [ ] B001 | P1: When doing a recording with silence (no talk at all), the app will inject: `[BLANK_AUDIO]`
+- [ ] B001 | P1: For local models, when doing a recording with silence (no talk at all), the app will inject: `[BLANK_AUDIO]`
   - sometimes for really long pauses it will inject in those parts of the text something like:
     - `[Pause]` or even multiple ones like `[Pause][Pause][Pause]`
+- [x] B002 | P1: Fix the build. After creating a build and starting the .exe file the following happens:
+  - indicator shows part of the Settings window - not the waveforms and the indicator states
+  - Settings window can be opened from the tray
+  - opening the wizard from the Settings window, opens the Settings window again (2 settings windows opened)
+  - I suspect this is because we have the following HTML files in the root: `index.html`, `indicator.html`, `wizard.html` and `toast.html`
+    - ...and `index.html` is actually for the Settings window, and `indicator.html` is for the indicator window
+    - and probably the .exe considers the `index.html` file as the main entry point
 
 ## Changes
 
@@ -55,7 +62,7 @@ Each item follows the format: `[status] ID | Priority: Description`
 
 - [x] F001: Add all transcribed text to the clipboard as well
   - in case the user changes the focus, the transcribed text is also added to the clipboard
-- [ ] F002: If target changed after starting recording, before injecting text, switch back to the original target ?
+- [ ] F002: Snapshot the target where recording started, and in case during recording the target changed, use the snapshot target to inject the text into
 - [ ] F003: Add support for push-to-talk - separate hotkey
 - [ ] F004: Add support for pausing / resuming recordings
   - only for hands-free mode
