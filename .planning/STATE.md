@@ -7,7 +7,7 @@ current_phase_name: Local Transcription
 status: completed
 stopped_at: Completed 10-04-PLAN.md (3 UAT gaps closed, phase 10 ready for completion)
 last_updated: "2026-03-30T20:16:17.947Z"
-last_activity: 2026-04-03 - Completed quick task 7: max 5-minute recordings
+last_activity: 2026-04-04 - Completed quick task 8: remove transcribed text from success log
 progress:
   total_phases: 11
   completed_phases: 9
@@ -307,6 +307,7 @@ Recent decisions affecting current work:
 | 5 | Show success toast after injection only for Clipboard mode | 2026-04-03 | 91099fb | [5-success-toast-after-injection](./quick/5-success-toast-after-injection/)                 |
 | 6 | Implement VAD auto-stop on silence | 2026-04-03 | 941b4ee | [6-auto-stop-on-silence](./quick/6-auto-stop-on-silence/)                                   |
 | 7 | Wire 5-minute recording hard cap end-to-end (warning toast + auto-stop) | 2026-04-03 | 6748e5c | [7-max-5-minute-recordings](./quick/7-max-5-minute-recordings/)                             |
+| 8 | Remove transcribed text from success log lines | 2026-04-04 | ce593dd | [8-remove-transcribed-text-from-success-log](./quick/8-remove-transcribed-text-from-success-log/) |
 
 ### Blockers/Concerns
 
@@ -317,7 +318,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-03
-Stopped at: Completed quick task 7: 5-minute recording limit wired end-to-end
+Last session: 2026-04-04
+Stopped at: Completed quick task 8: remove transcribed text from success log
 Resume file: None
 
