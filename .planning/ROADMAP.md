@@ -232,7 +232,7 @@ Note: Phase 10 depends on Phase 3 (not Phase 9); it can be executed after Phase 
 **Goal:** Configure Vite multi-page build and move HTML entry points so all four Tauri windows load correct content in the production .exe
 **Requirements**: N/A (urgent build fix)
 **Depends on:** Phase 10
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 10.1-01-PLAN.md — Move HTML files to src/, add Vite rollupOptions.input, update tauri.conf.json window URLs

@@ -5,14 +5,14 @@ milestone_name: milestone
 current_phase: 10
 current_phase_name: Local Transcription
 status: completed
-stopped_at: Phase 10.1 context gathered
-last_updated: "2026-04-04T17:35:13.175Z"
+stopped_at: "Completed 10.1-01 automated tasks (Task 1+2). Awaiting checkpoint: human-verify Task 3 (production .exe verification)"
+last_updated: "2026-04-04T18:06:25.531Z"
 last_activity: 2026-03-25
 progress:
   total_phases: 12
-  completed_phases: 9
-  total_plans: 49
-  completed_plans: 49
+  completed_phases: 10
+  total_plans: 50
+  completed_plans: 50
 ---
 
 ---
@@ -200,6 +200,7 @@ Progress: [█████████░] 90%
 | Phase 10-local-transcription P03 | 5 | 2 tasks | 6 files |
 | Phase 10-local-transcription P03 | 40 | 3 tasks | 8 files |
 | Phase 10 P04 | 2 | 2 tasks | 3 files |
+| Phase 10.1 P01 | 2 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -305,6 +306,7 @@ Recent decisions affecting current work:
 - [Phase 10-local-transcription]: LocalFeatureDisabledProvider stub instead of panic(): app never crashes when local-transcription feature not compiled in
 - [Phase 10-local-transcription]: Pre-recording guard uses std::path::Path::new().exists() at hotkey time to block audio capture when no local model is available
 - [Phase 10-local-transcription]: activeDownloadId.value = null added as first statement in deleteModel() — ensures Download button re-enables immediately after delete without waiting for any download lifecycle event
+- [Phase 10.1-01]: HTML entry files moved to src/ with indicator.html->src/index.html and index.html->src/settings.html; Vite rollupOptions.input uses resolve(__dirname,...) for all 4 entries; tauri.conf.json window URLs updated to src/*.html bare relative paths
 
 ### Roadmap Evolution
 
@@ -337,7 +339,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-04T17:35:13.166Z
-Stopped at: Phase 10.1 context gathered
-Resume file: .planning/phases/10.1-fix-the-build-when-starting-the-exe-file-the-indicator-shows-inside-the-indicator-window-part-of-the-settings-window/10.1-CONTEXT.md
+Last session: 2026-04-04T18:06:25.527Z
+Stopped at: Completed 10.1-01 automated tasks (Task 1+2). Awaiting checkpoint: human-verify Task 3 (production .exe verification)
+Resume file: None
 
