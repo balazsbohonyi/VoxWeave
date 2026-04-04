@@ -124,19 +124,15 @@ pub fn start_recording_with_snapshot<R: Runtime>(
     };
 
     #[cfg(not(test))]
-    let (level_emitter_stop, level_emitter_thread) =
-        start_realtime_level_capture(app, &resolved.active_device, Arc::clone(&pcm_buffer), vad_threshold, vad_silence_ms)?;
-
-    #[cfg(not(test))]
-    let session = session::new_session(
-        resolved.active_device,
-        level_emitter_stop,
-        level_emitter_thread,
-        pcm_buffer,
-    );
+    let (level_emitter_stop, level_emitter_thread) = {
+        let (s, t) = start_realtime_level_capture(app, &resolved.active_device, Arc::clone(&pcm_buffer), vad_threshold, vad_silence_ms)?;
+        (Some(s), Some(t))
+    };
 
     #[cfg(test)]
-    let session = session::new_session(resolved.active_device, pcm_buffer);
+    let (level_emitter_stop, level_emitter_thread) = (None, None);
+
+    let session = session::new_session(resolved.active_device, level_emitter_stop, level_emitter_thread, pcm_buffer);
 
     *state.audio_session.lock().map_err(|e| e.to_string())? = Some(session);
     Ok(())
@@ -331,7 +327,7 @@ fn start_realtime_level_capture<R: Runtime>(
             .map_err(|e| e.to_string())
             .and_then(|mut devices| {
                 devices
-                    .find(|device| device.name().ok().as_deref() == Some(&setup_device_name))
+                    .find(|device| device.name().ok().as_deref() == Some(setup_device_name.as_str()))
                     .ok_or_else(|| {
                         format!("Unable to access selected microphone '{setup_device_name}'.")
                     })
@@ -660,7 +656,7 @@ mod tests {
     #[test]
     fn session_state_transitions() {
         let pcm_buffer = Arc::new(Mutex::new(Vec::new()));
-        let session = session::new_session("Mic A".to_string(), pcm_buffer);
+        let session = session::new_session("Mic A".to_string(), None, None, pcm_buffer);
         assert_eq!(session.sample_rate_hz, 16_000);
         assert_eq!(session.channels, 1);
         assert_eq!(session.active_device, "Mic A");
