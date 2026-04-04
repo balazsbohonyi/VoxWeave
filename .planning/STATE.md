@@ -5,6 +5,23 @@ milestone_name: milestone
 current_phase: 10
 current_phase_name: Local Transcription
 status: completed
+stopped_at: Phase 10.1 context gathered
+last_updated: "2026-04-04T17:35:13.175Z"
+last_activity: 2026-03-25
+progress:
+  total_phases: 12
+  completed_phases: 9
+  total_plans: 49
+  completed_plans: 49
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+current_phase: 10
+current_phase_name: Local Transcription
+status: completed
 stopped_at: Completed 10-04-PLAN.md (3 UAT gaps closed, phase 10 ready for completion)
 last_updated: "2026-03-30T20:16:17.947Z"
 last_activity: 2026-04-04 - Completed quick task 9: add transcribed text to clipboard
@@ -292,6 +309,7 @@ Recent decisions affecting current work:
 ### Roadmap Evolution
 
 - Phase 05.1 inserted after Phase 5: implement real PCM accumulation and Opus encoder (URGENT)
+- Phase 10.1 inserted after Phase 10: fix the build - when starting the .exe file the indicator shows inside the indicator window part of the Settings window (URGENT)
 
 ### Pending Todos
 
@@ -319,7 +337,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-04
-Stopped at: Completed quick task 9: add transcribed text to clipboard
-Resume file: None
+Last session: 2026-04-04T17:35:13.166Z
+Stopped at: Phase 10.1 context gathered
+Resume file: .planning/phases/10.1-fix-the-build-when-starting-the-exe-file-the-indicator-shows-inside-the-indicator-window-part-of-the-settings-window/10.1-CONTEXT.md
 
