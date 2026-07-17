@@ -1,6 +1,4 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI coding agents when working with code in this repository.
 
 ### Plan Mode
 
@@ -134,6 +132,7 @@ Terminal window classes for FlashPaste paste shortcut switching: `ConsoleWindowC
 | `transcription.provider` in config controls the active provider; `fallback_order` is the failover chain | These are separate concerns — changing fallback order does not change the active provider. |
 | `TranscriptionConfig` uses nested `providers` map (not flat fields) | Per-provider api_key/model stored under `providers.<id>`; language hint is global; migrated at load time via `migrate_transcription_fields` on raw JSON — no disk rewrite needed |
 | `TranscriptionConfig` migration runs at load time on raw JSON Value | Old flat keys (`openai_api_key` etc.) are promoted to nested structure transparently; unknown fields preserved |
+| Success toast shown only for Clipboard injection mode | Other modes (FlashPaste, Keystroke) inject inline and don't need a separate confirmation; toast was added alongside clipboard support and intentionally scoped to it |
 
 ## Config
 
@@ -150,3 +149,16 @@ All planning documents live in `.planning/`:
 - `research/` — stack, architecture, features, and pitfalls research
 
 When implementing a phase, check `ROADMAP.md` for that phase's success criteria and `REQUIREMENTS.md` for the specific requirement IDs being satisfied.
+
+## Tool priority: LSP FIRST
+
+**When navigating code, ALWAYS use LSP before grep, glob, bash, or Read-and-scan.** LSP is faster, more accurate, and cheaper on tokens. Only fall back to grep/glob for non-code text search or regex patterns. This is a hard rule, not a suggestion.
+
+## graphify
+
+This project has a graphify knowledge graph at graphify-out/.
+
+Rules:
+- Before answering architecture or codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes and community structure
+- If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
+- After modifying code files in this session, run `graphify update .` to keep the graph current (AST-only, no API cost)

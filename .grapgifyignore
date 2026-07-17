@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.claude/
+.codex/
+.opencode/
+.idea/
+.vscode/
+.planning/
+.docs/
