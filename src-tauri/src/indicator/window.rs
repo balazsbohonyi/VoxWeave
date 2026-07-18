@@ -1,6 +1,6 @@
 use tauri::{AppHandle, LogicalPosition, Monitor, Position, Runtime, WebviewWindow};
 
-pub const INDICATOR_WIDTH: i32 = 180;
+pub const INDICATOR_WIDTH: i32 = 150;
 pub const INDICATOR_HEIGHT: i32 = 38;
 pub const TOAST_HEIGHT: i32 = 108;
 pub const TOAST_GAP: i32 = 6;
