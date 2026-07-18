@@ -50,7 +50,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 - [x] **LOCL-01**: App supports local transcription via whisper.cpp (whisper-rs)
 - [x] **LOCL-02**: Models are NOT bundled — downloaded on-demand from settings with progress bar and cancel option
 - [x] **LOCL-03**: Available models: tiny (~75MB), base (~150MB), small (~500MB), medium (~1.5GB) with quality/speed descriptions
-- [x] **LOCL-04**: Downloaded models stored in `%APPDATA%/VoxWeave/models/`; user can delete models to free space
+- [x] **LOCL-04**: Downloaded models use `%APPDATA%/VoxWeave/models/` when installed, or `data/models/` for marker-selected portable copies; users can delete models to free space
 - [x] **LOCL-05**: Local transcription runs on a background thread without freezing the UI
 - [x] **LOCL-06**: Audio is passed as WAV/PCM float32 to whisper.cpp
 - [x] **LOCL-07**: If the model file is missing or corrupt, show an error with a prompt to re-download
@@ -104,7 +104,7 @@ Requirements for Windows MVP. Each maps to roadmap phases.
 
 ### Config
 
-- [x] **CONF-01**: All settings persist in JSON at `%APPDATA%/VoxWeave/config.json`
+- [x] **CONF-01**: Installed settings persist in `%APPDATA%/VoxWeave/config.json`; portable copies persist at `data/config.json`
 - [x] **CONF-02**: Config includes: engine, active provider, per-provider API key and model under `transcription.providers`, global language hint, hotkey, mic device, local model path, injection method/speed, auto-fallback, autostart, indicator position, first-launch flag
 - [x] **CONF-03**: Missing fields use defaults; unknown fields are ignored (forward/backward compatible)
 

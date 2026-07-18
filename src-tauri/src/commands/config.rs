@@ -10,6 +10,16 @@ use tauri::AppHandle;
 use tauri::State;
 use tauri_plugin_autostart::ManagerExt;
 
+#[derive(Debug, serde::Serialize)]
+pub struct RuntimeInfo {
+    pub is_portable: bool,
+}
+
+#[tauri::command]
+pub fn get_runtime_info(paths: State<'_, crate::paths::StoragePaths>) -> RuntimeInfo {
+    RuntimeInfo { is_portable: paths.is_portable }
+}
+
 /// Return the current in-memory config.
 #[tauri::command]
 pub fn get_config(state: State<AppState>) -> Result<AppConfig, String> {
@@ -133,7 +143,14 @@ pub async fn test_connection(
 /// Enable or disable launching VoxWeave at Windows login via the autostart plugin.
 /// Wraps HKCU\Software\Microsoft\Windows\CurrentVersion\Run registry key.
 #[tauri::command]
-pub fn set_launch_at_login(app: AppHandle, enabled: bool) -> Result<(), String> {
+pub fn set_launch_at_login(
+    app: AppHandle,
+    paths: State<'_, crate::paths::StoragePaths>,
+    enabled: bool,
+) -> Result<(), String> {
+    if paths.is_portable {
+        return Err("Launch at login is unavailable in portable mode.".to_string());
+    }
     let autostart = app.autolaunch();
     if enabled {
         autostart.enable().map_err(|e| e.to_string())?;
@@ -154,6 +171,12 @@ pub fn open_settings_window(app: AppHandle) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn runtime_info_reports_portable_state() {
+        assert!(RuntimeInfo { is_portable: true }.is_portable);
+        assert!(!RuntimeInfo { is_portable: false }.is_portable);
+    }
 
     #[test]
     fn get_provider_models_openai_has_exactly_three_items() {

@@ -21,14 +21,12 @@ use std::path::PathBuf;
 /// Returns the path to the VoxWeave config directory:
 /// `%APPDATA%\VoxWeave` on Windows, `~/.config/VoxWeave` elsewhere.
 pub fn config_dir() -> Result<PathBuf, String> {
-    let base = dirs_next::config_dir()
-        .ok_or_else(|| "Cannot determine user config directory".to_string())?;
-    Ok(base.join("VoxWeave"))
+    Ok(crate::paths::StoragePaths::current()?.data_dir)
 }
 
 /// Returns the full path to the config file.
 pub fn config_path() -> Result<PathBuf, String> {
-    Ok(config_dir()?.join("config.json"))
+    Ok(crate::paths::StoragePaths::current()?.config_path())
 }
 
 // ---------------------------------------------------------------------------

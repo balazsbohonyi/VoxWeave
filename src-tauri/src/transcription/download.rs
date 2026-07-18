@@ -50,9 +50,11 @@ pub struct DownloadEventPayload {
 
 /// Returns the models directory: `%APPDATA%/VoxWeave/models/`.
 pub fn models_dir() -> Result<std::path::PathBuf, String> {
-    let base = dirs_next::config_dir()
-        .ok_or_else(|| "Cannot determine user config directory".to_string())?;
-    Ok(base.join("VoxWeave").join("models"))
+    Ok(crate::paths::StoragePaths::current()?.models_dir())
+}
+
+pub fn resolve_model_path(stored: &str) -> Result<std::path::PathBuf, String> {
+    crate::paths::StoragePaths::current()?.resolve_model_path(stored)
 }
 
 /// Returns the file path for a specific model ID.
@@ -208,10 +210,7 @@ pub async fn run_download<R: tauri::Runtime>(
     std::fs::rename(&partial_path, &final_path)
         .map_err(|e| format!("Failed to finalize model file: {e}"))?;
 
-    let model_path_str = final_path
-        .to_str()
-        .ok_or_else(|| "Model path is not valid UTF-8".to_string())?
-        .to_string();
+    let model_path_str = crate::paths::StoragePaths::current()?.persist_model_path(&final_path)?;
 
     let _ = app.emit(
         MODEL_DOWNLOAD_DONE_EVENT,

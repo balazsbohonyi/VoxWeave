@@ -52,7 +52,7 @@ Text lands in any window — terminals, editors, browsers — without friction. 
 ## Context
 
 - **Competitive context**: Wispr Flow is the commercial incumbent. VoxWeave differentiates on BYOK model, zero cost (beyond API usage), privacy (audio never touches third-party servers beyond the user's chosen provider), and terminal support.
-- **Distribution**: Pre-built Windows installer via GitHub Releases. Open source.
+- **Distribution**: Draft-first GitHub Releases provide a Windows installer and a marker-selected portable ZIP. Open source.
 - **Cross-platform intent**: Windows is the MVP, but macOS is the next planned platform. The architecture must use proper abstractions for platform-specific code (audio capture, text injection, clipboard operations, hotkey registration, elevation checks) so adding macOS requires implementing platform traits — not rewriting core logic.
 - **Provider model lists**: Hardcoded model lists for all providers. OpenAI: whisper-1, gpt-4o-transcribe, gpt-4o-mini-transcribe. Groq: whisper-large-v3-turbo (default), whisper-large-v3, distil-whisper-large-v3-en.
 - **OpenRouter dropped**: OpenRouter has no Whisper-style STT endpoint. Its chat completions approach (base64 audio) produced inconsistent results and is not purpose-built for dictation. Confirmed by user testing — do not re-add without re-evaluation.

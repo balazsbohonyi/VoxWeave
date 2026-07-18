@@ -1,0 +1,65 @@
+name: Publish release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: lts/* }
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - run: pnpm install --frozen-lockfile
+
+      - name: Validate tag and project versions
+        id: version
+        shell: pwsh
+        run: |
+          $tag = '${{ github.ref_name }}'.TrimStart('v')
+          $package = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $tauri = (Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
+          $cargo = (Select-String -Path src-tauri/Cargo.toml -Pattern '^version = "(.+)"').Matches[0].Groups[1].Value
+          if ($tag -ne $package -or $tag -ne $tauri -or $tag -ne $cargo) { throw "Tag $tag must match package.json ($package), tauri.conf.json ($tauri), and Cargo.toml ($cargo)." }
+          "version=$tag" >> $env:GITHUB_OUTPUT
+      - name: Select bundle targets
+        id: bundles
+        shell: pwsh
+        run: |
+          if ('${{ github.ref_name }}'.Contains('-')) { 'args=--bundles nsis' >> $env:GITHUB_OUTPUT } else { 'args=' >> $env:GITHUB_OUTPUT }
+      - uses: tauri-apps/tauri-action@v0
+        env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
+        with:
+          tagName: v__VERSION__
+          releaseName: VoxWeave v__VERSION__
+          releaseBody: See CHANGELOG.md for release notes.
+          releaseDraft: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          args: ${{ steps.bundles.outputs.args }}
+      - name: Create and validate portable archive
+        shell: pwsh
+        run: |
+          $version = '${{ steps.version.outputs.version }}'
+          $root = "portable/VoxWeave-$version-portable"
+          $zip = "VoxWeave-$version-portable-windows-x64.zip"
+          $exe = 'src-tauri/target/release/voxweave.exe'
+          if (!(Test-Path $exe) -or !(Test-Path '.github/release/README_portable.txt')) { throw 'Required portable asset is missing.' }
+          New-Item -ItemType Directory -Force $root | Out-Null
+          Copy-Item $exe "$root/voxweave.exe"
+          Copy-Item .github/release/README_portable.txt "$root/README_portable.txt"
+          New-Item -ItemType File -Force "$root/voxweave.portable" | Out-Null
+          Compress-Archive -Path "$root/*" -DestinationPath $zip -Force
+          $entries = [IO.Compression.ZipFile]::OpenRead((Resolve-Path $zip)).Entries.FullName
+          $expected = @('voxweave.exe', 'README_portable.txt', 'voxweave.portable')
+          if ((Compare-Object $expected $entries) -ne $null) { throw "Portable archive contents are invalid: $($entries -join ', ')" }
+      - name: Upload portable archive to draft
+        shell: pwsh
+        env: { GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
+        run: gh release upload "v${{ steps.version.outputs.version }}" "VoxWeave-${{ steps.version.outputs.version }}-portable-windows-x64.zip" --clobber

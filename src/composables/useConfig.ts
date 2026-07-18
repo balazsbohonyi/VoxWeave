@@ -10,6 +10,7 @@ import type {
   AppConfig,
   AudioWarningPayload,
   HotkeyWarningPayload,
+  RuntimeInfo,
 } from "../types/index";
 
 // ---------------------------------------------------------------------------
@@ -19,6 +20,7 @@ import type {
 const AUDIO_DEVICE_POLL_INTERVAL_MS = 3_000;
 
 const config = ref<AppConfig | null>(null);
+const runtimeInfo = ref<RuntimeInfo | null>(null);
 const loading = ref(false);
 const error = ref<string | null>(null);
 const hotkeyWarning = ref<HotkeyWarningPayload | null>(null);
@@ -89,6 +91,7 @@ async function loadConfig(): Promise<void> {
   error.value = null;
   try {
     config.value = await invoke<AppConfig>("get_config");
+    runtimeInfo.value = await invoke<RuntimeInfo>("get_runtime_info");
     await loadAudioInputDevices();
   } catch (e) {
     error.value = String(e);
@@ -171,6 +174,7 @@ function stopAudioDevicePolling(): void {
 export function useConfig() {
   return {
     config,
+    runtimeInfo,
     loading,
     error,
     hotkeyWarning,

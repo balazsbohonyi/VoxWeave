@@ -72,6 +72,10 @@ export interface AppConfig {
   first_launch: boolean;
 }
 
+export interface RuntimeInfo {
+  is_portable: boolean;
+}
+
 // ---------------------------------------------------------------------------
 // Recording state
 // ---------------------------------------------------------------------------

@@ -122,9 +122,7 @@ pub fn get_downloaded_models(
 #[tauri::command]
 pub fn get_model_path(model_id: String) -> Result<String, String> {
     let path = download::model_file_path(&model_id)?;
-    path.to_str()
-        .ok_or_else(|| "Model path is not valid UTF-8".to_string())
-        .map(|s| s.to_string())
+    crate::paths::StoragePaths::current()?.persist_model_path(&path)
 }
 
 /// Delete a downloaded model file and clear the config if it was the active model.
@@ -141,10 +139,7 @@ pub fn delete_model(
     }
 
     // If this was the configured model path, clear it
-    let model_path_str = path
-        .to_str()
-        .ok_or_else(|| "Model path is not valid UTF-8".to_string())?
-        .to_string();
+    let model_path_str = crate::paths::StoragePaths::current()?.persist_model_path(&path)?;
 
     let mut config = state.config.lock().unwrap();
     let currently_configured = config

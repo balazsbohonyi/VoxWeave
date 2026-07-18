@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Right-clicking the tray shows a context menu with Settings, Start/Stop Recording, and Quit
   3. Double-clicking the tray icon opens the settings window
   4. Closing the settings window minimizes to tray rather than quitting
-  5. Config is read from and written to `%APPDATA%/VoxWeave/config.json`; missing fields use defaults and unknown fields are preserved
+  5. Installed config uses `%APPDATA%/VoxWeave/config.json`; a portable marker selects sibling `data/config.json`; missing fields use defaults and unknown fields are preserved
 **Plans**: 5 plans
 Plans:
 - [x] 04-01-indicator-window-runtime-PLAN.md - indicator window runtime + lifecycle wiring
@@ -197,7 +197,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Selecting "Local" engine in settings and triggering a recording produces a transcription without any network call
   2. Models (tiny/base/small/medium) can be downloaded on-demand from the settings panel with a live progress bar and a cancel option
-  3. Downloaded models are stored in `%APPDATA%/VoxWeave/models/` and can be deleted from within settings to free disk space
+  3. Downloaded models use `%APPDATA%/VoxWeave/models/` when installed or portable `data/models/`, and can be deleted from Settings
   4. Local transcription runs on a background thread and does not freeze the UI during processing
   5. If a model file is missing or corrupt, an error notification prompts the user to re-download
 **Plans**: 4 plans
