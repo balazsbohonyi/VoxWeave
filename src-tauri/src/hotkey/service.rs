@@ -255,8 +255,9 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                 let model_path = cfg.transcription.providers.local.model_path.clone();
                 let has_model = model_path.as_deref().map(|p| {
                     if p.is_empty() { return false; }
-                    let path = std::path::Path::new(p);
-                    if path.is_absolute() {
+                    if std::path::Path::new(p).is_absolute() {
+                        std::path::Path::new(p).exists()
+                    } else if let Ok(path) = crate::transcription::download::resolve_model_path(p) {
                         path.exists()
                     } else {
                         // Legacy relative path (e.g. "ggml-tiny.bin") — reconstruct absolute

@@ -5,6 +5,7 @@ mod hotkey;
 mod indicator;
 mod injection;
 mod platform;
+mod paths;
 mod state;
 mod transcription;
 mod tray;
@@ -22,13 +23,20 @@ pub fn run() {
         log::LevelFilter::Info
     };
 
+    let storage = paths::StoragePaths::current().expect("Unable to initialize VoxWeave storage");
+    let log_target = if storage.is_portable {
+        Target::new(TargetKind::Folder { path: storage.logs_dir(), file_name: None })
+    } else {
+        Target::new(TargetKind::LogDir { file_name: None })
+    };
+
     tauri::Builder::default()
         .plugin(
             LogBuilder::new()
                 .level(log_level)
                 .targets([
                     Target::new(TargetKind::Stdout),
-                    Target::new(TargetKind::LogDir { file_name: None }),
+                    log_target,
                     Target::new(TargetKind::Webview),
                 ])
                 .build(),
@@ -38,7 +46,8 @@ pub fn run() {
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             None,
         ))
-        .setup(|app| {
+        .setup(move |app| {
+            app.manage(storage.clone());
             // Managed state — single source of truth across commands and tray
             let app_state = AppState::load();
             app.manage(app_state);
@@ -153,6 +162,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::config::get_config,
+            commands::config::get_runtime_info,
             commands::config::save_config,
             commands::config::get_provider_models,
             commands::config::test_connection,

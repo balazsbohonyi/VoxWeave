@@ -65,7 +65,7 @@ src-tauri/src/
 ├── injection/               # FlashPaste, keystroke, clipboard modes + fallback pipeline
 ├── platform/                # Platform abstraction traits + Windows implementations
 │   └── windows/             # GetForegroundWindow, SendInput, integrity checks, ShellExecuteW
-├── config/                  # AppConfig serde struct, load/save to %APPDATA%/VoxWeave/config.json
+├── config/                  # AppConfig persistence (installed AppData or portable data/config.json)
 ├── tray.rs                  # System tray setup and menu event handling
 └── state.rs                 # Tauri AppState (config, recording state, cancel flag)
 ```
@@ -130,7 +130,7 @@ Terminal window classes for FlashPaste paste shortcut switching: `ConsoleWindowC
 
 ## Config
 
-Stored at `%APPDATA%/VoxWeave/config.json`. Missing fields use defaults; unknown fields are preserved (forward/backward compatible). All settings persist immediately — no save button.
+Installed copies store config at `%APPDATA%/VoxWeave/config.json`; a `voxweave.portable` marker beside the executable selects `data/config.json`. Missing fields use defaults; unknown fields are preserved. All settings persist immediately.
 
 ## Planning
 

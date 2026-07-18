@@ -63,12 +63,15 @@ pub fn make_provider(
         TranscriptionProvider::Openai => Box::new(OpenAiProvider::new()),
         TranscriptionProvider::Groq => Box::new(GroqProvider::new()),
         TranscriptionProvider::Local => {
-            let model_path = config
+            let stored_model_path = config
                 .providers
                 .local
                 .model_path
                 .clone()
                 .unwrap_or_default();
+            let model_path = crate::transcription::download::resolve_model_path(&stored_model_path)
+                .unwrap_or_else(|_| std::path::PathBuf::from(stored_model_path))
+                .to_string_lossy().into_owned();
             Box::new(crate::transcription::local::LocalProvider::new(model_path))
         }
     }

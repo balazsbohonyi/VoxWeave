@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { useConfig } from "../../../composables/useConfig";
 import HotkeyCapture from "./HotkeyCapture.vue";
 
-const { config, hotkeyWarning, saveConfig } = useConfig();
+const { config, runtimeInfo, hotkeyWarning, saveConfig } = useConfig();
 
 async function onHotkeySave(combo: string): Promise<void> {
   await saveConfig({ hotkey: combo });
@@ -16,12 +16,8 @@ async function onOpenWizard(): Promise<void> {
 
 async function onLaunchAtLoginChange(e: Event): Promise<void> {
   const enabled = (e.target as HTMLInputElement).checked;
+  await invoke<void>("set_launch_at_login", { enabled });
   await saveConfig({ launch_at_login: enabled });
-  try {
-    await invoke<void>("set_launch_at_login", { enabled });
-  } catch {
-    // Command may not be registered yet (Plan 02 not executed); ignore gracefully
-  }
 }
 </script>
 
@@ -48,13 +44,15 @@ async function onLaunchAtLoginChange(e: Event): Promise<void> {
         <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
           Launch on Windows startup
         </p>
-        <p class="text-xs text-gray-400 dark:text-gray-500">
-          Start VoxWeave automatically when you log in
+        <p id="portable-autostart-help" class="text-xs text-gray-400 dark:text-gray-500">
+          {{ runtimeInfo?.is_portable ? "Unavailable in portable mode. Disable installed autostart before moving a copy." : "Start VoxWeave automatically when you log in" }}
         </p>
       </div>
       <input
         type="checkbox"
-        :checked="config.launch_at_login"
+        :checked="runtimeInfo?.is_portable ? false : config.launch_at_login"
+        :disabled="runtimeInfo?.is_portable ?? false"
+        aria-describedby="portable-autostart-help"
         class="h-4 w-4 rounded accent-blue-500"
         @change="onLaunchAtLoginChange"
       >

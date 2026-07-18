@@ -71,7 +71,7 @@ Audio is transcribed via cloud providers (OpenAI, Groq) using your own API keys,
 | small | ~500 MB | Higher accuracy |
 | medium | ~1.5 GB | Best accuracy |
 
-Models are downloaded on-demand and stored in `%APPDATA%/VoxWeave/models/`.
+Models are downloaded on-demand and stored in `%APPDATA%/VoxWeave/models/` for installed copies. A portable copy (with `voxweave.portable` beside `voxweave.exe`) stores models in `data/models/` beside the executable.
 
 ---
 
@@ -89,7 +89,7 @@ Fallback chain: **Keystrokes → FlashPaste → Clipboard** (configurable).
 
 ## Configuration
 
-All settings persist in `%APPDATA%/VoxWeave/config.json`. Changes take effect immediately — no save button required.
+Installed-copy settings persist in `%APPDATA%/VoxWeave/config.json`; portable copies use `data/config.json` beside the executable. Changes take effect immediately — no save button required.
 
 **Configurable options:**
 - Global hotkey binding
