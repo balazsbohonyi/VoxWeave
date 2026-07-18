@@ -3,19 +3,15 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import StateBadge from "./components/StateBadge.vue";
 import type {
-  AppConfig,
   AudioLevelPayload,
   IndicatorStatePayload,
   IndicatorVisualState,
-  InjectionMode,
   RecordingState,
 } from "../../types";
 
 const state = ref<IndicatorVisualState>("hidden");
 const level = ref(0);
-const injectionMode = ref<InjectionMode>("flash_paste");
 const win = getCurrentWindow();
 
 let unlistenState: UnlistenFn | null = null;
@@ -127,15 +123,6 @@ function drawFrame() {
   rafId = requestAnimationFrame(drawFrame);
 }
 
-async function loadInjectionMode(): Promise<void> {
-  try {
-    const config = await invoke<AppConfig>("get_config");
-    injectionMode.value = config.injection.mode;
-  } catch {
-    injectionMode.value = "flash_paste";
-  }
-}
-
 async function onPointerDown(event: PointerEvent): Promise<void> {
   const target = event.target as HTMLElement | null;
   if (target?.closest(".indicator-record-button")) {
@@ -192,7 +179,6 @@ onMounted(async () => {
   // Start animation loop
   rafId = requestAnimationFrame(drawFrame);
 
-  await loadInjectionMode();
   unlistenMoved = await win.onMoved(() => {
     queuePersistPosition();
   });
@@ -275,7 +261,6 @@ onBeforeUnmount(() => {
         <span class="indicator-record-button">
           <span class="indicator-record-dot" :class="{ 'indicator-record-dot-active': isRecording }" />
         </span>
-        <StateBadge :state="state" :injection-mode="injectionMode" />
       </div>
       <div class="indicator-waveform">
         <canvas ref="waveCanvas" class="indicator-waveform-canvas" />
