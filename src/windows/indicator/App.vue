@@ -49,10 +49,10 @@ const waveCanvas = ref<HTMLCanvasElement | null>(null);
 let rafId: number | null = null;
 
 const BAR_COUNT = 20;
-const BAR_WIDTH = 3;
+const BAR_WIDTH = 2;
 const BAR_GAP = 2;
-const MIN_HEIGHT = 2;
-const MAX_HEIGHT = 18;
+const MIN_HEIGHT = 1;
+const MAX_HEIGHT = 12;
 const LERP_SPEED = 0.18;
 
 const barHeights = new Float32Array(BAR_COUNT).fill(MIN_HEIGHT);
@@ -97,7 +97,7 @@ function drawFrame() {
     } else {
       const phase = (i / (BAR_COUNT - 1)) * Math.PI * 2;
       const sineVal = Math.max(0, (Math.sin(phase) + 1) / 2 + idleJitter[i]);
-      target = MIN_HEIGHT + sineVal * MAX_HEIGHT * 0.28;
+      target = MIN_HEIGHT + sineVal * MAX_HEIGHT * 0.42;
     }
 
     barHeights[i] += (target - barHeights[i]) * LERP_SPEED;
@@ -173,7 +173,7 @@ onMounted(async () => {
   const canvas = waveCanvas.value;
   if (canvas) {
     canvas.width = BAR_COUNT * (BAR_WIDTH + BAR_GAP) - BAR_GAP;
-    canvas.height = 22;
+    canvas.height = 26;
   }
 
   // Start animation loop

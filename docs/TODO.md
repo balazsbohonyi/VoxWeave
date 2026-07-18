@@ -32,7 +32,7 @@ Each item follows the format: `[status] ID | Priority: Description`
 - [ ] C006 | P1: Display a typing cue while injecting the text
 - [x] C007 | P1: Simplify the waveforms - rounded rectangles instead of squares
   - also use natural smoothened animation and syne waveforms
-- [ ] C008 | P1: simplify the indicator
+- [x] C008 | P1: simplify the indicator
   - make it smaller
   - display the indicator only when recording and remove the setting that forces to show it on app start
   - remove the red recording indicator circle
