@@ -31,12 +31,88 @@ pub fn wav_bytes_to_f32(wav_bytes: &[u8]) -> Result<Vec<f32>, String> {
     Ok(samples)
 }
 
+/// Remove known Whisper non-speech annotations from a local transcript.
+///
+/// Only complete, allowlisted square-bracket annotations are removed. Other
+/// bracketed content is copied verbatim, while whitespace outside those spans
+/// is collapsed so a removed annotation remains a word boundary.
+pub(crate) fn normalize_local_transcript(transcript: &str) -> String {
+    fn is_non_speech_annotation(label: &str) -> bool {
+        let normalized = label
+            .split(|c: char| c.is_whitespace() || matches!(c, '_' | '-'))
+            .filter(|part| !part.is_empty())
+            .collect::<Vec<_>>()
+            .join(" ")
+            .to_lowercase();
+
+        matches!(
+            normalized.as_str(),
+            "blank audio"
+                | "pause"
+                | "silence"
+                | "no speech"
+                | "music"
+                | "applause"
+                | "laughter"
+                | "noise"
+                | "inaudible"
+        )
+    }
+
+    fn push_pending_space(output: &mut String, pending_space: &mut bool) {
+        if *pending_space && !output.is_empty() {
+            output.push(' ');
+        }
+        *pending_space = false;
+    }
+
+    let mut output = String::with_capacity(transcript.len());
+    let mut pending_space = false;
+    let mut offset = 0;
+
+    while offset < transcript.len() {
+        let remaining = &transcript[offset..];
+        if remaining.starts_with('[') {
+            let Some(relative_end) = remaining.find(']') else {
+                push_pending_space(&mut output, &mut pending_space);
+                output.push_str(remaining);
+                break;
+            };
+
+            let span_end = relative_end + 1;
+            let label = &remaining[1..relative_end];
+            if is_non_speech_annotation(label) {
+                pending_space = true;
+            } else {
+                push_pending_space(&mut output, &mut pending_space);
+                output.push_str(&remaining[..span_end]);
+            }
+            offset += span_end;
+            continue;
+        }
+
+        let ch = remaining
+            .chars()
+            .next()
+            .expect("offset always points inside transcript");
+        if ch.is_whitespace() {
+            pending_space = true;
+        } else {
+            push_pending_space(&mut output, &mut pending_space);
+            output.push(ch);
+        }
+        offset += ch.len_utf8();
+    }
+
+    output
+}
+
 // ---------------------------------------------------------------------------
 // LocalProvider — requires whisper-rs native library (CMake + MSVC)
 // ---------------------------------------------------------------------------
 
 mod provider_impl {
-    use super::wav_bytes_to_f32;
+    use super::{normalize_local_transcript, wav_bytes_to_f32};
     use crate::audio::encode::{EncodedAudio, EncodedFormat};
     use crate::config::TranscriptionConfig;
     use crate::transcription::provider::{TranscriptionError, TranscriptionProviderTrait};
@@ -141,7 +217,7 @@ mod provider_impl {
                     }
                 }
 
-                Ok::<String, TranscriptionError>(text.trim().to_string())
+                Ok::<String, TranscriptionError>(normalize_local_transcript(&text))
             })
             .await
             .map_err(|e| TranscriptionError::Network {
@@ -252,6 +328,102 @@ mod tests {
         assert!(
             matches!(failed, TranscriptionError::ModelLoadFailed { .. }),
             "ModelLoadFailed variant should match"
+        );
+    }
+
+    #[test]
+    fn test_normalize_local_transcript_removes_blank_audio_variants() {
+        for transcript in [
+            "[BLANK_AUDIO]",
+            "[blank audio]",
+            "[Blank-Audio]",
+            "[ blank_audio ]",
+        ] {
+            assert_eq!(normalize_local_transcript(transcript), "");
+        }
+    }
+
+    #[test]
+    fn test_normalize_local_transcript_removes_repeated_pauses() {
+        assert_eq!(normalize_local_transcript("[Pause][Pause][Pause]"), "");
+        assert_eq!(
+            normalize_local_transcript(" [pause] \n [PAUSE]\t[pause] "),
+            ""
+        );
+    }
+
+    #[test]
+    fn test_normalize_local_transcript_keeps_words_separated() {
+        assert_eq!(
+            normalize_local_transcript("Hello[Pause]world"),
+            "Hello world"
+        );
+    }
+
+    #[test]
+    fn test_normalize_local_transcript_removes_allowlisted_annotations() {
+        for label in [
+            "blank audio",
+            "pause",
+            "silence",
+            "no speech",
+            "music",
+            "applause",
+            "laughter",
+            "noise",
+            "inaudible",
+        ] {
+            let transcript = format!("before [{label}] after");
+            assert_eq!(
+                normalize_local_transcript(&transcript),
+                "before after",
+                "label should be removed: {label}"
+            );
+        }
+
+        assert_eq!(
+            normalize_local_transcript("before [NO_SPEECH] [blank-audio] after"),
+            "before after"
+        );
+    }
+
+    #[test]
+    fn test_normalize_local_transcript_preserves_arbitrary_brackets() {
+        assert_eq!(
+            normalize_local_transcript("Add [TODO] [1] [important] after [Noise]"),
+            "Add [TODO] [1] [important] after"
+        );
+        assert_eq!(
+            normalize_local_transcript("Keep [two  words] exactly"),
+            "Keep [two  words] exactly"
+        );
+    }
+
+    #[test]
+    fn test_normalize_local_transcript_preserves_malformed_brackets() {
+        assert_eq!(
+            normalize_local_transcript("Keep [Pause and everything after"),
+            "Keep [Pause and everything after"
+        );
+        assert_eq!(
+            normalize_local_transcript("Keep ] stray [TODO]"),
+            "Keep ] stray [TODO]"
+        );
+    }
+
+    #[test]
+    fn test_normalize_local_transcript_collapses_whitespace_and_keeps_unicode() {
+        assert_eq!(
+            normalize_local_transcript("  Bună\t[Silence]\n  lume!  "),
+            "Bună lume!"
+        );
+    }
+
+    #[test]
+    fn test_normalize_local_transcript_normalizes_plain_whitespace() {
+        assert_eq!(
+            normalize_local_transcript("  Hello \n\tworld!  "),
+            "Hello world!"
         );
     }
 }

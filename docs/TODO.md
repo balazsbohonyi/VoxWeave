@@ -11,7 +11,7 @@ Each item follows the format: `[status] ID | Priority: Description`
 
 ## Bugs
 
-- [ ] B001 | P1: For local models, when doing a recording with silence (no talk at all), the app will inject: `[BLANK_AUDIO]`
+- [x] B001 | P1: For local models, when doing a recording with silence (no talk at all), the app will inject: `[BLANK_AUDIO]`
   - sometimes for really long pauses it will inject in those parts of the text something like:
     - `[Pause]` or even multiple ones like `[Pause][Pause][Pause]`
 - [x] B002 | P1: Fix the build. After creating a build and starting the .exe file the following happens:
@@ -25,12 +25,12 @@ Each item follows the format: `[status] ID | Priority: Description`
 ## Changes
 
 - [x] C001 | P1: Show success toast after injection only for the clipboard injection method
-- [ ] C002 | P3:  Consider adding the following to the Vue code: linter & prettier
+- [ ] C002 | P3: Consider adding the following to the Vue code: linter & prettier
 - [x] C003 | P1: Generate a CHANGELOGS.md document
 - [ ] C004 | P1: Create and change the logo
-- [ ] C005 | P1: Replace the ellipsis for the processing state with an animated spinner
-- [ ] C006 | P1: Display a typing cue while injecting the text
-- [x] C007 | P1: Simplify the waveforms - rounded rectangles instead of squares
+- [x] ~~C005 | P1: Replace the ellipsis for the processing state with an animated spinner~~
+- [x] ~~C006 | P1: Display a typing cue while injecting the text~~
+- [x] C007 | P1: Simplify the waveforms; use rounded rectangles instead of squares
   - also use natural smoothened animation and syne waveforms
 - [x] C008 | P1: simplify the indicator
   - make it smaller

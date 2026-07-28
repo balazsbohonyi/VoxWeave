@@ -346,7 +346,7 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                 let app_clone = app.clone();
                 tauri::async_runtime::spawn(async move {
                     match transcription::transcribe_with_retry(&app_clone, &encoded).await {
-                        Ok(text) => {
+                        Ok(Some(text)) => {
                             // Show injecting state while injection runs
                             indicator::show_injecting(&app_clone);
 
@@ -495,6 +495,10 @@ pub fn toggle_recording_state<R: Runtime>(app: &AppHandle<R>) {
                             // Return early so the outer spawn's unconditional reset below is
                             // skipped — the inner spawn owns the reset for the injection path.
                             return;
+                        }
+                        Ok(None) => {
+                            // No speech is a handled outcome. The service already showed the
+                            // informational toast and intentionally emitted no text event.
                         }
                         Err(()) => {
                             // show_toast_window already showed the toast and hid the indicator.

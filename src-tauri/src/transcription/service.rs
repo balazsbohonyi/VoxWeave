@@ -47,6 +47,38 @@ pub struct TranscriptionErrorPayload {
     pub retryable: bool,
 }
 
+#[derive(Debug, PartialEq, Eq)]
+enum SuccessfulTranscription {
+    Deliver(String),
+    NoSpeech,
+}
+
+#[derive(serde::Serialize)]
+struct PlainToastPayload<'a> {
+    #[serde(rename = "type")]
+    toast_type: &'a str,
+    message: &'a str,
+}
+
+fn no_speech_toast_payload() -> PlainToastPayload<'static> {
+    PlainToastPayload {
+        toast_type: "info",
+        message: "No speech detected.",
+    }
+}
+
+fn classify_successful_transcription(
+    provider: &TranscriptionProvider,
+    text: &str,
+) -> SuccessfulTranscription {
+    let text = text.trim_end();
+    if provider == &TranscriptionProvider::Local && text.is_empty() {
+        SuccessfulTranscription::NoSpeech
+    } else {
+        SuccessfulTranscription::Deliver(text.to_string())
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Provider dispatch
 // ---------------------------------------------------------------------------
@@ -164,6 +196,28 @@ fn emit_transcription_error<R: tauri::Runtime>(
     let _ = indicator::show_toast_window(app, &payload, false);
 }
 
+fn finish_successful_transcription<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+    provider: &TranscriptionProvider,
+    text: String,
+    success_log: &str,
+) -> Result<Option<String>, ()> {
+    match classify_successful_transcription(provider, &text) {
+        SuccessfulTranscription::Deliver(text) => {
+            log::info!("{success_log}");
+            let _ = app.emit(TRANSCRIPTION_DONE_EVENT, text.clone());
+            Ok(Some(text))
+        }
+        SuccessfulTranscription::NoSpeech => {
+            let payload = no_speech_toast_payload();
+            if let Err(err) = indicator::show_toast_window(app, &payload, false) {
+                log::warn!("Failed to show no-speech toast: {err}");
+            }
+            Ok(None)
+        }
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Public transcription entry point
 // ---------------------------------------------------------------------------
@@ -174,12 +228,13 @@ fn emit_transcription_error<R: tauri::Runtime>(
 /// point. The function never blocks the Tokio runtime with CPU work.
 ///
 /// # Return value
-/// `Ok(text)` when transcription succeeds (TRANSCRIPTION_DONE_EVENT also emitted).
-/// `Err(())` for any failure (TRANSCRIPTION_ERROR_EVENT emitted before returning).
+/// `Ok(Some(text))` when transcription produces text (TRANSCRIPTION_DONE_EVENT
+/// also emitted), `Ok(None)` for a handled no-speech result, and `Err(())` for
+/// failures. No-speech results show an informational toast.
 pub async fn transcribe_with_retry<R: tauri::Runtime>(
     app: &tauri::AppHandle<R>,
     audio: &EncodedAudio,
-) -> Result<String, ()> {
+) -> Result<Option<String>, ()> {
     use crate::state::AppState;
     use tauri::Manager;
 
@@ -218,10 +273,12 @@ pub async fn transcribe_with_retry<R: tauri::Runtime>(
 
         match provider_impl.transcribe(audio, &config).await {
             Ok(text) => {
-                let text = text.trim_end().to_string();
-                log::info!("[transcription] success");
-                let _ = app.emit(TRANSCRIPTION_DONE_EVENT, text.clone());
-                return Ok(text);
+                return finish_successful_transcription(
+                    app,
+                    &config.provider,
+                    text,
+                    "[transcription] success",
+                );
             }
 
             Err(TranscriptionError::InvalidKey { provider }) => {
@@ -324,7 +381,7 @@ pub async fn transcribe_with_provider<R: tauri::Runtime>(
     app: &tauri::AppHandle<R>,
     audio: &EncodedAudio,
     target_provider: TranscriptionProvider,
-) -> Result<String, ()> {
+) -> Result<Option<String>, ()> {
     use crate::state::AppState;
     use tauri::Manager;
 
@@ -339,12 +396,12 @@ pub async fn transcribe_with_provider<R: tauri::Runtime>(
     // Delegate to the provider implementation directly (no retry — fallback gets one attempt)
     let provider_impl = make_provider(&call_config.provider, &call_config);
     match provider_impl.transcribe(audio, &call_config).await {
-        Ok(text) => {
-            let text = text.trim_end().to_string();
-            log::info!("[transcription] success (fallback)");
-            let _ = app.emit(TRANSCRIPTION_DONE_EVENT, text.clone());
-            Ok(text)
-        }
+        Ok(text) => finish_successful_transcription(
+            app,
+            &call_config.provider,
+            text,
+            "[transcription] success (fallback)",
+        ),
         Err(err) => {
             // Emit error with no further fallback_provider (fallback already tried)
             let (code, message) = match &err {
@@ -452,6 +509,48 @@ mod tests {
         let config = make_config_with_keys("", "");
         let result = find_fallback_provider(&TranscriptionProvider::Openai, &config);
         assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_local_empty_success_classifies_as_no_speech() {
+        for text in ["", " ", "\n\t"] {
+            assert_eq!(
+                classify_successful_transcription(&TranscriptionProvider::Local, text),
+                SuccessfulTranscription::NoSpeech
+            );
+        }
+    }
+
+    #[test]
+    fn test_local_non_empty_success_remains_deliverable() {
+        assert_eq!(
+            classify_successful_transcription(&TranscriptionProvider::Local, "hello world  "),
+            SuccessfulTranscription::Deliver("hello world".to_string())
+        );
+    }
+
+    #[test]
+    fn test_empty_cloud_success_does_not_classify_as_no_speech() {
+        for provider in [
+            TranscriptionProvider::Openai,
+            TranscriptionProvider::Groq,
+        ] {
+            assert_eq!(
+                classify_successful_transcription(&provider, ""),
+                SuccessfulTranscription::Deliver(String::new())
+            );
+        }
+    }
+
+    #[test]
+    fn test_no_speech_toast_is_informational_and_has_no_action_fields() {
+        let payload = serde_json::to_value(no_speech_toast_payload()).unwrap();
+
+        assert_eq!(payload["type"], "info");
+        assert_eq!(payload["message"], "No speech detected.");
+        assert!(payload.get("retryable").is_none());
+        assert!(payload.get("fallback_provider").is_none());
+        assert!(payload.get("action").is_none());
     }
 
     // -----------------------------------------------------------------------

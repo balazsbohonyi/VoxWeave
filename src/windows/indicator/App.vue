@@ -255,6 +255,7 @@ onBeforeUnmount(() => {
   <main
     class="indicator-root"
     @pointerdown="onPointerDown"
+    @contextmenu.prevent
   >
     <section class="indicator-pill" :data-state="state">
       <div class="indicator-left">
