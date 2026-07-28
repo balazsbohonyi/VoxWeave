@@ -48,14 +48,16 @@ pub(crate) fn normalize_local_transcript(transcript: &str) -> String {
         matches!(
             normalized.as_str(),
             "blank audio"
+                | "applause"
+                | "clears throat"
+                | "inaudible"
+                | "laughter"
+                | "laughs"
+                | "music"
+                | "no speech"
+                | "noise"
                 | "pause"
                 | "silence"
-                | "no speech"
-                | "music"
-                | "applause"
-                | "laughter"
-                | "noise"
-                | "inaudible"
         )
     }
 
