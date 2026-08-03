@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
 import { useConfig } from "../../../composables/useConfig";
+import ToggleSwitch from "../../../components/ToggleSwitch.vue";
 import HotkeyCapture from "./HotkeyCapture.vue";
 
 const { config, runtimeInfo, hotkeyWarning, saveConfig } = useConfig();
@@ -14,8 +15,11 @@ async function onOpenWizard(): Promise<void> {
   await invoke<void>("open_wizard_window");
 }
 
-async function onLaunchAtLoginChange(e: Event): Promise<void> {
-  const enabled = (e.target as HTMLInputElement).checked;
+async function onPushToTalkChange(enabled: boolean): Promise<void> {
+  await saveConfig({ push_to_talk: enabled });
+}
+
+async function onLaunchAtLoginChange(enabled: boolean): Promise<void> {
   await invoke<void>("set_launch_at_login", { enabled });
   await saveConfig({ launch_at_login: enabled });
 }
@@ -38,24 +42,41 @@ async function onLaunchAtLoginChange(e: Event): Promise<void> {
       </p>
     </div>
 
+    <!-- Push to talk -->
+    <div class="mb-4">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+          Push to talk
+        </p>
+        <ToggleSwitch
+          :model-value="config.push_to_talk"
+          label="Push to talk"
+          described-by="push-to-talk-help"
+          @update:model-value="onPushToTalkChange"
+        />
+      </div>
+      <p id="push-to-talk-help" class="text-xs text-gray-400 dark:text-gray-500">
+        Hold the hotkey to record; release it to start processing
+      </p>
+    </div>
+
     <!-- Launch at login -->
-    <div class="mb-4 flex items-center justify-between">
-      <div>
+    <div class="mb-4">
+      <div class="flex items-center justify-between">
         <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
           Launch on Windows startup
         </p>
-        <p id="portable-autostart-help" class="text-xs text-gray-400 dark:text-gray-500">
-          {{ runtimeInfo?.is_portable ? "Unavailable in portable mode. Disable installed autostart before moving a copy." : "Start VoxWeave automatically when you log in" }}
-        </p>
+        <ToggleSwitch
+          :model-value="runtimeInfo?.is_portable ? false : config.launch_at_login"
+          label="Launch on Windows startup"
+          :disabled="runtimeInfo?.is_portable ?? false"
+          described-by="portable-autostart-help"
+          @update:model-value="onLaunchAtLoginChange"
+        />
       </div>
-      <input
-        type="checkbox"
-        :checked="runtimeInfo?.is_portable ? false : config.launch_at_login"
-        :disabled="runtimeInfo?.is_portable ?? false"
-        aria-describedby="portable-autostart-help"
-        class="h-4 w-4 rounded accent-blue-500"
-        @change="onLaunchAtLoginChange"
-      >
+      <p id="portable-autostart-help" class="text-xs text-gray-400 dark:text-gray-500">
+        {{ runtimeInfo?.is_portable ? "Unavailable in portable mode. Disable installed autostart before moving a copy." : "Start VoxWeave automatically when you log in" }}
+      </p>
     </div>
 
     <!-- Setup Wizard re-open -->

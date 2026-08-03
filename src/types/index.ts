@@ -64,6 +64,7 @@ export interface IndicatorConfig {
 
 export interface AppConfig {
   hotkey: string;
+  push_to_talk: boolean;
   audio: AudioConfig;
   transcription: TranscriptionConfig;
   injection: InjectionConfig;

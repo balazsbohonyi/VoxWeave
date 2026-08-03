@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useConfig } from "../../../composables/useConfig";
+import ToggleSwitch from "../../../components/ToggleSwitch.vue";
 import type { InjectionMode, KeystrokeSpeed } from "../../../types/index";
 
 const { config, saveConfig } = useConfig();
@@ -14,10 +15,9 @@ function onSpeedChange(speed: KeystrokeSpeed): void {
   void saveConfig({ injection: { ...config.value.injection, keystroke_speed: speed } });
 }
 
-function onFallbackChange(e: Event): void {
+function onFallbackChange(enabled: boolean): void {
   if (!config.value) return;
-  const checked = (e.target as HTMLInputElement).checked;
-  void saveConfig({ injection: { ...config.value.injection, auto_fallback: checked } });
+  void saveConfig({ injection: { ...config.value.injection, auto_fallback: enabled } });
 }
 </script>
 
@@ -110,22 +110,21 @@ function onFallbackChange(e: Event): void {
       </div>
     </div>
 
-    <!-- Auto-fallback checkbox -->
-    <div class="flex items-center justify-between">
-      <div>
+    <!-- Auto-fallback toggle -->
+    <div>
+      <div class="flex items-center justify-between">
         <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
           Auto-fallback
         </p>
-        <p class="text-xs text-gray-400 dark:text-gray-500">
-          Automatically fall back to next method if injection fails
-        </p>
+        <ToggleSwitch
+          :model-value="config.injection.auto_fallback"
+          label="Auto-fallback"
+          @update:model-value="onFallbackChange"
+        />
       </div>
-      <input
-        type="checkbox"
-        :checked="config.injection.auto_fallback"
-        class="h-4 w-4 rounded accent-blue-500"
-        @change="onFallbackChange"
-      >
+      <p class="text-xs text-gray-400 dark:text-gray-500">
+        Automatically fall back to next method if injection fails
+      </p>
     </div>
 
     <!-- Method descriptions -->

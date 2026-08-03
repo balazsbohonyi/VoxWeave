@@ -195,6 +195,7 @@ mod tests {
     fn test_default_config_values() {
         let config = AppConfig::default();
         assert_eq!(config.hotkey, "Ctrl+Shift+Space");
+        assert!(!config.push_to_talk);
         assert!(matches!(
             config.transcription.provider,
             TranscriptionProvider::Openai
@@ -216,6 +217,7 @@ mod tests {
         let raw: serde_json::Value = serde_json::from_str(partial).unwrap();
         let config: AppConfig = serde_json::from_value(raw).unwrap_or_default();
         assert_eq!(config.hotkey, "Ctrl+F9");
+        assert!(!config.push_to_talk);
         // Nested sections should be at defaults.
         assert_eq!(config.transcription.providers.openai.model, "whisper-1");
         assert!(config.indicator.show);
@@ -304,6 +306,7 @@ mod tests {
         // Write a config, read it back as Value, check fields.
         let config = AppConfig {
             hotkey: "Ctrl+F8".to_string(),
+            push_to_talk: true,
             ..AppConfig::default()
         };
         let typed_value = serde_json::to_value(&config).unwrap();
@@ -313,6 +316,7 @@ mod tests {
         merge_into(&mut raw, typed_value);
 
         assert_eq!(raw["hotkey"], "Ctrl+F8");
+        assert_eq!(raw["push_to_talk"], true);
         assert_eq!(raw["my_future_setting"], "preserved");
     }
 }

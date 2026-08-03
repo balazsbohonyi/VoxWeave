@@ -54,6 +54,7 @@ pub(crate) fn normalize_local_transcript(transcript: &str) -> String {
                 | "laughter"
                 | "laughs"
                 | "music"
+                | "music playing"
                 | "no speech"
                 | "noise"
                 | "pause"

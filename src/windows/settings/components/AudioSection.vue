@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useConfig } from "../../../composables/useConfig";
+import ToggleSwitch from "../../../components/ToggleSwitch.vue";
 import WarningCard from "./WarningCard.vue";
 
 const {
@@ -123,21 +124,20 @@ onUnmounted(() => {
     </div>
 
     <!-- Auto-stop on silence toggle -->
-    <div class="mb-3 flex items-center justify-between">
-      <div>
+    <div class="mb-3">
+      <div class="flex items-center justify-between">
         <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
           Auto-stop on silence
         </p>
-        <p class="text-xs text-gray-400 dark:text-gray-500">
-          Automatically stop recording after a period of silence
-        </p>
+        <ToggleSwitch
+          :model-value="silenceEnabled"
+          label="Auto-stop on silence"
+          @update:model-value="silenceEnabled = $event"
+        />
       </div>
-      <input
-        type="checkbox"
-        :checked="silenceEnabled"
-        class="h-4 w-4 rounded accent-blue-500"
-        @change="silenceEnabled = ($event.target as HTMLInputElement).checked"
-      >
+      <p class="text-xs text-gray-400 dark:text-gray-500">
+        Automatically stop recording after a period of silence
+      </p>
     </div>
 
     <!-- Silence duration input (indented, disabled when toggle is off) -->

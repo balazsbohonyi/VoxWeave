@@ -267,10 +267,14 @@ impl Default for IndicatorConfig {
 /// empty config file produces a valid working configuration.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct AppConfig {
-    /// Global push-to-talk hotkey in the format "Modifier+Key"
+    /// Global recording hotkey in the format "Modifier+Key"
     /// (e.g. "Ctrl+Shift+Space").
     #[serde(default = "default_hotkey")]
     pub hotkey: String,
+
+    /// Hold the hotkey to record and stop when it is released.
+    #[serde(default)]
+    pub push_to_talk: bool,
 
     /// Audio capture settings.
     #[serde(default)]
@@ -301,6 +305,7 @@ impl Default for AppConfig {
     fn default() -> Self {
         Self {
             hotkey: default_hotkey(),
+            push_to_talk: false,
             audio: AudioConfig::default(),
             transcription: TranscriptionConfig::default(),
             injection: InjectionConfig::default(),

@@ -204,9 +204,38 @@ where
 }
 
 pub fn handle_shortcut_event<R: Runtime>(app: &AppHandle<R>, event: ShortcutState) {
-    if event == ShortcutState::Pressed {
+    let state = app.state::<AppState>();
+    let push_to_talk = state
+        .config
+        .lock()
+        .map(|config| config.push_to_talk)
+        .unwrap_or(false);
+    let recording_state = state
+        .recording_state
+        .lock()
+        .map(|state| state.clone())
+        .unwrap_or(RecordingState::Idle);
+
+    if shortcut_event_should_toggle(push_to_talk, event, &recording_state) {
         toggle_recording_state(app);
     }
+}
+
+pub(crate) fn shortcut_event_should_toggle(
+    push_to_talk: bool,
+    event: ShortcutState,
+    recording_state: &RecordingState,
+) -> bool {
+    if !push_to_talk {
+        return event == ShortcutState::Pressed;
+    }
+
+    matches!(
+        (event, recording_state),
+        (ShortcutState::Pressed, RecordingState::Idle)
+            | (ShortcutState::Pressed, RecordingState::Transcribing)
+            | (ShortcutState::Released, RecordingState::Recording)
+    )
 }
 
 pub(crate) fn next_recording_state(current: &RecordingState) -> Option<RecordingState> {
@@ -563,6 +592,60 @@ fn persist_config(state: &AppState, config: AppConfig) -> Result<(), String> {
 mod tests {
     use super::*;
     use crate::config::InjectionMode;
+
+    #[test]
+    fn toggle_mode_acts_only_on_press() {
+        for state in [
+            RecordingState::Idle,
+            RecordingState::Recording,
+            RecordingState::Transcribing,
+        ] {
+            assert!(shortcut_event_should_toggle(
+                false,
+                ShortcutState::Pressed,
+                &state
+            ));
+            assert!(!shortcut_event_should_toggle(
+                false,
+                ShortcutState::Released,
+                &state
+            ));
+        }
+    }
+
+    #[test]
+    fn push_to_talk_routes_press_and_release_by_recording_state() {
+        assert!(shortcut_event_should_toggle(
+            true,
+            ShortcutState::Pressed,
+            &RecordingState::Idle
+        ));
+        assert!(!shortcut_event_should_toggle(
+            true,
+            ShortcutState::Pressed,
+            &RecordingState::Recording
+        ));
+        assert!(shortcut_event_should_toggle(
+            true,
+            ShortcutState::Released,
+            &RecordingState::Recording
+        ));
+        assert!(shortcut_event_should_toggle(
+            true,
+            ShortcutState::Pressed,
+            &RecordingState::Transcribing
+        ));
+        assert!(!shortcut_event_should_toggle(
+            true,
+            ShortcutState::Released,
+            &RecordingState::Idle
+        ));
+        assert!(!shortcut_event_should_toggle(
+            true,
+            ShortcutState::Released,
+            &RecordingState::Transcribing
+        ));
+    }
 
     #[test]
     fn success_toast_label() {

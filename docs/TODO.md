@@ -63,7 +63,7 @@ Each item follows the format: `[status] ID | Priority: Description`
 - [x] F001: Add all transcribed text to the clipboard as well
   - in case the user changes the focus, the transcribed text is also added to the clipboard
 - [ ] F002: Snapshot the target where recording started, and in case during recording the target changed, use the snapshot target to inject the text into
-- [ ] F003: Add support for push-to-talk - separate hotkey
+- [x] F003: Add support for push-to-talk - separate hotkey
 - [ ] F004: Add support for pausing / resuming recordings
   - only for hands-free mode
 - [ ] F005: Add support for Command Mode - separate hotkey
